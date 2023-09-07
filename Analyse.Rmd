@@ -1,0 +1,14 @@
+```{r}
+library(tidyverse)
+```
+
+```{r}
+dat = read.csv("bixi1.csv")
+```
+
+```{r}
+dat %>%
+  group_by(mem) %>%
+  summarize(mean=mean(dat[]))
+```
+
