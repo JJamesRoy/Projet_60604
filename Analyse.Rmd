@@ -6,9 +6,40 @@ library(tidyverse)
 dat = read.csv("bixi1.csv")
 ```
 
-```{r}
-dat %>%
+```{r member}
+donnees_summary <- dat %>%
   group_by(mem) %>%
-  summarize(mean=mean(dat[]))
+  summarise(percentage = n() / nrow(dat) * 100)
+# Création variable pour afficher en %
+
+# Création du graphique à barres
+ggplot(data = donnees_summary, aes(x = factor(mem), y = percentage, fill = factor(mem))) +
+  geom_bar(stat = "identity") +
+  theme_minimal()
+```
+
+Graphique voyage par jour (découper par membre)
+```{r}
+
+```
+
+Même chose par mois
+```{r}
+
+```
+
+Temp
+```{r}
+
+```
+
+Rain
+```{r}
+
+```
+
+Temps moyen selon membre
+```{r}
+
 ```
 
