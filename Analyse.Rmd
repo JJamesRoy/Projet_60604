@@ -20,26 +20,53 @@ ggplot(data = donnees_summary, aes(x = factor(mem), y = percentage, fill = facto
 
 Graphique voyage par jour (découper par membre)
 ```{r}
-
+ggplot(dat, aes(wday, avg)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  facet_wrap(~ mem)
 ```
 
 Même chose par mois
 ```{r}
-
+ggplot(dat, aes(mm, avg)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  facet_wrap(~ mem)
 ```
 
 Temp
 ```{r}
+dat_temp <- dat %>%
+  select(mem, avg, temp) %>% 
+  group_by(temp, mem) %>%
+  summarise(avg = mean(avg))
 
+ggplot(dat_temp, aes(temp, avg)) +
+  geom_line(stat = "identity") +
+  theme_minimal() +
+  facet_wrap(~ mem)
 ```
 
 Rain
 ```{r}
+dat_rain <- dat %>%
+  select(mem, avg, rain) %>% 
+  group_by(rain, mem) %>%
+  summarise(avg = mean(avg))
 
+ggplot(dat_rain, aes(rain, avg)) +
+  geom_line(stat = "identity") +
+  theme_minimal() +
+  facet_wrap(~ mem)
 ```
 
 Temps moyen selon membre
 ```{r}
+dat_mem <- dat %>%
+  select(mem, avg) %>% 
+  group_by(mem) %>%
+  summarise(avg = mean(avg))
 
+print(dat_mem)
 ```
 
