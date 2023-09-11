@@ -70,3 +70,16 @@ dat_mem <- dat %>%
 print(dat_mem)
 ```
 
+essaie de graph
+```{r}
+dat %>%  ggplot(aes(rain,avg))+
+  geom_point()+
+  theme_minimal()
+
+dat %>% ggplot(aes(dur))+
+  geom_density()
+  
+  
+
+
+```
