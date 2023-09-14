@@ -1,9 +1,12 @@
 ```{r}
 library(tidyverse)
+library(ggthemes)
+library(RColorBrewer)
 ```
 
 ```{r}
 dat = read.csv("bixi1.csv")
+
 ```
 
 ```{r member}
@@ -15,15 +18,33 @@ donnees_summary <- dat %>%
 # Création du graphique à barres
 ggplot(data = donnees_summary, aes(x = factor(mem), y = percentage, fill = factor(mem))) +
   geom_bar(stat = "identity") +
+  guides(fill=guide_legend(title = "Membre"))+
+  ggtitle("Pourcentage de membre et de non membre BIXI")+
+  xlab("")+
+  ylab("Pourcentage")+
   theme_minimal()
 ```
 
 Graphique voyage par jour (découper par membre)
 ```{r}
-ggplot(dat, aes(wday, avg)) +
+
+dat$wday <- factor(dat$wday,
+                   levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
+
+label <- c(`1` = "Membre", `0` = "Non membre")
+
+dat %>% 
+ggplot(aes(x=wday, y=avg,
+           fill = wday)) +
   geom_bar(stat = "identity") +
-  theme_minimal() +
-  facet_wrap(~ mem)
+  theme_minimal()+
+  scale_fill_brewer(palette = "Blues")+
+  facet_wrap(~ mem,labeller=labeller(mem=label))+
+  theme(legend.position="none")+
+  labs(title = "Durée moyenne des déplacement \npar jours selon les membres et les non membres")+
+  xlab("")+
+  ylab("Durée moyenne (en minutes) des déplacement")
+        
 ```
 
 Même chose par mois
@@ -72,13 +93,12 @@ print(dat_mem)
 
 essaie de graph
 ```{r}
-dat %>%  ggplot(aes(rain,avg))+
+dat %>%  ggplot(aes(avg,temp))+
   geom_point()+
   theme_minimal()
 
 dat %>% ggplot(aes(dur))+
   geom_density()
-  
   
 
 
