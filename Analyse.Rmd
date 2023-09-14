@@ -1,3 +1,25 @@
+---
+title: "Projet BIXI - Partie 1: Analyse exploratoire"
+subtitle: "MATH60604 - Modélisation statistique"
+author: "Abdoul Wassi Badirou"
+date: "`r Sys.Date()`"
+output: 
+  #bookdown::pdf_document2:
+  bookdown::html_document2:
+    toc: true 
+    number_sections: true
+    toc_float: # to float the table of contents to the left of the main document content.
+      collapsed: false
+  pdf_document:
+  html_document:
+    toc: true 
+    number_sections: true
+    toc_float: # to float the table of contents to the left of the main document content.
+      collapsed: false
+params:
+  created_date: '2023-09-12'
+---
+
 ```{r}
 library(tidyverse)
 library(ggthemes)
@@ -8,6 +30,9 @@ library(RColorBrewer)
 dat = read.csv("bixi1.csv")
 
 ```
+
+
+
 
 ```{r member}
 donnees_summary <- dat %>%
@@ -26,6 +51,7 @@ ggplot(data = donnees_summary, aes(x = factor(mem), y = percentage, fill = facto
 ```
 
 Graphique voyage par jour (découper par membre)
+
 ```{r}
 
 dat$wday <- factor(dat$wday,
@@ -48,6 +74,7 @@ ggplot(aes(x=wday, y=avg,
 ```
 
 Même chose par mois
+
 ```{r}
 ggplot(dat, aes(mm, avg)) +
   geom_bar(stat = "identity") +
@@ -56,6 +83,7 @@ ggplot(dat, aes(mm, avg)) +
 ```
 
 Temp
+
 ```{r}
 dat_temp <- dat %>%
   select(mem, avg, temp) %>% 
@@ -69,6 +97,7 @@ ggplot(dat_temp, aes(temp, avg)) +
 ```
 
 Rain
+
 ```{r}
 dat_rain <- dat %>%
   select(mem, avg, rain) %>% 
@@ -82,6 +111,7 @@ ggplot(dat_rain, aes(rain, avg)) +
 ```
 
 Temps moyen selon membre
+
 ```{r}
 dat_mem <- dat %>%
   select(mem, avg) %>% 
@@ -92,6 +122,7 @@ print(dat_mem)
 ```
 
 essaie de graph
+
 ```{r}
 dat %>%  ggplot(aes(avg,temp))+
   geom_point()+
