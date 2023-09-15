@@ -176,14 +176,18 @@ hist(freqTable_station, xlab = "Nombre d'observations", ylab = "Nombre de statio
 
 ### Exploration des relations avec la durée des trajets
 
-En croisant la variable `dur` avec la variable `wday` qui représente les jours de la semaine et `mem` qui représente l'abonnement, nous pouvons obtenir le figure \@ref(fig:dur_day). Plusieurs analyses sont pertinentes à partir de ce graphique. D'abord, les membres utilisent beaucoup plus les Bixi (au niveau de la durée) que les non-membres, et ce, peu importe le jour de la semaine. Les types d'utilisation semblent aussi changé, par exemple, les non-membres utilisent plus les Bixi les fin de semaines alors que pour les membres, la tendance semble moins claire. En effet, les membres semblent avoir une utilisation croissante la semaine et décroissante la fin de semaine. Naturellemement, on pourrait penser que c'est parce qu'ils utilisent le Bixi comme un moyen de transport régulier pour aller au travail ou à l'école par exemple.
+En croisant la variable `dur` avec la variable `wday` qui représente les jours de la semaine et `mem` qui représente l'abonnement, nous pouvons obtenir le figure @ref(fig:dur_day). Plusieurs analyses sont pertinentes à partir de ce graphique. D'abord, les membres utilisent beaucoup plus les Bixi (au niveau de la durée) que les non-membres, et ce, peu importe le jour de la semaine. Les types d'utilisation semblent aussi changé, par exemple, les non-membres utilisent plus les Bixi les fin de semaines alors que pour les membres, la tendance semble moins claire. En effet, les membres semblent avoir une utilisation croissante la semaine et décroissante la fin de semaine. Naturellemement, on pourrait penser que c'est parce qu'ils utilisent le Bixi comme un moyen de transport régulier pour aller au travail ou à l'école par exemple.
 
 D'un point de vue d'affaire, il pourrait être intéressant pour l'entreprise Bixi de faire des accords avec les gros employeurs de Montréal pour augmenter ses clients et accélérer la transition vers des moyens de transport plus doux.
-```{r dur_day}
+
+```{r}
 dat$wday <- factor(dat$wday,
                    levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
 
 label <- c(`1` = "Membre", `0` = "Non membre")
+```
+
+```{r dur_day}
 
 dat %>% 
 ggplot(aes(x=wday, y=dur,
@@ -199,8 +203,6 @@ ggplot(aes(x=wday, y=dur,
 
 En croisant la variable `dur` avec la variable `mm` qui représente les mois où il est possible de prendre un Bixi et `mem` qui représente l'abonnement, nous pouvons obtenir le figure \@ref(fig:dur_mm). Plusieurs analyses sont pertinentes à partir de ce graphique. D'abord, les membres utilisent beaucoup plus les Bixi (au niveau de la durée) que les non-membres, et ce, peu importe le mois de l'année. D'une façon similaire, l'utilisation semble atteindre son pic vers août pour les deux types de clients. Il est aussi intéressant de constater que les membres utilisent moins les Bixi durant le moins de juillet. Cela semble concorder avec une affirmation précédente, les membres peuvent par exemple être en congé durant ce mois et ils utilisent donc moins les Bixi pour aller à leur occupation régulière.
 
-D'un point de vue d'affaire, 
-
 ```{r dur_mm}
 ggplot(dat, aes(as.factor(mm), dur, fill = as.factor(mm))) +
   geom_bar(stat = "identity") +
@@ -213,26 +215,37 @@ ggplot(dat, aes(as.factor(mm), dur, fill = as.factor(mm))) +
   ylab("Durée totale (en minutes) des déplacement")
 ```
 
-```{r dur_temp}
+En croisant la variable `dur` avec la variable `temp` qui représente la température moyenne de la journée et `mem` qui représente l'abonnement, nous pouvons obtenir le figure \@ref(fig:dur_temp). Naturellement, on voit une relation positive entre la température moyenne et la durée totale de déplacement. La relation semble toutefois ralentir ou même s'inverser peu après les 20°C. Ce graphique donne globalement les mêmes informations que le précédent étant donné que la température est fortemement corrélée avec les mois.
+
+Graphique corrélation pareil mais avec mois ?
+
+```{r}
 dat_temp <- dat %>%
   select(mem, dur, temp, avg) %>% 
   group_by(temp, mem) %>%
   summarise(dur = log(sum(dur)))
+```
 
+```{r dur_temp}
 ggplot(dat_temp, aes(temp, dur)) +
   geom_point() +
   facet_wrap(~mem,labeller=labeller(mem=label)) +
   labs(title = "Durée totale des déplacement \npar jours selon les membres et les non membres")+
-  xlab("Température en °C")+
+  xlab("Précipitation")+
   ylab("Log naturel de la durée totale des déplacement")
 ```
 
-```{r dur_rain}
+En croisant la variable `dur` avec la variable `rain` qui représente la précipitation totale de pluie lors de la journée et `mem` qui représente l'abonnement, nous pouvons obtenir le figure \@ref(fig:dur_rain). Il est intéressant de constater que la relation est très semblable pour les membres et les non-membres. En effet, il semble y avoir une relation inversement proportionnelle entre la pluie et la durée totale des déplacements. C'est-à-dire qu'un peu de pluie a un effet significatif sur l'utilisation, mais cela se stabilise rapidement.
+
+```{r}
 dat_rain <- dat %>%
   select(mem, dur, rain) %>% 
   group_by(rain, mem) %>%
   summarise(dur = log(sum(dur)))
 
+```
+
+```{r dur_rain}
 ggplot(dat_rain, aes(rain, dur)) +
   geom_point() +
   facet_wrap(~mem,labeller=labeller(mem=label)) +
@@ -240,17 +253,21 @@ ggplot(dat_rain, aes(rain, dur)) +
   xlab("Température en °C")+
   ylab("Log naturel de la durée totale des déplacement")
 ```
-Selon le tableau \@ref(tab:table_mem)
+
+En croisant la variable `dur` et `avg` avec `mem` qui représente l'abonnement, nous pouvons obtenir le tableau \@ref(tab:table_mem).
+
+```{r}
+dat_rain <- dat %>%
+  select(mem, dur, rain) %>% 
+  group_by(rain, mem) %>%
+  summarise(dur = log(sum(dur)))
+```
 
 ```{r table_mem}
-dat_mem <- dat %>%
-  select(mem, avg, dur) %>% 
-  group_by(mem) %>%
-  summarise(avg = mean(avg), dur = sum(dur)) %>% 
-  mutate(mem = ifelse(mem == 1, "Membre", "Non-membre"))
-
 kable(dat_mem, col.names = c("Membre", "Durée moyenne", "Durée totale"), caption = "Détail sur la durée selon les abonnements")
 ```
+
+La durée moyennedes trajets est assez similaire entre les membres et les non-membres. Cela est assez intéressant, car il est facile de penser que les membres utiliseraient plus les Bixi pour des trajets plus long. En revanche, les membres ont une durée totale de trajets beaucoup plus haute que les non-membres, ce qui rejoint ce que nous avions observé précédemment.
 
 # Conclusion {.unnumbered}
 
