@@ -181,49 +181,58 @@ dat$wday <- factor(dat$wday,
 label <- c(`1` = "Membre", `0` = "Non membre")
 
 dat %>% 
-ggplot(aes(x=wday, y=avg,
+ggplot(aes(x=wday, y=dur,
            fill = wday)) +
   geom_bar(stat = "identity") +
-  theme_minimal()+
   scale_fill_brewer(palette = "Blues")+
   facet_wrap(~ mem,labeller=labeller(mem=label))+
   theme(legend.position="none")+
-  labs(title = "Durée moyenne des déplacement \npar jours selon les membres et les non membres")+
+  labs(title = "Durée totale des déplacement \npar jours selon les membres et les non membres")+
   xlab("")+
-  ylab("Durée moyenne (en minutes) des déplacement")
+  ylab("Durée totale (en minutes) des déplacement")
 ```
 
 ```{r}
-ggplot(dat, aes(mm, avg)) +
+ggplot(dat, aes(as.factor(mm), dur)) +
   geom_bar(stat = "identity") +
-  theme_minimal() +
-  facet_wrap(~ mem)
+  facet_wrap(~ mem,labeller=labeller(mem=label))+
+  theme(legend.position="none")+
+  scale_x_discrete(breaks = 4:11,labels=c("Avril","Mai","Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre")) +
+  labs(title = "Durée totale des déplacement \npar jours selon les membres et les non membres")+
+  xlab("")+
+  ylab("Durée totale (en minutes) des déplacement")
 ```
 
 ```{r}
 dat_temp <- dat %>%
-  select(mem, avg, temp) %>% 
+  select(mem, dur, temp, avg) %>% 
   group_by(temp, mem) %>%
-  summarise(avg = mean(avg))
+  summarise(dur = log(sum(dur)))
 
-ggplot(dat_temp, aes(temp, avg)) +
-  geom_line(stat = "identity") +
-  theme_minimal() +
-  facet_wrap(~ mem)
+ggplot(dat_temp, aes(temp, dur)) +
+  geom_point() +
+  facet_wrap(~mem,labeller=labeller(mem=label)) +
+  labs(title = "Durée totale des déplacement \npar jours selon les membres et les non membres")+
+  xlab("Température en °C")+
+  ylab("Log naturel de la durée totale (en minutes) des déplacement")
+  theme_minimal()
 ```
 
 Rain
 
 ```{r}
 dat_rain <- dat %>%
-  select(mem, avg, rain) %>% 
+  select(mem, dur, rain) %>% 
   group_by(rain, mem) %>%
-  summarise(avg = mean(avg))
+  summarise(dur = log(sum(dur)))
 
-ggplot(dat_rain, aes(rain, avg)) +
-  geom_line(stat = "identity") +
-  theme_minimal() +
-  facet_wrap(~ mem)
+ggplot(dat_rain, aes(rain, dur)) +
+  geom_point() +
+  facet_wrap(~mem,labeller=labeller(mem=label)) +
+  labs(title = "Durée totale des déplacement \npar jours selon les membres et les non membres")+
+  xlab("Température en °C")+
+  ylab("Log naturel de la durée totale (en minutes) des déplacement")
+  theme_minimal()
 ```
 
 Temps moyen selon membre
@@ -263,9 +272,6 @@ ggplot(data = donnees_summary, aes(x = factor(mem), y = percentage, fill = facto
   ylab("Pourcentage")+
   theme_minimal()
 ```
-
-
-
 
 essaie de graph
 
