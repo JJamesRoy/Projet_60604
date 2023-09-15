@@ -4,8 +4,8 @@ subtitle: "MATH60604 - Modélisation statistique"
 author: "James Roy,Alfred Assal,Samuel Croteau,Abdoul Wassi Badirou"
 date: "`r Sys.Date()`"
 output: 
-  #bookdown::pdf_document2:
-  bookdown::html_document2:
+  bookdown::pdf_document2:
+  #bookdown::html_document2:
     toc: true 
     number_sections: true
     toc_float: # to float the table of contents to the left of the main document content.
@@ -176,6 +176,7 @@ hist(freqTable_station, xlab = "Nombre d'observations", ylab = "Nombre de statio
 
 ### Exploration des relations avec la durée des trajets
 
+En croisant la variable `dur` avec la variable `wday` qui représente les jours de la semaine et `mem` qui représente l'abonnement, nous pouvons obtenir le figure \@ref(fig:dur_day). Plusieurs analyses sont pertinentes à partir de ce graphique. D'abord, les membres utilisent beaucoup plus les Bixi (au niveau de la durée) que les non-membres, et ce, peu importe le jour de la semaine. Les types d'utilisation semblent aussi changé, par exemple, les non-membres utilisent plus les Bixi les fin de semaines alors que pour les membres, la tendance semble moins claire.
 ```{r dur_day}
 dat$wday <- factor(dat$wday,
                    levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
