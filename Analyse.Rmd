@@ -30,6 +30,7 @@ knitr::opts_chunk$set(warning = FALSE)
 library(tidyverse)
 library(ggthemes)
 library(RColorBrewer)
+library(knitr)
 ```
 
 # Notes
@@ -239,11 +240,16 @@ Temps moyen selon membre
 
 ```{r}
 dat_mem <- dat %>%
-  select(mem, avg) %>% 
+  select(mem, avg, dur) %>% 
   group_by(mem) %>%
-  summarise(avg = mean(avg))
+  summarise(avg = mean(avg), dur = sum(dur))
 
-print(dat_mem)
+table(dat_mem)
+
+table <- kable(dat_mem, caption = "Données de durée et de température moyenne", align = "c")
+
+# Afficher le tableau
+cat(table)
 ```
 
 # Conclusion {.unnumbered}
