@@ -4,8 +4,8 @@ subtitle: "MATH60604 - Modélisation statistique"
 author: "James Roy,Alfred Assal,Samuel Croteau,Abdoul Wassi Badirou"
 date: "`r Sys.Date()`"
 output: 
-  bookdown::pdf_document2:
-  #bookdown::html_document2:
+  #bookdown::pdf_document2:
+  bookdown::html_document2:
     toc: true 
     number_sections: true
     toc_float: # to float the table of contents to the left of the main document content.
@@ -176,7 +176,9 @@ hist(freqTable_station, xlab = "Nombre d'observations", ylab = "Nombre de statio
 
 ### Exploration des relations avec la durée des trajets
 
-En croisant la variable `dur` avec la variable `wday` qui représente les jours de la semaine et `mem` qui représente l'abonnement, nous pouvons obtenir le figure \@ref(fig:dur_day). Plusieurs analyses sont pertinentes à partir de ce graphique. D'abord, les membres utilisent beaucoup plus les Bixi (au niveau de la durée) que les non-membres, et ce, peu importe le jour de la semaine. Les types d'utilisation semblent aussi changé, par exemple, les non-membres utilisent plus les Bixi les fin de semaines alors que pour les membres, la tendance semble moins claire.
+En croisant la variable `dur` avec la variable `wday` qui représente les jours de la semaine et `mem` qui représente l'abonnement, nous pouvons obtenir le figure \@ref(fig:dur_day). Plusieurs analyses sont pertinentes à partir de ce graphique. D'abord, les membres utilisent beaucoup plus les Bixi (au niveau de la durée) que les non-membres, et ce, peu importe le jour de la semaine. Les types d'utilisation semblent aussi changé, par exemple, les non-membres utilisent plus les Bixi les fin de semaines alors que pour les membres, la tendance semble moins claire. En effet, les membres semblent avoir une utilisation croissante la semaine et décroissante la fin de semaine. Naturellemement, on pourrait penser que c'est parce qu'ils utilisent le Bixi comme un moyen de transport régulier pour aller au travail ou à l'école par exemple.
+
+D'un point de vue d'affaire, il pourrait être intéressant pour l'entreprise Bixi de faire des accords avec les gros employeurs de Montréal pour augmenter ses clients et accélérer la transition vers des moyens de transport plus doux.
 ```{r dur_day}
 dat$wday <- factor(dat$wday,
                    levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
@@ -194,6 +196,10 @@ ggplot(aes(x=wday, y=dur,
   xlab("")+
   ylab("Durée totale (en minutes) des déplacement")
 ```
+
+En croisant la variable `dur` avec la variable `mm` qui représente les mois où il est possible de prendre un Bixi et `mem` qui représente l'abonnement, nous pouvons obtenir le figure \@ref(fig:dur_mm). Plusieurs analyses sont pertinentes à partir de ce graphique. D'abord, les membres utilisent beaucoup plus les Bixi (au niveau de la durée) que les non-membres, et ce, peu importe le mois de l'année. D'une façon similaire, l'utilisation semble atteindre son pic vers août pour les deux types de clients. Il est aussi intéressant de constater que les membres utilisent moins les Bixi durant le moins de juillet. Cela semble concorder avec une affirmation précédente, les membres peuvent par exemple être en congé durant ce mois et ils utilisent donc moins les Bixi pour aller à leur occupation régulière.
+
+D'un point de vue d'affaire, 
 
 ```{r dur_mm}
 ggplot(dat, aes(as.factor(mm), dur, fill = as.factor(mm))) +
