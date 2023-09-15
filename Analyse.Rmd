@@ -24,6 +24,7 @@ params:
 knitr::opts_chunk$set(echo = FALSE)
 knitr::opts_chunk$set(message = FALSE)
 knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(error = FALSE)
 ```
 
 ```{r}
@@ -175,7 +176,7 @@ hist(freqTable_station, xlab = "Nombre d'observations", ylab = "Nombre de statio
 
 ### Exploration des relations avec la durée des trajets
 
-```{r}
+```{r dur_day}
 dat$wday <- factor(dat$wday,
                    levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
 
@@ -193,9 +194,10 @@ ggplot(aes(x=wday, y=dur,
   ylab("Durée totale (en minutes) des déplacement")
 ```
 
-```{r}
-ggplot(dat, aes(as.factor(mm), dur)) +
+```{r dur_mm}
+ggplot(dat, aes(as.factor(mm), dur, fill = as.factor(mm))) +
   geom_bar(stat = "identity") +
+  scale_fill_brewer(palette = "Blues")+
   facet_wrap(~ mem,labeller=labeller(mem=label))+
   theme(legend.position="none")+
   scale_x_discrete(breaks = 4:11,labels=c("Avril","Mai","Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre")) +
@@ -204,7 +206,7 @@ ggplot(dat, aes(as.factor(mm), dur)) +
   ylab("Durée totale (en minutes) des déplacement")
 ```
 
-```{r}
+```{r dur_temp}
 dat_temp <- dat %>%
   select(mem, dur, temp, avg) %>% 
   group_by(temp, mem) %>%
@@ -215,13 +217,10 @@ ggplot(dat_temp, aes(temp, dur)) +
   facet_wrap(~mem,labeller=labeller(mem=label)) +
   labs(title = "Durée totale des déplacement \npar jours selon les membres et les non membres")+
   xlab("Température en °C")+
-  ylab("Log naturel de la durée totale (en minutes) des déplacement")
-  theme_minimal()
+  ylab("Log naturel de la durée totale des déplacement")
 ```
 
-Rain
-
-```{r}
+```{r dur_rain}
 dat_rain <- dat %>%
   select(mem, dur, rain) %>% 
   group_by(rain, mem) %>%
@@ -232,24 +231,18 @@ ggplot(dat_rain, aes(rain, dur)) +
   facet_wrap(~mem,labeller=labeller(mem=label)) +
   labs(title = "Durée totale des déplacement \npar jours selon les membres et les non membres")+
   xlab("Température en °C")+
-  ylab("Log naturel de la durée totale (en minutes) des déplacement")
-  theme_minimal()
+  ylab("Log naturel de la durée totale des déplacement")
 ```
+Selon le tableau \@ref(tab:table_mem)
 
-Temps moyen selon membre
-
-```{r}
+```{r table_mem}
 dat_mem <- dat %>%
   select(mem, avg, dur) %>% 
   group_by(mem) %>%
-  summarise(avg = mean(avg), dur = sum(dur))
+  summarise(avg = mean(avg), dur = sum(dur)) %>% 
+  mutate(mem = ifelse(mem == 1, "Membre", "Non-membre"))
 
-table(dat_mem)
-
-table <- kable(dat_mem, caption = "Données de durée et de température moyenne", align = "c")
-
-# Afficher le tableau
-cat(table)
+kable(dat_mem, col.names = c("Membre", "Durée moyenne", "Durée totale"), caption = "Détail sur la durée selon les abonnements")
 ```
 
 # Conclusion {.unnumbered}
