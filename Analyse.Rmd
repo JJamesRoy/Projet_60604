@@ -175,40 +175,6 @@ hist(freqTable_station, xlab = "Nombre d'observations", ylab = "Nombre de statio
 ### Exploration des relations avec la durée des trajets
 
 ```{r}
-
-```
-
-# Conclusion {.unnumbered}
-
-voir le tableau \@ref(tab:test)
-
-```{r test}
-knitr::kable(summary(dat), caption="tableau")
-
-```
-
-voir la figure \@ref(fig:member)
-
-```{r member, fig.cap="Nom de la figure"}
-donnees_summary <- dat %>%
-  group_by(mem) %>%
-  summarise(percentage = n() / nrow(dat) * 100)
-# Création variable pour afficher en %
-
-# Création du graphique à barres
-ggplot(data = donnees_summary, aes(x = factor(mem), y = percentage, fill = factor(mem))) +
-  geom_bar(stat = "identity") +
-  guides(fill=guide_legend(title = "Membre"))+
-  ggtitle("Pourcentage de membre et de non membre BIXI")+
-  xlab("")+
-  ylab("Pourcentage")+
-  theme_minimal()
-```
-
-Graphique voyage par jour (découper par membre)
-
-```{r}
-
 dat$wday <- factor(dat$wday,
                    levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
 
@@ -225,10 +191,7 @@ ggplot(aes(x=wday, y=avg,
   labs(title = "Durée moyenne des déplacement \npar jours selon les membres et les non membres")+
   xlab("")+
   ylab("Durée moyenne (en minutes) des déplacement")
-        
 ```
-
-Même chose par mois
 
 ```{r}
 ggplot(dat, aes(mm, avg)) +
@@ -236,8 +199,6 @@ ggplot(dat, aes(mm, avg)) +
   theme_minimal() +
   facet_wrap(~ mem)
 ```
-
-Temp
 
 ```{r}
 dat_temp <- dat %>%
@@ -275,6 +236,36 @@ dat_mem <- dat %>%
 
 print(dat_mem)
 ```
+
+# Conclusion {.unnumbered}
+
+voir le tableau \@ref(tab:test)
+
+```{r test}
+knitr::kable(summary(dat), caption="tableau")
+
+```
+
+voir la figure \@ref(fig:member)
+
+```{r member, fig.cap="Nom de la figure"}
+donnees_summary <- dat %>%
+  group_by(mem) %>%
+  summarise(percentage = n() / nrow(dat) * 100)
+# Création variable pour afficher en %
+
+# Création du graphique à barres
+ggplot(data = donnees_summary, aes(x = factor(mem), y = percentage, fill = factor(mem))) +
+  geom_bar(stat = "identity") +
+  guides(fill=guide_legend(title = "Membre"))+
+  ggtitle("Pourcentage de membre et de non membre BIXI")+
+  xlab("")+
+  ylab("Pourcentage")+
+  theme_minimal()
+```
+
+
+
 
 essaie de graph
 
