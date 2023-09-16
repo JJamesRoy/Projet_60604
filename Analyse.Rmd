@@ -585,7 +585,12 @@ Vs les stations...
 dat_n_tot_station <- dat %>%
   select(mem, n_tot, station) %>% 
   group_by(station, mem) %>%
-  summarise(n_tot = (sum(n_tot)))
+  summarise(n_tot = (sum(n_tot)))%>% 
+  add_count(station) %>% 
+  filter(dense_rank(n_tot) < 14)
+
+
+plot(dat_n_tot_station$station,dat_n_tot_station$n_tot)
 ```
 
 
