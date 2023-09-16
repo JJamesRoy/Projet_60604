@@ -238,6 +238,7 @@ ggplot(dat_temp, aes(temp, dur)) +
   labs(title = "Durée totale des déplacement \npar jours selon les membres et les non membres")+
   xlab("Précipitation")+
   ylab("Log naturel de la durée totale des déplacement")
+
 ```
 
 En croisant la variable `dur` avec la variable `rain` qui représente la précipitation totale de pluie lors de la journée et `mem` qui représente l'abonnement, nous pouvons obtenir le figure \@ref(fig:rain). Il est intéressant de constater que la relation est très semblable pour les membres et les non-membres. En effet, il semble y avoir une relation inversement proportionnelle entre la pluie et la durée totale des déplacements. C'est-à-dire qu'un peu de pluie a un effet significatif sur l'utilisation, mais cela se stabilise rapidement.
@@ -262,17 +263,36 @@ ggplot(dat_rain, aes(rain, dur)) +
 En croisant la variable `dur` et `avg` avec `mem` qui représente l'abonnement, nous pouvons obtenir le tableau \@ref(tab:tab-mem).
 
 ```{r}
-dat_rain <- dat %>%
-  select(mem, dur, rain) %>% 
-  group_by(rain, mem) %>%
-  summarise(dur = log(sum(dur)))
+dat_mem <- dat %>%
+  select(mem, avg, dur) %>% 
+  group_by(mem) %>%
+  summarise(avg = mean(avg), dur = sum(dur)) %>% 
+  mutate(dur_relative = ifelse(mem == 1, dur / sum(dat$mem == 1), dur / sum(dat$mem ==0))) %>% 
+  mutate(mem = ifelse(mem == 1, "Membre", "Non-membre"))
 ```
 
 ```{r tab-mem}
-kable(dat_mem, col.names = c("Membre", "Durée moyenne", "Durée totale"), caption = "Détail sur la durée selon les abonnements")
+kable(dat_mem, col.names = c("Membre", "Durée moyenne", "Durée totale", "Durée totale relative"), caption = "Détail sur la durée selon les abonnements")
 ```
 
-La durée moyennedes trajets est assez similaire entre les membres et les non-membres. Cela est assez intéressant, car il est facile de penser que les membres utiliseraient plus les Bixi pour des trajets plus long. En revanche, les membres ont une durée totale de trajets beaucoup plus haute que les non-membres, ce qui rejoint ce que nous avions observé précédemment.
+La durée moyenne des trajets est assez similaire entre les membres et les non-membres. Cela est assez intéressant, car il est facile de penser que les membres utiliseraient plus les Bixi pour des trajets plus long. En revanche, les membres ont une durée totale de trajets beaucoup plus haute que les non-membres, ce qui rejoint ce que nous avions observé précédemment. Il apparait aussi que les membres sont responsables de la majeure partie des déplacements (en durée). Ainsi, selon la rentabilité du programme d'adhéesion (donnée non disponible), il pourrait être opportun d'attirer des nouveaux membres avec des promotions et des campagnes publicitaires.
+
+En croisant la variable `dur` et `avg` avec `holiday` qui représente si le jour est férié ou non, nous pouvons obtenir le tableau \@ref(tab:tab-hol).
+
+```{r tab-hol}
+dat_hol <- dat %>%
+  select(holiday, avg, dur) %>% 
+  group_by(holiday) %>%
+  summarise(avg = mean(avg), dur = sum(dur)) %>% 
+  mutate(dur_relative = ifelse(holiday == 1, dur / sum(dat$holiday == 1), dur / sum(dat$holiday ==0))) %>% 
+  mutate(holiday = ifelse(holiday == 1, "Férié", "Non férié"))
+
+
+kable(dat_hol, col.names = c("Jour", "Durée moyenne", "Durée totale", "Durée totale relative"), caption = "Détail sur la durée selon les fériés")
+
+```
+
+La durée moyenne des trajets est légérement supérieure pour les jours fériés. Aussi, la durée totale relative des trajets est supérieure pendant les jours fériés. Cela s'explique par le fait que les usagers ont plus de temps disponible pour utiliser les Bixi. Il serait aussi avantageux pour Bixi d'augmenter la disponibilité des vélos lors des jours fériés.
 
 # Conclusion {.unnumbered}
 
