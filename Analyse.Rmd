@@ -294,6 +294,240 @@ kable(dat_hol, col.names = c("Jour", "Durée moyenne", "Durée totale", "Durée 
 
 La durée moyenne des trajets est légérement supérieure pour les jours fériés. Aussi, la durée totale relative des trajets est supérieure pendant les jours fériés. Cela s'explique par le fait que les usagers ont plus de temps disponible pour utiliser les Bixi. Il serait aussi avantageux pour Bixi d'augmenter la disponibilité des vélos lors des jours fériés.
 
+
+### Exploration des relations avec l'utilisation des Bixi
+
+Dans la prochaine section, nous allons explorer les relations entre l'utilisation des Bixi, soit la variable `n_tot` (ainsi que `n_AM` et `nPM` dans certains cas) et diverses variables de notre base de données.
+
+La figure \@ref(fig:graph_n_tot_vs_temp) montre la relation entre le nombre de déplacement total moyen par jour d'après une certaine température.
+
+```{r graph_n_tot_vs_temp}
+dat_temp_ntot <- dat %>%
+  select(mem, n_tot, temp) %>% 
+  group_by(temp, mem) %>%
+  summarise(n_tot = (mean(n_tot)))
+
+ggplot(dat_temp_ntot, aes(temp, n_tot)) +
+  geom_point() + geom_smooth(method='lm', se=FALSE) +
+  facet_wrap(~mem,labeller=labeller(mem=label)) +
+  labs(title = "Nombre moyen de déplacements \npar rapport à la température")+
+  xlab("Température en °C")+
+  ylab("Nombre de déplacement moyen")
+  theme_minimal()
+
+dat_temp_n_tot_mem <- filter(dat_temp_ntot, mem == 1)
+cor_n_tot_temp_mem <- cor(dat_temp_n_tot_mem$n_tot,dat_temp_n_tot_mem$temp)
+
+dat_temp_n_tot_nmem <- filter(dat_temp_ntot, mem == 0)
+cor_n_tot_temp_nmem <- cor(dat_temp_n_tot_nmem$n_tot,dat_temp_n_tot_nmem$temp)
+```
+
+D'après ce graphique, il est possible de constater que qu'en moyenne, le nombre de déplacement effectué avec les Bixi a tendance à augmenter avec la température. Une corrélation positive (adjectif) de 0.65 pour les membres et 0.48 pour les non-membres...
+
+La figure \@ref(fig:graph_n_tot_vs_rain) montre la relation entre le nombre de déplacement total moyen par jour d'après la quantité de pluie tombé dans une journée.
+
+```{r graph_n_tot_vs_rain}
+dat_rain_ntot <- dat %>%
+  select(mem, n_tot, rain) %>% 
+  group_by(rain, mem) %>%
+  summarise(n_tot = (mean(n_tot)))
+
+ggplot(dat_rain_ntot, aes(rain, n_tot)) +
+  geom_point() + geom_smooth(method='lm', se=FALSE) +
+  facet_wrap(~mem,labeller=labeller(mem=label)) +
+  labs(title = "Nombre moyen de déplacements \npar rapport à la quantité de précipitations")+
+  xlab("Quantité de précipitations (mm) par jour")+
+  ylab("Nombre de déplacement moyen")
+  theme_minimal()
+
+dat_rain_n_tot_mem <- filter(dat_rain_ntot, mem == 1)
+cor_n_tot_rain_mem <- cor(dat_rain_n_tot_mem$n_tot,dat_rain_n_tot_mem$rain)
+
+dat_rain_n_tot_nmem <- filter(dat_rain_ntot, mem == 0)
+cor_n_tot_rain_nmem <- cor(dat_rain_n_tot_nmem$n_tot,dat_rain_n_tot_nmem$rain)
+```
+
+
+D'après ce graphique, il est possible de constater que qu'en moyenne, le nombre de déplacement effectué avec les Bixi a tendance à diminuer avec la quantité de précipitation. Cependant, une corrélation négative (adjectif) de -0.30 pour les membres et -0.25 pour les non-membres...
+
+La figure \@ref(fig:n_tot_vs_day) montre la relation entre le nombre de déplacement moyen pour différents moment de la journée et le nombre total de déplacement d'après le jour de la semaine, ainsi que la semaine ou la fin de semaine.
+
+```{r n_tot_vs_day}
+
+monday <- select(filter(dat, wday == "Monday" & mem == 1),n_tot,n_AM,n_PM)
+v_monday <- c(mean(monday$n_AM),mean(monday$n_PM), mean(monday$n_tot-monday$n_AM-monday$n_PM),mean(monday$n_tot))
+
+monday_nm <- select(filter(dat, wday == "Monday" & mem == 0),n_tot,n_AM,n_PM)
+v_monday_nm <- c(mean(monday_nm$n_AM),mean(monday_nm$n_PM),mean(monday_nm$n_tot-monday_nm$n_AM-monday_nm$n_PM),mean(monday_nm$n_tot))
+
+
+tuesday <- select(filter(dat, wday == "Tuesday" & mem == 1),n_tot,n_AM,n_PM)
+v_tuesday <- c(mean(tuesday$n_AM),mean(tuesday$n_PM), mean(tuesday$n_tot-tuesday$n_AM-tuesday$n_PM),mean(tuesday$n_tot))
+
+tuesday_nm <- select(filter(dat, wday == "Tuesday" & mem == 0),n_tot,n_AM,n_PM)
+v_tuesday_nm <- c(mean(tuesday_nm$n_AM),mean(tuesday_nm$n_PM),mean(tuesday_nm$n_tot-tuesday_nm$n_AM-tuesday_nm$n_PM),mean(tuesday_nm$n_tot))
+
+
+wednesday <- select(filter(dat, wday == "Wednesday" & mem == 1),n_tot,n_AM,n_PM)
+v_wednesday <- c(mean(wednesday$n_AM),mean(wednesday$n_PM), mean(wednesday$n_tot-wednesday$n_AM-wednesday$n_PM),mean(wednesday$n_tot))
+
+wednesday_nm <- select(filter(dat, wday == "Wednesday" & mem == 0),n_tot,n_AM,n_PM)
+v_wednesday_nm <- c(mean(wednesday_nm$n_AM),mean(wednesday_nm$n_PM),mean(wednesday_nm$n_tot-wednesday_nm$n_AM-wednesday_nm$n_PM),mean(wednesday_nm$n_tot))
+
+
+thursday <- select(filter(dat, wday == "Thursday" & mem == 1),n_tot,n_AM,n_PM)
+v_thursday <- c(mean(thursday$n_AM),mean(thursday$n_PM), mean(thursday$n_tot-thursday$n_AM-thursday$n_PM),mean(thursday$n_tot))
+
+thursday_nm <- select(filter(dat, wday == "Thursday" & mem == 0),n_tot,n_AM,n_PM)
+v_thursday_nm <- c(mean(thursday_nm$n_AM),mean(thursday_nm$n_PM),mean(thursday_nm$n_tot-thursday_nm$n_AM-thursday_nm$n_PM),mean(thursday_nm$n_tot))
+
+
+friday <- select(filter(dat, wday == "Friday" & mem == 1),n_tot,n_AM,n_PM)
+v_friday <- c(mean(friday$n_AM),mean(friday$n_PM), mean(friday$n_tot-friday$n_AM-friday$n_PM),mean(friday$n_tot))
+
+friday_nm <- select(filter(dat, wday == "Friday" & mem == 0),n_tot,n_AM,n_PM)
+v_friday_nm <- c(mean(friday_nm$n_AM),mean(friday_nm$n_PM),mean(friday_nm$n_tot-friday_nm$n_AM-friday_nm$n_PM),mean(friday_nm$n_tot))
+
+
+saturday <- select(filter(dat, wday == "Saturday" & mem == 1),n_tot,n_AM,n_PM)
+v_saturday <- c(mean(saturday$n_AM),mean(saturday$n_PM), mean(saturday$n_tot-saturday$n_AM-saturday$n_PM),mean(saturday$n_tot))
+
+saturday_nm <- select(filter(dat, wday == "Saturday" & mem == 0),n_tot,n_AM,n_PM)
+v_saturday_nm <- c(mean(saturday_nm$n_AM),mean(saturday_nm$n_PM),mean(saturday_nm$n_tot-saturday_nm$n_AM-saturday_nm$n_PM),mean(saturday_nm$n_tot))
+
+
+sunday <- select(filter(dat, wday == "Sunday" & mem == 1),n_tot,n_AM,n_PM)
+v_sunday <- c(mean(sunday$n_AM),mean(sunday$n_PM), mean(sunday$n_tot-sunday$n_AM-sunday$n_PM),mean(sunday$n_tot))
+
+sunday_nm <- select(filter(dat, wday == "Sunday" & mem == 0),n_tot,n_AM,n_PM)
+v_sunday_nm <- c(mean(sunday_nm$n_AM),mean(sunday_nm$n_PM),mean(sunday_nm$n_tot-sunday_nm$n_AM-sunday_nm$n_PM),mean(sunday_nm$n_tot))
+
+
+v_semaine <- c(mean(v_monday[1],v_tuesday[1],v_wednesday[1],v_thursday[1],v_friday[1]),+
+             mean(v_monday[2],v_tuesday[2],v_wednesday[2],v_thursday[2],v_friday[2]),+
+             mean(v_monday[3],v_tuesday[3],v_wednesday[3],v_thursday[3],v_friday[3]),+
+             mean(v_monday[4],v_tuesday[4],v_wednesday[4],v_thursday[4],v_friday[4]))
+
+v_fin_semaine <- c(mean(v_saturday[1],v_sunday[1]),+
+                 mean(v_saturday[2],v_sunday[2]),+
+                 mean(v_saturday[3],v_sunday[3]),+
+                 mean(v_saturday[4],v_sunday[4]))
+
+
+v_semaine_nm <- c(mean(v_monday_nm[1],v_tuesday_nm[1],v_wednesday_nm[1],v_thursday_nm[1],v_friday_nm[1]),+
+             mean(v_monday_nm[2],v_tuesday_nm[2],v_wednesday_nm[2],v_thursday_nm[2],v_friday_nm[2]),+
+             mean(v_monday_nm[3],v_tuesday_nm[3],v_wednesday_nm[3],v_thursday_nm[3],v_friday_nm[3]),+
+             mean(v_monday_nm[4],v_tuesday_nm[4],v_wednesday_nm[4],v_thursday_nm[4],v_friday_nm[4]))
+
+v_fin_semaine_nm <- c(mean(v_saturday_nm[1],v_sunday_nm[1]),+
+                 mean(v_saturday_nm[2],v_sunday_nm[2]),+
+                 mean(v_saturday_nm[3],v_sunday_nm[3]),+
+                 mean(v_saturday_nm[4],v_sunday_nm[4]))
+
+n_tot_vs_day = ceiling(c(v_monday, v_tuesday, v_wednesday, v_thursday, v_friday, v_saturday, v_sunday, v_semaine, v_fin_semaine))
+n_tot_vs_day_nm = ceiling(c(v_monday_nm, v_tuesday_nm, v_wednesday_nm, v_thursday_nm, v_friday_nm, v_saturday_nm, v_sunday_nm, v_semaine_nm, v_fin_semaine_nm))
+
+
+moment <- rep(c("AM", "PM", "Nuit", "Total"),9)
+
+day <- c(rep("Lundi",4), rep("Mardi",4), rep("Mercredi",4), rep("Jeudi",4), rep("Vendredi",4), rep("Samedi",4), rep("Dimanche",4), rep("Semaine",4), rep("Fin de semaine",4))
+
+wday_data_n <- data.frame(moment,n_tot_vs_day,day)
+wday_data_n_nm <- data.frame(moment,n_tot_vs_day_nm,day)
+
+
+ggplot(wday_data_n, aes(fill=moment,y = n_tot_vs_day, x = day )) + geom_bar(position="dodge", stat="identity")+
+geom_text(aes(label=n_tot_vs_day), position=position_dodge(width=0.9), vjust=-0.25)
+
+ggplot(wday_data_n_nm, aes(fill=moment,y = n_tot_vs_day_nm, x = day )) + geom_bar(position="dodge", stat="identity")+
+geom_text(aes(label=n_tot_vs_day_nm), position=position_dodge(width=0.9), vjust=-0.25)
+              
+```
+
+D'après ce graphique...
+
+La figure \\\@ref(fig:n_tot_vs_holiday) montre la relation entre le nombre de déplacement moyen et si la journée est férié ou non.
+
+```{r n_tot_vs_holiday}
+
+data_ferie_mem = unlist(select(filter(dat, holiday == 1 & mem == 1),n_tot))
+data_ferie_nmem = unlist(select(filter(dat, holiday == 1 & mem == 0),n_tot))
+data_nferie_mem = unlist(select(filter(dat, holiday == 0 & mem == 1),n_tot))
+data_nferie_nmem = unlist(select(filter(dat, holiday == 0 & mem == 0),n_tot))
+
+bp <- boxplot(data_ferie_mem, data_nferie_mem, staplewex = 1,
+              main = "Nombre de déplacements pour les membres",
+              at = c(1,2),
+              names = c("Férié", "Non-férié"),
+              las = 2,
+              col = c("orange","blue"),
+              border = "black"
+              )
+text(x = col(bp$stats) - .5, y = bp$stats, labels = bp$stats, cex = 0.7)
+
+bp <- boxplot(data_ferie_nmem, data_nferie_nmem, staplewex = 1,
+              main = "Nombre de déplacements pour les non-membres",
+              at = c(1,2),
+              names = c("Férié", "Non-férié"),
+              las = 2,
+              col = c("orange","blue"),
+              border = "black"
+              )
+text(x = col(bp$stats) - .5, y = bp$stats, labels = bp$stats, cex = 0.5)
+
+
+```
+
+
+D'après ce graphique...
+
+Reste à faire d'après la station et mois de l'année...
+
+La figure \\\@ref(fig:n_tot_vs_mois) représente la relation entre l'utilisation des Bixis et le mois de l'année. Comme l'analyse univariée la démontré, nous avons très peu de données pour les mois d'avril et novembre en comparaison aux autres mois faisant partie de l'étude, ainsi nous n'allons pas les prendre en compte pour cette relation.
+
+```{r n_tot_vs_mois}
+
+etat <- rep(c("Membre", "Non-membre"),8)
+
+mois <- c(rep("Avril",2), rep("Mai",2), rep("Juin",2), rep("Juillet",2), rep("Août",2), rep("Septembre",2), rep("Octobre",2), rep("Novembre",2))
+
+dat_mem_n_tot_vs_mm <- select(filter(dat,mem == 1),n_tot,mm)
+dat_nmem_n_tot_vs_mm <- select(filter(dat,mem == 0),n_tot,mm)
+
+#v_n_tot_vs_mm <- ceiling(c(mean(filter(dat_mem_n_tot_vs_mm, mm == 4)$n_tot), mean(filter(dat_nmem_n_tot_vs_mm, mm == 4)$n_tot),+
+#                       mean(filter(dat_mem_n_tot_vs_mm, mm == 5)$n_tot), mean(filter(dat_nmem_n_tot_vs_mm, mm == 5)$n_tot),+
+#                       mean(filter(dat_mem_n_tot_vs_mm, mm == 6)$n_tot), mean(filter(dat_nmem_n_tot_vs_mm, mm == 6)$n_tot),+
+#                       mean(filter(dat_mem_n_tot_vs_mm, mm == 7)$n_tot), mean(filter(dat_nmem_n_tot_vs_mm, mm == 7)$n_tot),+
+#                       mean(filter(dat_mem_n_tot_vs_mm, mm == 8)$n_tot), mean(filter(dat_nmem_n_tot_vs_mm, mm == 8)$n_tot),+
+#                       mean(filter(dat_mem_n_tot_vs_mm, mm == 9)$n_tot), mean(filter(dat_nmem_n_tot_vs_mm, mm == 9)$n_tot),+
+#                       mean(filter(dat_mem_n_tot_vs_mm, mm == 10)$n_tot), mean(filter(dat_nmem_n_tot_vs_mm, mm == 10)$n_tot),+
+#                       mean(filter(dat_mem_n_tot_vs_mm, mm == 11)$n_tot), mean(filter(dat_nmem_n_tot_vs_mm, mm == 11)$n_tot)))
+
+v_n_tot_vs_mm <- c(sum(filter(dat_mem_n_tot_vs_mm, mm == 4)$n_tot), sum(filter(dat_nmem_n_tot_vs_mm, mm == 4)$n_tot),+
+                       sum(filter(dat_mem_n_tot_vs_mm, mm == 5)$n_tot), sum(filter(dat_nmem_n_tot_vs_mm, mm == 5)$n_tot),+
+                       sum(filter(dat_mem_n_tot_vs_mm, mm == 6)$n_tot), sum(filter(dat_nmem_n_tot_vs_mm, mm == 6)$n_tot),+
+                       sum(filter(dat_mem_n_tot_vs_mm, mm == 7)$n_tot), sum(filter(dat_nmem_n_tot_vs_mm, mm == 7)$n_tot),+
+                       sum(filter(dat_mem_n_tot_vs_mm, mm == 8)$n_tot), sum(filter(dat_nmem_n_tot_vs_mm, mm == 8)$n_tot),+
+                       sum(filter(dat_mem_n_tot_vs_mm, mm == 9)$n_tot), sum(filter(dat_nmem_n_tot_vs_mm, mm == 9)$n_tot),+
+                       sum(filter(dat_mem_n_tot_vs_mm, mm == 10)$n_tot), sum(filter(dat_nmem_n_tot_vs_mm, mm == 10)$n_tot),+
+                       sum(filter(dat_mem_n_tot_vs_mm, mm == 11)$n_tot), sum(filter(dat_nmem_n_tot_vs_mm, mm == 11)$n_tot))
+
+
+dmm_data_n_tot <- data.frame(etat,v_n_tot_vs_mm,mois)
+
+#Réaranger l'ordre:
+
+ggplot(dmm_data_n_tot, aes(fill=etat,y = v_n_tot_vs_mm, x = mois)) + geom_bar(position="dodge",stat="identity")+
+geom_text(aes(label=v_n_tot_vs_mm), position=position_dodge(width=0.9), vjust=-0.25)
+
+#hist(dat$mm)
+
+#plot(dat$mm,dat$n_tot)
+
+```
+
+
+
 # Conclusion {.unnumbered}
 
 voir le tableau \@ref(tab:test)
