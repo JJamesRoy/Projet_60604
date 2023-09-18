@@ -492,65 +492,39 @@ geom_text(aes(label=n_tot_vs_day_nm), position=position_dodge(width=0.9), vjust=
               
 ```
 
-D'après ces figures, peu importe l'abonnement, on remarque qu'il y a en moyenne plus de déplacement en après-midi qu'en avant-midi ou durant la nuit. De plus, il y aurait sensiblement le même nombre de déplacement en avant-midi que durant la nuit.
+Pour les membres, on remarque qu'en moyenne, il y a plus de déplacements en après-midi qu'en avant-midi et durant la nuit. De façon générale, il y a aussi un peu plus de déplacements en avant-midi que la nuit. Il est aussi possible de remarquer que le nombre de déplacement total est très semblable pour tous les jours. Ainsi, on remarque aussi que le nombre moyen de déplacements entre la semaine et la fin de semaine est très semblables.
 
-```{r wday, fig.cap="Nom de la figure"}
+Pour les non-membres, il y a aussi plus de déplacements en après-midi qu'en avant-midi et durant la nuit. Puis, l'utilisation en avant-midi et la nuit est très semblable pour tous les jours. Il est aussi possible de remarquer que le nombre de déplacement total est très semblable pour tous les jours. Ainsi, on remarque aussi que le nombre moyen de déplacements entre la semaine et la fin de semaine est semblables aussi.
 
-dat_test <- dat %>%
-  select(mem, n_tot, wday) %>% 
-  group_by(wday, mem) %>%
-  summarise(n_tot = (mean(n_tot)))
+D'un point de vue d'affaires, il n'y aurait pas d'avantage significatif à prioriser une journée ou une autre de la semaine si l'entreprise devait enlever une certaines quantité de Bixi des routes pour une journée.
 
-
-day <- c(rep("Lundi",2), rep("Mardi",2), rep("Mercredi",2), rep("Jeudi",2), rep("Vendredi",2), rep("Samedi",2), rep("Dimanche",2))
-
-ggplot(dat_test, aes(x=wday, y=n_tot,
-           fill = day)) +
-  geom_bar(stat = "identity") +
-  scale_fill_brewer(palette = "Blues")+
-  facet_wrap(~ mem,labeller=labeller(mem=label))+
-  theme(legend.position="none")+
-  labs(title = "Nombre de déplacement \npar jours selon les membres et les non membres")+
-  xlab("")+
-  ylab("Nombre de déplacement")+
-  geom_text(aes(label=ceiling(n_tot)), position=position_dodge(width=0.9), vjust=-0.25)
-
-```
-
-D'après ce graphique...
-
-La figure \\\@ref(fig:n_tot_vs_holiday) montre la relation entre le nombre de déplacement moyen et si la journée est férié ou non.
+Le tableau \\\@ref(fig:n_tot_vs_holiday) montre la relation entre le nombre de déplacement et si la journée est férié ou non.
 
 ```{r n_tot_vs_holiday}
-
-data_ferie_mem = unlist(select(filter(dat, holiday == 1 & mem == 1),n_tot))
-data_ferie_nmem = unlist(select(filter(dat, holiday == 1 & mem == 0),n_tot))
-data_nferie_mem = unlist(select(filter(dat, holiday == 0 & mem == 1),n_tot))
-data_nferie_nmem = unlist(select(filter(dat, holiday == 0 & mem == 0),n_tot))
 
 dat_hol_n_tot <- dat %>%
   select(holiday, n_tot) %>% 
   group_by(holiday) %>%
-  summarise(avg = mean(n_tot), n_tot = sum(n_tot)) %>% 
-  mutate(n_tot_relative = ifelse(holiday == 1, n_tot / sum(dat$holiday == 1), n_tot / sum(dat$holiday ==0))) %>% 
+  mutate(mean_n_tot = n_tot) %>% 
+  summarise(mean_n_tot = mean(n_tot), n_tot = sum(n_tot)) %>%
   mutate(holiday = ifelse(holiday == 1, "Férié", "Non férié"))
 
-kable(dat_hol_n_tot, col.names = c("Jour", "Nb. déplacement moyen", "Nb. déplacement total", "Nb. déplacement total relatif"), caption = "Détail sur le nombre de déplacement selon les fériés")
+kable(dat_hol_n_tot, col.names = c("Jour", "Nb. déplacement moyen", "Nb. déplacement total"), caption = "Détail sur le nombre de déplacement selon les fériés")
 
 ```
 
-D'après ce graphique...
+Ce tableau montre qu'en moyenne il y a un peu plus de déplacements durant les jours férié, mais on parle ici d'un peu plus qu'un seul déplacement. Ce qui ne semble pas assez signifiant pour conclure que le nombre de déplacement est affecté par le fait qu'il s'agit d'un jour férié ou non.
 
 ```{r tab-mem-n_tot}
 dat_mem_n_tot <- dat %>%
   select(mem, n_tot) %>% 
   group_by(mem) %>%
   summarise(avg = mean(n_tot), n_tot = sum(n_tot)) %>% 
-  mutate(n_tot_relative = ifelse(mem == 1, n_tot / sum(dat$n_tot == 1), n_tot / sum(dat$mem ==0))) %>% 
   mutate(mem = ifelse(mem == 1, "Membre", "Non-membre"))
 
-kable(dat_mem_n_tot, col.names = c("Membre", "Nb. de déplacement moyen", "Nb. de déplacement total", "Nb. de déplacement relatif"), caption = "Détail sur le nombre de déplacement selon les abonnements")
+kable(dat_mem_n_tot, col.names = c("Membre", "Nb. de déplacement moyen", "Nb. de déplacement total"), caption = "Détail sur le nombre de déplacement selon les abonnements")
 ```
+D'après ce tableau,
 
 Reste à faire d'après la station...
 
