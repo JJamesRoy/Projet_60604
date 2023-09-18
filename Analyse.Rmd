@@ -234,11 +234,15 @@ dat_temp <- dat %>%
 ```{r temp, fig.cap="Nom de la figure"}
 ggplot(dat_temp, aes(temp, dur)) +
   geom_point() +
-  facet_wrap(~mem,labeller=labeller(mem=label)) +
+  facet_wrap(~mem,labeller=labeller(mem=label))+
+  geom_smooth(method='lm', se=FALSE) +
   labs(title = "Durée totale des déplacement \npar jours selon les membres et les non membres")+
-  xlab("Précipitation")+
+  xlab("Température en °C")+
   ylab("Log naturel de la durée totale des déplacement")
 
+dat_temp_cor = dat_temp %>% 
+  group_by(mem) %>%
+  summarise(cor = cor(temp,dur))
 ```
 
 En croisant la variable `dur` avec la variable `rain` qui représente la précipitation totale de pluie lors de la journée et `mem` qui représente l'abonnement, nous pouvons obtenir le figure \@ref(fig:rain). Il est intéressant de constater que la relation est très semblable pour les membres et les non-membres. En effet, il semble y avoir une relation inversement proportionnelle entre la pluie et la durée totale des déplacements. C'est-à-dire qu'un peu de pluie a un effet significatif sur l'utilisation, mais cela se stabilise rapidement.
@@ -255,9 +259,14 @@ dat_rain <- dat %>%
 ggplot(dat_rain, aes(rain, dur)) +
   geom_point() +
   facet_wrap(~mem,labeller=labeller(mem=label)) +
+  geom_smooth(method='lm', se=FALSE) +
   labs(title = "Durée totale des déplacement \npar jours selon les membres et les non membres")+
-  xlab("Température en °C")+
+  xlab("Précipitation")+
   ylab("Log naturel de la durée totale des déplacement")
+
+dat_rain_cor = dat_rain %>% 
+  group_by(mem) %>%
+  summarise(cor = cor(rain,dur))
 ```
 
 En croisant la variable `dur` et `avg` avec `mem` qui représente l'abonnement, nous pouvons obtenir le tableau \@ref(tab:tab-mem).
@@ -318,6 +327,12 @@ cor_n_tot_temp_mem <- cor(dat_temp_n_tot_mem$n_tot,dat_temp_n_tot_mem$temp)
 
 dat_temp_n_tot_nmem <- filter(dat_temp_ntot, mem == 0)
 cor_n_tot_temp_nmem <- cor(dat_temp_n_tot_nmem$n_tot,dat_temp_n_tot_nmem$temp)
+
+# Plutot ceci :
+
+dat_temp_ntot_cor = dat_temp_ntot %>% 
+  group_by(mem) %>%
+  summarise(cor = cor(temp,n_tot))
 ```
 
 D'après ce graphique, il est possible de constater que qu'en moyenne, le nombre de déplacement effectué avec les Bixi a tendance à augmenter avec la température. Une corrélation positive (adjectif) de 0.65 pour les membres et 0.48 pour les non-membres...
