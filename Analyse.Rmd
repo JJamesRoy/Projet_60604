@@ -294,7 +294,6 @@ kable(dat_hol, col.names = c("Jour", "Durée moyenne", "Durée totale", "Durée 
 
 La durée moyenne des trajets est légérement supérieure pour les jours fériés. Aussi, la durée totale relative des trajets est supérieure pendant les jours fériés. Cela s'explique par le fait que les usagers ont plus de temps disponible pour utiliser les Bixi. Il serait aussi avantageux pour Bixi d'augmenter la disponibilité des vélos lors des jours fériés.
 
-
 ### Exploration des relations avec l'utilisation des Bixi
 
 Dans la prochaine section, nous allons explorer les relations entre l'utilisation des Bixi, soit la variable `n_tot` (ainsi que `n_AM` et `nPM` dans certains cas) et diverses variables de notre base de données.
@@ -313,7 +312,6 @@ ggplot(dat_temp_ntot, aes(temp, n_tot)) +
   labs(title = "Nombre moyen de déplacements \npar rapport à la température")+
   xlab("Température en °C")+
   ylab("Nombre de déplacement moyen")
-  theme_minimal()
 
 dat_temp_n_tot_mem <- filter(dat_temp_ntot, mem == 1)
 cor_n_tot_temp_mem <- cor(dat_temp_n_tot_mem$n_tot,dat_temp_n_tot_mem$temp)
@@ -338,7 +336,6 @@ ggplot(dat_rain_ntot, aes(rain, n_tot)) +
   labs(title = "Nombre moyen de déplacements \npar rapport à la quantité de précipitations")+
   xlab("Quantité de précipitations (mm) par jour")+
   ylab("Nombre de déplacement moyen")
-  theme_minimal()
 
 dat_rain_n_tot_mem <- filter(dat_rain_ntot, mem == 1)
 cor_n_tot_rain_mem <- cor(dat_rain_n_tot_mem$n_tot,dat_rain_n_tot_mem$rain)
@@ -346,7 +343,6 @@ cor_n_tot_rain_mem <- cor(dat_rain_n_tot_mem$n_tot,dat_rain_n_tot_mem$rain)
 dat_rain_n_tot_nmem <- filter(dat_rain_ntot, mem == 0)
 cor_n_tot_rain_nmem <- cor(dat_rain_n_tot_nmem$n_tot,dat_rain_n_tot_nmem$rain)
 ```
-
 
 D'après ce graphique, il est possible de constater que qu'en moyenne, le nombre de déplacement effectué avec les Bixi a tendance à diminuer avec la quantité de précipitation. Cependant, une corrélation négative (adjectif) de -0.30 pour les membres et -0.25 pour les non-membres...
 
@@ -453,7 +449,6 @@ geom_text(aes(label=n_tot_vs_day_nm), position=position_dodge(width=0.9), vjust=
               
 ```
 
-
 ```{r wday, fig.cap="Nom de la figure"}
 
 dat_test <- dat %>%
@@ -477,8 +472,6 @@ ggplot(dat_test, aes(x=wday, y=n_tot,
 
 ```
 
-
-
 D'après ce graphique...
 
 La figure \\\@ref(fig:n_tot_vs_holiday) montre la relation entre le nombre de déplacement moyen et si la journée est férié ou non.
@@ -501,9 +494,7 @@ kable(dat_hol_n_tot, col.names = c("Jour", "Nb. déplacement moyen", "Nb. dépla
 
 ```
 
-
 D'après ce graphique...
-
 
 ```{r tab-mem-n_tot}
 dat_mem_n_tot <- dat %>%
@@ -579,7 +570,6 @@ ggplot(dat_test, aes(x=mm, y=n_tot,
 
 Vs les stations...
 
-
 ```{r n_tot_vs_station}
 
 dat_n_tot_station <- dat %>%
@@ -592,8 +582,6 @@ dat_n_tot_station <- dat %>%
 
 plot(dat_n_tot_station$station,dat_n_tot_station$n_tot)
 ```
-
-
 
 # Conclusion {.unnumbered}
 
