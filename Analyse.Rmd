@@ -305,9 +305,9 @@ La durée moyenne des trajets est légérement supérieure pour les jours féri�
 
 ### Exploration des relations avec l'utilisation des Bixi
 
-Dans la prochaine section, nous allons explorer les relations entre l'utilisation des Bixi, soit la variable `n_tot` (ainsi que `n_AM` et `nPM` dans certains cas) et diverses variables de notre base de données.
+Dans la prochaine section, nous allons explorer les relations entre l'utilisation des Bixis, soit la variable `n_tot` (ainsi que `n_AM` et `n_PM` dans certains cas) et diverses variables de notre base de données.
 
-La figure \@ref(fig:graph_n_tot_vs_temp) montre la relation entre le nombre de déplacement total moyen par jour d'après une certaine température.
+La figure \@ref(fig:graph_n_tot_vs_temp) montre la relation entre le nombre de déplacement total moyen par jour par rapport à la température pour les membres et les non-membres.
 
 ```{r graph_n_tot_vs_temp}
 dat_temp_ntot <- dat %>%
@@ -322,20 +322,21 @@ ggplot(dat_temp_ntot, aes(temp, n_tot)) +
   xlab("Température en °C")+
   ylab("Nombre de déplacement moyen")
 
-dat_temp_n_tot_mem <- filter(dat_temp_ntot, mem == 1)
-cor_n_tot_temp_mem <- cor(dat_temp_n_tot_mem$n_tot,dat_temp_n_tot_mem$temp)
-
-dat_temp_n_tot_nmem <- filter(dat_temp_ntot, mem == 0)
-cor_n_tot_temp_nmem <- cor(dat_temp_n_tot_nmem$n_tot,dat_temp_n_tot_nmem$temp)
-
-# Plutot ceci :
-
 dat_temp_ntot_cor = dat_temp_ntot %>% 
   group_by(mem) %>%
   summarise(cor = cor(temp,n_tot))
 ```
 
-D'après ce graphique, il est possible de constater que qu'en moyenne, le nombre de déplacement effectué avec les Bixi a tendance à augmenter avec la température. Une corrélation positive (adjectif) de 0.65 pour les membres et 0.48 pour les non-membres...
+D'après ce graphique, il est possible de constater qu'il semble exister une relation linéaire entre le nombre de déplacement effectué en Bixi et la température, que ce soit pour un membre et un non-membre. Dans les deux cas, on observe que le nombre de déplacement moyen a tendance à augmenter avec la température. Une forte corrélation positive de 0.65 pour les membres et une corrélation moyenne de 0.48 pour les non-membres.
+
+D'un point de vue d'affaires, si l'entreprise Bixi désirerait par exemple effectuer une mise à jour logiciel ou effectuer de la maintenance sur certains vélos et que ceci nécessiterait de récupérer une certaines quantité de Bixi, il faudrait que l'entreprise entreprenne ces changements pendant les journées où il fait plus froid, ou durant les périodes plus froides soit durant les mois d'avril, mai, octobre ou novembre comme le montre le tableau \@ref(table:graph_temp_vs_mois).
+
+```{r graph_temp_vs_mois}
+
+mean_temp_vs_mm <- round(aggregate(dat$temp~dat$mm, FUN=mean, na.rm = TRUE), digits=2)
+kable(mean_temp_vs_mm, col.names = c("Mois","Température moyenne (°C)"), caption = "Température moyenne par mois")
+
+```
 
 La figure \@ref(fig:graph_n_tot_vs_rain) montre la relation entre le nombre de déplacement total moyen par jour d'après la quantité de pluie tombé dans une journée.
 
@@ -346,20 +347,18 @@ dat_rain_ntot <- dat %>%
   summarise(n_tot = (mean(n_tot)))
 
 ggplot(dat_rain_ntot, aes(rain, n_tot)) +
-  geom_point() + geom_smooth(method='lm', se=FALSE) +
+  geom_point() + #geom_smooth(method='lm', se=FALSE) +
   facet_wrap(~mem,labeller=labeller(mem=label)) +
   labs(title = "Nombre moyen de déplacements \npar rapport à la quantité de précipitations")+
   xlab("Quantité de précipitations (mm) par jour")+
   ylab("Nombre de déplacement moyen")
 
-dat_rain_n_tot_mem <- filter(dat_rain_ntot, mem == 1)
-cor_n_tot_rain_mem <- cor(dat_rain_n_tot_mem$n_tot,dat_rain_n_tot_mem$rain)
-
-dat_rain_n_tot_nmem <- filter(dat_rain_ntot, mem == 0)
-cor_n_tot_rain_nmem <- cor(dat_rain_n_tot_nmem$n_tot,dat_rain_n_tot_nmem$rain)
+dat_rain_ntot_cor = dat_rain_ntot %>% 
+  group_by(mem) %>%
+  summarise(cor = cor(rain,n_tot))
 ```
 
-D'après ce graphique, il est possible de constater que qu'en moyenne, le nombre de déplacement effectué avec les Bixi a tendance à diminuer avec la quantité de précipitation. Cependant, une corrélation négative (adjectif) de -0.30 pour les membres et -0.25 pour les non-membres...
+D'après ce graphique, il ne semble pas avoir de corrélation entre le nombre de déplacement et la quantité de précipitation dans une journée.
 
 La figure \@ref(fig:n_tot_vs_day) montre la relation entre le nombre de déplacement moyen pour différents moment de la journée et le nombre total de déplacement d'après le jour de la semaine, ainsi que la semaine ou la fin de semaine.
 
@@ -463,6 +462,8 @@ ggplot(wday_data_n_nm, aes(fill=moment,y = n_tot_vs_day_nm, x = day )) + geom_ba
 geom_text(aes(label=n_tot_vs_day_nm), position=position_dodge(width=0.9), vjust=-0.25)
               
 ```
+
+D'après ces figures, peu importe l'abonnement, on remarque qu'il y a en moyenne plus de déplacement en après-midi qu'en avant-midi ou durant la nuit. De plus, il y aurait sensiblement le même nombre de déplacement en avant-midi que durant la nuit.
 
 ```{r wday, fig.cap="Nom de la figure"}
 
