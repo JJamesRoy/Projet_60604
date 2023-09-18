@@ -222,6 +222,8 @@ ggplot(dat, aes(as.factor(mm), dur, fill = as.factor(mm))) +
 
 En croisant la variable `dur` avec la variable `temp` qui représente la température moyenne de la journée et `mem` qui représente l'abonnement, nous pouvons obtenir le figure @ref(fig:temp). Naturellement, on voit une relation positive entre la température moyenne et la durée totale de déplacement. La relation semble toutefois ralentir ou même s'inverser peu après les 20°C. Ce graphique donne globalement les mêmes informations que le précédent étant donné que la température est fortemement corrélée avec les mois.
 
+Au niveau de la corrélation, elle est de 0.53 pour les non-membres et de 0.48 pour les membres. Cela confirme que les membres sont des clients plus réguliers et moins affectés par des raisons exogènes comme la température.
+
 Graphique corrélation pareil mais avec mois ?
 
 ```{r}
@@ -245,7 +247,9 @@ dat_temp_cor = dat_temp %>%
   summarise(cor = cor(temp,dur))
 ```
 
-En croisant la variable `dur` avec la variable `rain` qui représente la précipitation totale de pluie lors de la journée et `mem` qui représente l'abonnement, nous pouvons obtenir le figure \@ref(fig:rain). Il est intéressant de constater que la relation est très semblable pour les membres et les non-membres. En effet, il semble y avoir une relation inversement proportionnelle entre la pluie et la durée totale des déplacements. C'est-à-dire qu'un peu de pluie a un effet significatif sur l'utilisation, mais cela se stabilise rapidement.
+En croisant la variable `dur` avec la variable `rain` qui représente la précipitation totale de pluie lors de la journée et `mem` qui représente l'abonnement, nous pouvons obtenir le figure \@ref(fig:rain). Il est intéressant de constater que la relation est très semblable pour les membres et les non-membres. En effet, il semble y avoir une relation inversement proportionnelle entre la pluie et la durée totale des déplacements. C'est-à-dire qu'un peu de pluie a un effet significatif sur l'utilisation, mais l'effet se stabilise rapidement.
+
+Au niveau de la corrélation, elle est de -0.45 pour les membres et les non-membres.
 
 ```{r}
 dat_rain <- dat %>%
@@ -302,6 +306,29 @@ kable(dat_hol, col.names = c("Jour", "Durée moyenne", "Durée totale", "Durée 
 ```
 
 La durée moyenne des trajets est légérement supérieure pour les jours fériés. Aussi, la durée totale relative des trajets est supérieure pendant les jours fériés. Cela s'explique par le fait que les usagers ont plus de temps disponible pour utiliser les Bixi. Il serait aussi avantageux pour Bixi d'augmenter la disponibilité des vélos lors des jours fériés.
+
+```{r}
+dat_station = dat %>% group_by(station) %>% summarise(dur = sum(dur))
+data <- dat_station[order(-dat_station$dur), ]
+
+# Créer un graphique à barres classant les stations en ordre décroissant
+ggplot(data, aes(x = factor(station, levels = unique(data$station)), y = dur)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  labs(x = "Station", y = "Somme de la Durée", title = "Stations Classées en Ordre Décroissant par Somme de Durée") +
+  scale_x_discrete(labels = rep("", length(data$station))) +
+  theme(panel.grid.major.x = element_blank(),
+        axis.ticks.x = element_blank())
+  
+top3_stat_dur = head(data, 3)
+```
+
+En fonction de la duration, le top 3 des stations sont :
+
+-   de la Commune / Place Jacques-Cartier
+
+-   de la Commune / St-Sulpice
+
+-   Métro Mont-Royal (Rivard / du Mont-Royal)
 
 ### Exploration des relations avec l'utilisation des Bixi
 
@@ -456,10 +483,12 @@ wday_data_n_nm <- wday_data_n_nm %>% mutate(day=factor(day,
                                                "Dimanche", "Semaine", "Fin de semaine"), ordered=TRUE))
 
 ggplot(wday_data_n, aes(fill=moment,y = n_tot_vs_day, x = day )) + geom_bar(position="dodge", stat="identity")+
-geom_text(aes(label=n_tot_vs_day), position=position_dodge(width=0.9), vjust=-0.25)
+geom_text(aes(label=n_tot_vs_day), position=position_dodge(width=0.9), vjust=-0.25) #+
+  #geom_vline(xintercept=7.5, linetype="dotted", color="red", size = 0.8)
 
 ggplot(wday_data_n_nm, aes(fill=moment,y = n_tot_vs_day_nm, x = day )) + geom_bar(position="dodge", stat="identity")+
-geom_text(aes(label=n_tot_vs_day_nm), position=position_dodge(width=0.9), vjust=-0.25)
+geom_text(aes(label=n_tot_vs_day_nm), position=position_dodge(width=0.9), vjust=-0.25) #+
+  #geom_vline(xintercept=7.5, linetype="dotted", color="red", size = 0.8)
               
 ```
 
