@@ -374,7 +374,7 @@ dat_rain_ntot <- dat %>%
   summarise(n_tot = (mean(n_tot)))
 
 ggplot(dat_rain_ntot, aes(rain, n_tot)) +
-  geom_point() + #geom_smooth(method='lm', se=FALSE) +
+  geom_point() + geom_smooth(method='lm', se=FALSE) +
   facet_wrap(~mem,labeller=labeller(mem=label)) +
   labs(title = "Nombre moyen de déplacements \npar rapport à la quantité de précipitations")+
   xlab("Quantité de précipitations (mm) par jour")+
@@ -390,6 +390,13 @@ D'après ce graphique, il ne semble pas avoir de corrélation entre le nombre de
 La figure \@ref(fig:n_tot_vs_day) montre la relation entre le nombre de déplacement moyen pour différents moment de la journée et le nombre total de déplacement d'après le jour de la semaine, ainsi que la semaine ou la fin de semaine.
 
 ```{r n_tot_vs_day}
+
+dat_n_tot_wday <- dat %>%
+  select(mem, n_tot, wday, n_AM, n_PM) %>% 
+  group_by(wday, mem) %>%
+  summarise(n_tot = round((mean(n_tot)),digits=2),
+            n_AM =  round((mean(n_AM)),digits=2),
+            n_PM =  round((mean(n_PM)),digits=2))
 
 monday <- select(filter(dat, wday == "Monday" & mem == 1),n_tot,n_AM,n_PM)
 v_monday <- c(mean(monday$n_AM),mean(monday$n_PM), mean(monday$n_tot-monday$n_AM-monday$n_PM),mean(monday$n_tot))
@@ -483,12 +490,11 @@ wday_data_n_nm <- wday_data_n_nm %>% mutate(day=factor(day,
                                                "Dimanche", "Semaine", "Fin de semaine"), ordered=TRUE))
 
 ggplot(wday_data_n, aes(fill=moment,y = n_tot_vs_day, x = day )) + geom_bar(position="dodge", stat="identity")+
-geom_text(aes(label=n_tot_vs_day), position=position_dodge(width=0.9), vjust=-0.25) #+
-  #geom_vline(xintercept=7.5, linetype="dotted", color="red", size = 0.8)
+geom_text(aes(label=n_tot_vs_day), position=position_dodge(width=0.9), vjust=-0.25)+geom_vline(xintercept=7.5, linetype="dotted", color="red", size = 0.8)
 
 ggplot(wday_data_n_nm, aes(fill=moment,y = n_tot_vs_day_nm, x = day )) + geom_bar(position="dodge", stat="identity")+
-geom_text(aes(label=n_tot_vs_day_nm), position=position_dodge(width=0.9), vjust=-0.25) #+
-  #geom_vline(xintercept=7.5, linetype="dotted", color="red", size = 0.8)
+geom_text(aes(label=n_tot_vs_day_nm), position=position_dodge(width=0.9), vjust=-0.25)+
+  geom_vline(xintercept=7.5, linetype="dotted", color="red", size = 0.8)
               
 ```
 
@@ -516,16 +522,20 @@ kable(dat_hol_n_tot, col.names = c("Jour", "Nb. déplacement moyen", "Nb. dépla
 Ce tableau montre qu'en moyenne il y a un peu plus de déplacements durant les jours férié, mais on parle ici d'un peu plus qu'un seul déplacement. Ce qui ne semble pas assez signifiant pour conclure que le nombre de déplacement est affecté par le fait qu'il s'agit d'un jour férié ou non.
 
 ```{r tab-mem-n_tot}
+
 dat_mem_n_tot <- dat %>%
   select(mem, n_tot) %>% 
   group_by(mem) %>%
-  summarise(avg = mean(n_tot), n_tot = sum(n_tot)) %>% 
+  mutate(mean_n_tot = n_tot) %>%
+  summarise(mean_n_tot = mean(n_tot), n_tot = sum(n_tot)) %>% 
   mutate(mem = ifelse(mem == 1, "Membre", "Non-membre"))
 
 kable(dat_mem_n_tot, col.names = c("Membre", "Nb. de déplacement moyen", "Nb. de déplacement total"), caption = "Détail sur le nombre de déplacement selon les abonnements")
 ```
 
-D'après ce tableau,
+D'après ce tableau, il est possible d'observer qu'en général, les membres effectues plus de déplacements que les non-membres.
+
+D'un point de vue d'affaires,
 
 Reste à faire d'après la station...
 
@@ -533,50 +543,16 @@ La figure \\\@ref(fig:n_tot_vs_mois) représente la relation entre l'utilisation
 
 ```{r n_tot_vs_mois}
 
-etat <- rep(c("Membre", "Non-membre"),8)
-
-mois <- c(rep("Avril",2), rep("Mai",2), rep("Juin",2), rep("Juillet",2), rep("Août",2), rep("Septembre",2), rep("Octobre",2), rep("Novembre",2))
-
-dat_mem_n_tot_vs_mm <- select(filter(dat,mem == 1),n_tot,mm)
-dat_nmem_n_tot_vs_mm <- select(filter(dat,mem == 0),n_tot,mm)
-
-#v_n_tot_vs_mm <- ceiling(c(mean(filter(dat_mem_n_tot_vs_mm, mm == 4)$n_tot), mean(filter(dat_nmem_n_tot_vs_mm, mm == 4)$n_tot),+
-#                       mean(filter(dat_mem_n_tot_vs_mm, mm == 5)$n_tot), mean(filter(dat_nmem_n_tot_vs_mm, mm == 5)$n_tot),+
-#                       mean(filter(dat_mem_n_tot_vs_mm, mm == 6)$n_tot), mean(filter(dat_nmem_n_tot_vs_mm, mm == 6)$n_tot),+
-#                       mean(filter(dat_mem_n_tot_vs_mm, mm == 7)$n_tot), mean(filter(dat_nmem_n_tot_vs_mm, mm == 7)$n_tot),+
-#                       mean(filter(dat_mem_n_tot_vs_mm, mm == 8)$n_tot), mean(filter(dat_nmem_n_tot_vs_mm, mm == 8)$n_tot),+
-#                       mean(filter(dat_mem_n_tot_vs_mm, mm == 9)$n_tot), mean(filter(dat_nmem_n_tot_vs_mm, mm == 9)$n_tot),+
-#                       mean(filter(dat_mem_n_tot_vs_mm, mm == 10)$n_tot), mean(filter(dat_nmem_n_tot_vs_mm, mm == 10)$n_tot),+
-#                       mean(filter(dat_mem_n_tot_vs_mm, mm == 11)$n_tot), mean(filter(dat_nmem_n_tot_vs_mm, mm == 11)$n_tot)))
-
-v_n_tot_vs_mm <- c(sum(filter(dat_mem_n_tot_vs_mm, mm == 4)$n_tot), sum(filter(dat_nmem_n_tot_vs_mm, mm == 4)$n_tot),+
-                       sum(filter(dat_mem_n_tot_vs_mm, mm == 5)$n_tot), sum(filter(dat_nmem_n_tot_vs_mm, mm == 5)$n_tot),+
-                       sum(filter(dat_mem_n_tot_vs_mm, mm == 6)$n_tot), sum(filter(dat_nmem_n_tot_vs_mm, mm == 6)$n_tot),+
-                       sum(filter(dat_mem_n_tot_vs_mm, mm == 7)$n_tot), sum(filter(dat_nmem_n_tot_vs_mm, mm == 7)$n_tot),+
-                       sum(filter(dat_mem_n_tot_vs_mm, mm == 8)$n_tot), sum(filter(dat_nmem_n_tot_vs_mm, mm == 8)$n_tot),+
-                       sum(filter(dat_mem_n_tot_vs_mm, mm == 9)$n_tot), sum(filter(dat_nmem_n_tot_vs_mm, mm == 9)$n_tot),+
-                       sum(filter(dat_mem_n_tot_vs_mm, mm == 10)$n_tot), sum(filter(dat_nmem_n_tot_vs_mm, mm == 10)$n_tot),+
-                       sum(filter(dat_mem_n_tot_vs_mm, mm == 11)$n_tot), sum(filter(dat_nmem_n_tot_vs_mm, mm == 11)$n_tot))
-
-
-dmm_data_n_tot <- data.frame(etat,v_n_tot_vs_mm,mois)
-
-#ggplot(dmm_data_n_tot, aes(fill=etat,y = v_n_tot_vs_mm, x = mois)) + geom_bar(position="dodge",stat="identity")+
-#geom_text(aes(label=v_n_tot_vs_mm), position=position_dodge(width=0.9), vjust=-0.25)
-
-
-dat_test <- dat %>%
+dat_n_tot_vs_mois <- dat %>%
   select(mem, n_tot, mm) %>% 
   group_by(mm, mem) %>%
   summarise(n_tot = (sum(n_tot)))
 
 mois <- c(rep("Avril",2), rep("Mai",2), rep("Juin",2), rep("Juillet",2), rep("Août",2), rep("Septembre",2), rep("Octobre",2), rep("Novembre",2))
 
-dat_test <- dat_test %>% mutate(mm=factor(mm, 
-                                      levels=c(4:11), ordered=TRUE))
+dat_n_tot_vs_mois <- dat_n_tot_vs_mois %>% mutate(mm=factor(mm, levels=c(4:11), ordered=TRUE))
 
-
-ggplot(dat_test, aes(x=mm, y=n_tot,
+ggplot(dat_n_tot_vs_mois, aes(x=mm, y=n_tot,
            fill = mois)) +
   geom_bar(stat = "identity") +
   scale_fill_brewer(palette = "Blues")+
@@ -639,7 +615,6 @@ dat_rev
 
 kable(dat_rev, col.names = c("", "Revenu moyen", "Revenu total"), caption = "Détails entre les journées fériées et le revenu rapporté par les non-membres")
 ```
-
 
 # Conclusion {.unnumbered}
 
