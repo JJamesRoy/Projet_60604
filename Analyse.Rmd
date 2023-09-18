@@ -220,9 +220,9 @@ ggplot(dat, aes(as.factor(mm), dur, fill = as.factor(mm))) +
   ylab("Durée totale (en minutes) des déplacement")
 ```
 
-En croisant la variable `dur` avec la variable `temp` qui représente la température moyenne de la journée et `mem` qui représente l'abonnement, nous pouvons obtenir le figure @ref(fig:temp). Naturellement, on voit une relation positive entre la température moyenne et la durée totale de déplacement. La relation semble toutefois ralentir ou même s'inverser peu après les 20°C. Ce graphique donne globalement les mêmes informations que le précédent étant donné que la température est fortemement corrélée avec les mois.
+En croisant la variable `dur` avec la variable `temp` qui représente la température moyenne de la journée et `mem` qui représente l'abonnement, nous pouvons obtenir le figure @ref(fig:temp). Naturellement, on voit une relation positive entre la température totale moyenne et la durée totale de déplacement. La relation semble toutefois ralentir voir stagner vers les 20°C. Cela peut pourrait venir du fdit que l'utilisation des Bixi est plus élevé en été (donc les mois avec une température plus élevé). Ainsi, ce graphique donne globalement les mêmes informations que le précédent étant donné que la température est fortemement corrélée avec les mois.
 
-Au niveau de la corrélation, elle est de 0.53 pour les non-membres et de 0.48 pour les membres. Cela confirme que les membres sont des clients plus réguliers et moins affectés par des raisons exogènes comme la température.
+Au niveau de la corrélation, elle est de 0.53 pour les non-membres et de 0.67 pour les membres.
 
 Graphique corrélation pareil mais avec mois ?
 
@@ -230,21 +230,31 @@ Graphique corrélation pareil mais avec mois ?
 dat_temp <- dat %>%
   select(mem, dur, temp, avg) %>% 
   group_by(temp, mem) %>%
-  summarise(dur = log(sum(dur)))
+  summarise(dur = (mean(dur)),
+            avg = mean(avg))
 ```
 
 ```{r temp, fig.cap="Nom de la figure"}
 ggplot(dat_temp, aes(temp, dur)) +
   geom_point() +
   facet_wrap(~mem,labeller=labeller(mem=label))+
-  geom_smooth(method='lm', se=FALSE) +
+  geom_smooth(method='lm',  se=FALSE) +
   labs(title = "Durée totale des déplacement \npar jours selon les membres et les non membres")+
-  xlab("Température en °C")+
-  ylab("Log naturel de la durée totale des déplacement")
+  xlab("Température journalière moyenne en °C")+
+  ylab("Durée journalière totale moyenne des déplacement")
+
+ggplot(dat_temp, aes(temp, avg)) +
+  geom_point() +
+  facet_wrap(~mem,labeller=labeller(mem=label))+
+  geom_smooth(method='lm',  se=FALSE) +
+  labs(title = "Durée moyenne des déplacement \npar jours selon les membres et les non membres")+
+  xlab("Température journalière moyenne en °C")+
+  ylab("Durée journalière moyenne des déplacement")
 
 dat_temp_cor = dat_temp %>% 
   group_by(mem) %>%
-  summarise(cor = cor(temp,dur))
+  summarise(cor = cor(temp,dur),
+            cor_avg = cor(temp,avg))
 ```
 
 En croisant la variable `dur` avec la variable `rain` qui représente la précipitation totale de pluie lors de la journée et `mem` qui représente l'abonnement, nous pouvons obtenir le figure \@ref(fig:rain). Il est intéressant de constater que la relation est très semblable pour les membres et les non-membres. En effet, il semble y avoir une relation inversement proportionnelle entre la pluie et la durée totale des déplacements. C'est-à-dire qu'un peu de pluie a un effet significatif sur l'utilisation, mais l'effet se stabilise rapidement.
@@ -253,14 +263,23 @@ Au niveau de la corrélation, elle est de -0.45 pour les membres et les non-memb
 
 ```{r}
 dat_rain <- dat %>%
-  select(mem, dur, rain) %>% 
+  select(mem, dur, rain, avg) %>% 
   group_by(rain, mem) %>%
-  summarise(dur = log(sum(dur)))
+  summarise(dur = mean(dur),
+            avg = mean(avg))
 
 ```
 
 ```{r rain, fig.cap="Nom de la figure"}
 ggplot(dat_rain, aes(rain, dur)) +
+  geom_point() +
+  facet_wrap(~mem,labeller=labeller(mem=label)) +
+  geom_smooth(method='lm', se=FALSE) +
+  labs(title = "Durée totale des déplacement \npar jours selon les membres et les non membres")+
+  xlab("Précipitation")+
+  ylab("Log naturel de la durée totale des déplacement")
+
+ggplot(dat_rain, aes(rain, avg)) +
   geom_point() +
   facet_wrap(~mem,labeller=labeller(mem=label)) +
   geom_smooth(method='lm', se=FALSE) +
@@ -371,7 +390,7 @@ La figure \@ref(fig:graph_n_tot_vs_rain) montre la relation entre le nombre de d
 dat_rain_ntot <- dat %>%
   select(mem, n_tot, rain) %>% 
   group_by(rain, mem) %>%
-  summarise(n_tot = (mean(n_tot)))
+  summarise(n_tot = ((n_tot)))
 
 ggplot(dat_rain_ntot, aes(rain, n_tot)) +
   geom_point() + #geom_smooth(method='lm', se=FALSE) +
@@ -639,7 +658,6 @@ dat_rev
 
 kable(dat_rev, col.names = c("", "Revenu moyen", "Revenu total"), caption = "Détails entre les journées fériées et le revenu rapporté par les non-membres")
 ```
-
 
 # Conclusion {.unnumbered}
 
