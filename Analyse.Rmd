@@ -666,15 +666,6 @@ D'un point de vue entrepreneurial, la localisation des stations de bixi pour les
 
 ```{r holiday}
 
-#ggplot(dat,aes(as.factor(wday), rev, fill=as.factor(wday)))+
-#  geom_bar(stat = "identity")+
-#  scale_fill_brewer(palette = "Blues")+
-#  theme_minimal()+
-#  theme(legend.position = "none")+
-#  ggtitle("Revenu selon les journées de la semaine")+
-#  ylab("Revenu")+
-#  xlab("")
-
 df_Nmem_compl <- dat  %>% subset(mem == '0')
 
 dat_rev <- df_Nmem_compl %>%
@@ -682,8 +673,6 @@ dat_rev <- df_Nmem_compl %>%
   group_by(holiday) %>%
   summarise(rev_moyen = mean(rev),rev_total = sum(rev)) %>% 
   mutate(holiday = ifelse(holiday == 1, "Journée fériée", "journée normale"))
-
-dat_rev
 
 kable(dat_rev, col.names = c("", "Revenu moyen", "Revenu total"), caption = "Détails entre les journées fériées et le revenu rapporté par les non-membres")
 ```
