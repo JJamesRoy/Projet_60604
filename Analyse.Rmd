@@ -222,9 +222,10 @@ ggplot(dat, aes(as.factor(mm), dur, fill = as.factor(mm))) +
 
 En croisant la variable `dur` avec la variable `temp` qui représente la température moyenne de la journée et `mem` qui représente l'abonnement, nous pouvons obtenir le figure @ref(fig:temp). Naturellement, on voit une relation positive entre la température totale moyenne et la durée totale de déplacement. La relation semble toutefois ralentir voir stagner vers les 20°C. Cela peut pourrait venir du fdit que l'utilisation des Bixi est plus élevé en été (donc les mois avec une température plus élevé). Ainsi, ce graphique donne globalement les mêmes informations que le précédent étant donné que la température est fortemement corrélée avec les mois.
 
-Au niveau de la corrélation, elle est de 0.53 pour les non-membres et de 0.67 pour les membres.
+Au niveau des déplacements moyens (avec la variable `avg`), il semble que la durée moyenne des déplacements diminue après les 15°C.
 
-Graphique corrélation pareil mais avec mois ?
+Au niveau de la corrélation, elle est de 0.53 pour les non-membres et de 0.67 pour les membres pour le déplacement moyen total et de 0.26 pour les non-membres et de 0.34 pour les membres pour le déplacement moyen.
+
 
 ```{r}
 dat_temp <- dat %>%
@@ -257,9 +258,11 @@ dat_temp_cor = dat_temp %>%
             cor_avg = cor(temp,avg))
 ```
 
-En croisant la variable `dur` avec la variable `rain` qui représente la précipitation totale de pluie lors de la journée et `mem` qui représente l'abonnement, nous pouvons obtenir le figure \@ref(fig:rain). Il est intéressant de constater que la relation est très semblable pour les membres et les non-membres. En effet, il semble y avoir une relation inversement proportionnelle entre la pluie et la durée totale des déplacements. C'est-à-dire qu'un peu de pluie a un effet significatif sur l'utilisation, mais l'effet se stabilise rapidement.
+En croisant la variable `dur` avec la variable `rain` qui représente la précipitation totale de pluie lors de la journée et `mem` qui représente l'abonnement, nous pouvons obtenir le figure \@ref(fig:rain). Pour les non-membres l'effet de la pluie sur la durée totale moyenne n'est pas autant significative que pour les membres. Cela est assez étonnant, car il semble que les membres devraient avoir un usage régulier et ainsi moins sensible aux facteurs exogènes comme la pluie.
 
-Au niveau de la corrélation, elle est de -0.45 pour les membres et les non-membres.
+Au niveau des déplacements moyens (avec la variable `avg`), l'effet est assez similaire entre les membres et les non-membres, les déplacements sont en moyennes plus courts avec la pluie.
+
+Au niveau de la corrélation entre la pluie et la durée totale moyenne des déplacements, elle est de -0.36 pour les membres et de -0.24 les non-membres. Pour la durée moyenne, les corrélations sont de -0.38 pour les membres et de -0.18 pour les non-membres.
 
 ```{r}
 dat_rain <- dat %>%
@@ -275,21 +278,22 @@ ggplot(dat_rain, aes(rain, dur)) +
   geom_point() +
   facet_wrap(~mem,labeller=labeller(mem=label)) +
   geom_smooth(method='lm', se=FALSE) +
-  labs(title = "Durée totale des déplacement \npar jours selon les membres et les non membres")+
+  labs(title = "Durée totale moyenne des déplacement \npar jours selon les membres et les non membres")+
   xlab("Précipitation")+
-  ylab("Log naturel de la durée totale des déplacement")
+  ylab("Durée journalière totale moyenne des déplacement")
 
 ggplot(dat_rain, aes(rain, avg)) +
   geom_point() +
   facet_wrap(~mem,labeller=labeller(mem=label)) +
   geom_smooth(method='lm', se=FALSE) +
-  labs(title = "Durée totale des déplacement \npar jours selon les membres et les non membres")+
-  xlab("Précipitation")+
-  ylab("Log naturel de la durée totale des déplacement")
+  labs(title = "Durée moyenne des déplacement \npar jours selon les membres et les non membres")+
+  xlab("Précipitation de pluie (en mm)")+
+  ylab("Durée journalière moyenne des déplacement")
 
 dat_rain_cor = dat_rain %>% 
   group_by(mem) %>%
-  summarise(cor = cor(rain,dur))
+  summarise(cor = cor(rain,dur),
+            cor_avg = cor(rain,avg))
 ```
 
 En croisant la variable `dur` et `avg` avec `mem` qui représente l'abonnement, nous pouvons obtenir le tableau \@ref(tab:tab-mem).
@@ -308,6 +312,8 @@ kable(dat_mem, col.names = c("Membre", "Durée moyenne", "Durée totale", "Duré
 ```
 
 La durée moyenne des trajets est assez similaire entre les membres et les non-membres. Cela est assez intéressant, car il est facile de penser que les membres utiliseraient plus les Bixi pour des trajets plus long. En revanche, les membres ont une durée totale de trajets beaucoup plus haute que les non-membres, ce qui rejoint ce que nous avions observé précédemment. Il apparait aussi que les membres sont responsables de la majeure partie des déplacements (en durée). Ainsi, selon la rentabilité du programme d'adhéesion (donnée non disponible), il pourrait être opportun d'attirer des nouveaux membres avec des promotions et des campagnes publicitaires.
+
+
 
 En croisant la variable `dur` et `avg` avec `holiday` qui représente si le jour est férié ou non, nous pouvons obtenir le tableau \@ref(tab:tab-hol).
 
