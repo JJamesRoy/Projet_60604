@@ -631,20 +631,11 @@ plot(dat_n_tot_station$station,dat_n_tot_station$n_tot)
 
 Dans cette section, il sera principalement question de la variable revenu `rev`, puisque c'est la variable qui met en relation le revenu généré par les non-membres avec les autres variables. De ce fait, d'un point de vue entrepreneurial, c'est une variable d'intérêt capital, puisqu'elle participe au calcul de profit de BIXI. Cependant, puisque l'encodage des données du revenu n'est offert que pour les non-membres et que le revenu est calculé à partir de la durée du trajet, la corrélation entre ces deux dernières est relativement forte comme on peut le voir dans le tableau \@ref(fig:MatricCorr). Conséquemment, visualiser la relation entre le revenu et les journées de la semaine `wday`, le mois `mm`, la température `temp` et les précipitations `rain` reviennent à visualiser la même chose que dans la sections de l'exploration des relations avec la durée des trajets. Dès lors, il reste néanmoins intéressant d'observer comment le revenu se comporte lors des journées fériées `holiday`.
 
-Dans le cas de la relation entre les journées fériées et la durée du trajet, il est possible d'apercevoir qu'en moyenne les non-membres utilisent plus bixi lors des journées fériées, puisque le revenu moyen est plus élevé lors de ces journées (\@ref(tab:holiday)). Cela étant dit, il y a un parallèle à faire avec la figure illustrée plus haut \@ref(fig:wday) où l'on peut voir que les non-membres ont plus tendance à se déplacer en bixi la fin de semaine. Par conséquent, on peut soutenir l'hypothèse que l'utilisation de bixi par les non-membres est liée à des fins plus récréatives.
+Dans le cas de la relation entre les journées fériées et la durée du trajet, il est possible d'apercevoir qu'en moyenne les non-membres utilisent plus bixi lors des journées fériées, puisque le revenu moyen est plus élevé lors de ces journées (\@ref(tab:RevVSholiday)). Cela étant dit, il y a un parallèle à faire avec la figure illustrée plus haut \@ref(fig:wday) où l'on peut voir que les non-membres ont plus tendance à se déplacer en bixi la fin de semaine. Par conséquent, on peut soutenir l'hypothèse que l'utilisation de bixi par les non-membres est liée à des fins plus récréatives.
 
 D'un point de vue entrepreneurial, la localisation des stations de bixi pour les non-membres devient alors cruciale. Autrement dit, placer des stations de bixi proches des lieux culturels et les lieux de divertissement pourraient ainsi favoriser le revenu de l'entreprise.
 
-```{r holiday}
-
-#ggplot(dat,aes(as.factor(wday), rev, fill=as.factor(wday)))+
-#  geom_bar(stat = "identity")+
-#  scale_fill_brewer(palette = "Blues")+
-#  theme_minimal()+
-#  theme(legend.position = "none")+
-#  ggtitle("Revenu selon les journées de la semaine")+
-#  ylab("Revenu")+
-#  xlab("")
+```{r RevVSholiday}
 
 df_Nmem_compl <- dat  %>% subset(mem == '0')
 
@@ -659,26 +650,6 @@ dat_rev
 kable(dat_rev, col.names = c("", "Revenu moyen", "Revenu total"), caption = "Détails entre les journées fériées et le revenu rapporté par les non-membres")
 ```
 
-<<<<<<< HEAD
-Dans le cas de la relation entre les journées fériées et la durée du trajet, il est possible d'apercevoir qu'en moyenne les non-membres utilisent plus bixi lors des journées fériées, puisque le revenu moyen est plus élevé lors de ces journées (\@ref(tab:holiday)). Cela étant dit, il y a un parallèle à faire avec la figure illustrée plus haut \@ref(fig:wday) où l'on peut voir que les non-membres ont plus tendance à se déplacer en bixi la fin de semaine. Par conséquent, on peut soutenir l'hypothèse que l'utilisation de bixi par les non-membres est liée à des fins plus récréatives.
-
-D'un point de vue entrepreneurial, la localisation des stations de bixi pour les non-membres devient alors cruciale. Autrement dit, placer des stations de bixi proches des lieux culturels et les lieux de divertissement pourraient ainsi favoriser le revenu de l'entreprise.
-
-```{r holiday}
-
-df_Nmem_compl <- dat  %>% subset(mem == '0')
-
-dat_rev <- df_Nmem_compl %>%
-  select(rev, holiday) %>% 
-  group_by(holiday) %>%
-  summarise(rev_moyen = mean(rev),rev_total = sum(rev)) %>% 
-  mutate(holiday = ifelse(holiday == 1, "Journée fériée", "journée normale"))
-
-kable(dat_rev, col.names = c("", "Revenu moyen", "Revenu total"), caption = "Détails entre les journées fériées et le revenu rapporté par les non-membres")
-```
-
-=======
->>>>>>> 57b5b791246c3fe0c863c467c45e4ffe8f9438e4
 # Conclusion {.unnumbered}
 
 voir le tableau \@ref(tab:test)
