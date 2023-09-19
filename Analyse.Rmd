@@ -4,13 +4,13 @@ subtitle: "MATH60604 - Modélisation statistique"
 author: "James Roy,Alfred Assal,Samuel Croteau,Abdoul Wassi Badirou"
 date: "`r Sys.Date()`"
 output: 
-  #bookdown::pdf_document2:
+  pdf_document:
   bookdown::html_document2:
     toc: true 
     number_sections: true
     toc_float: # to float the table of contents to the left of the main document content.
       collapsed: false
-  pdf_document:
+  #bookdown::pdf_document2:
   html_document:
     toc: true 
     number_sections: true
@@ -32,6 +32,7 @@ library(tidyverse)
 library(ggthemes)
 library(RColorBrewer)
 library(knitr)
+library(corrplot)
 ```
 
 # Notes
