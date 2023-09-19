@@ -658,6 +658,7 @@ dat_rev
 kable(dat_rev, col.names = c("", "Revenu moyen", "Revenu total"), caption = "Détails entre les journées fériées et le revenu rapporté par les non-membres")
 ```
 
+<<<<<<< HEAD
 Dans le cas de la relation entre les journées fériées et la durée du trajet, il est possible d'apercevoir qu'en moyenne les non-membres utilisent plus bixi lors des journées fériées, puisque le revenu moyen est plus élevé lors de ces journées (\@ref(tab:holiday)). Cela étant dit, il y a un parallèle à faire avec la figure illustrée plus haut \@ref(fig:wday) où l'on peut voir que les non-membres ont plus tendance à se déplacer en bixi la fin de semaine. Par conséquent, on peut soutenir l'hypothèse que l'utilisation de bixi par les non-membres est liée à des fins plus récréatives.
 
 D'un point de vue entrepreneurial, la localisation des stations de bixi pour les non-membres devient alors cruciale. Autrement dit, placer des stations de bixi proches des lieux culturels et les lieux de divertissement pourraient ainsi favoriser le revenu de l'entreprise.
@@ -686,6 +687,8 @@ dat_rev
 kable(dat_rev, col.names = c("", "Revenu moyen", "Revenu total"), caption = "Détails entre les journées fériées et le revenu rapporté par les non-membres")
 ```
 
+=======
+>>>>>>> 57b5b791246c3fe0c863c467c45e4ffe8f9438e4
 # Conclusion {.unnumbered}
 
 voir le tableau \@ref(tab:test)
