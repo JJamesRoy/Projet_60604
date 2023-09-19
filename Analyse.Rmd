@@ -195,7 +195,6 @@ corplot <- corrplot(cor(corplot_dat,use='pairwise.complete.obs'), method = "colo
 
 ```
 
-
 ### Exploration des relations avec la durée des trajets
 
 En croisant la variable `dur` avec la variable `wday` qui représente les jours de la semaine et `mem` qui représente l'abonnement, nous pouvons obtenir le figure \@ref(fig:wday). Plusieurs analyses sont pertinentes à partir de ce graphique. D'abord, les membres utilisent beaucoup plus les Bixi (au niveau de la durée) que les non-membres, et ce, peu importe le jour de la semaine. Les types d'utilisation semblent aussi changé, par exemple, les non-membres utilisent plus les Bixi les fin de semaines alors que pour les membres, la tendance semble moins claire. En effet, les membres semblent avoir une utilisation croissante la semaine et décroissante la fin de semaine. Naturellemement, on pourrait penser que c'est parce qu'ils utilisent le Bixi comme un moyen de transport régulier pour aller au travail ou à l'école par exemple.
@@ -209,7 +208,7 @@ dat$wday <- factor(dat$wday,
 label <- c(`1` = "Membre", `0` = "Non membre")
 ```
 
-```{r wday, fig.cap="Nom de la figure"}
+```{r wday}
 ggplot(dat, aes(x=wday, y=dur,
            fill = wday)) +
   geom_bar(stat = "identity") +
@@ -230,7 +229,7 @@ label <- c(`1` = "Membre", `0` = "Non membre")
 
 En croisant la variable `dur` avec la variable `mm` qui représente les mois où il est possible de prendre un Bixi et `mem` qui représente l'abonnement, nous pouvons obtenir le figure \@ref(fig:mm). Plusieurs analyses sont pertinentes à partir de ce graphique. D'abord, les membres utilisent beaucoup plus les Bixi (au niveau de la durée) que les non-membres, et ce, peu importe le mois de l'année. D'une façon similaire, l'utilisation semble atteindre son pic vers août pour les deux types de clients. Il est aussi intéressant de constater que les membres utilisent moins les Bixi durant le moins de juillet. Cela semble concorder avec une affirmation précédente, les membres peuvent par exemple être en congé durant ce mois et ils utilisent donc moins les Bixi pour aller à leur occupation régulière.
 
-```{r mm, fig.cap="Nom de la figure"}
+```{r mm}
 ggplot(dat, aes(as.factor(mm), dur, fill = as.factor(mm))) +
   geom_bar(stat = "identity") +
   scale_fill_brewer(palette = "Blues")+
@@ -248,7 +247,6 @@ Au niveau des déplacements moyens (avec la variable `avg`), il semble que la du
 
 Au niveau de la corrélation, elle est de 0.53 pour les non-membres et de 0.67 pour les membres pour le déplacement moyen total et de 0.26 pour les non-membres et de 0.34 pour les membres pour le déplacement moyen.
 
-
 ```{r}
 dat_temp <- dat %>%
   select(mem, dur, temp, avg) %>% 
@@ -257,7 +255,7 @@ dat_temp <- dat %>%
             avg = mean(avg))
 ```
 
-```{r temp, fig.cap="Nom de la figure"}
+```{r temp}
 ggplot(dat_temp, aes(temp, dur)) +
   geom_point() +
   facet_wrap(~mem,labeller=labeller(mem=label))+
@@ -295,7 +293,7 @@ dat_rain <- dat %>%
 
 ```
 
-```{r rain, fig.cap="Nom de la figure"}
+```{r rain}
 ggplot(dat_rain, aes(rain, dur)) +
   geom_point() +
   facet_wrap(~mem,labeller=labeller(mem=label)) +
@@ -335,8 +333,6 @@ kable(dat_mem, col.names = c("Membre", "Durée moyenne", "Durée totale", "Duré
 
 La durée moyenne des trajets est assez similaire entre les membres et les non-membres. Cela est assez intéressant, car il est facile de penser que les membres utiliseraient plus les Bixi pour des trajets plus long. En revanche, les membres ont une durée totale de trajets beaucoup plus haute que les non-membres, ce qui rejoint ce que nous avions observé précédemment. Il apparait aussi que les membres sont responsables de la majeure partie des déplacements (en durée). Ainsi, selon la rentabilité du programme d'adhéesion (donnée non disponible), il pourrait être opportun d'attirer des nouveaux membres avec des promotions et des campagnes publicitaires.
 
-
-
 En croisant la variable `dur` et `avg` avec `holiday` qui représente si le jour est férié ou non, nous pouvons obtenir le tableau \@ref(tab:tab-hol).
 
 ```{r tab-hol}
@@ -354,7 +350,9 @@ kable(dat_hol, col.names = c("Jour", "Durée moyenne", "Durée totale", "Durée 
 
 La durée moyenne des trajets est légérement supérieure pour les jours fériés. Aussi, la durée totale relative des trajets est supérieure pendant les jours fériés. Cela s'explique par le fait que les usagers ont plus de temps disponible pour utiliser les Bixi. Il serait aussi avantageux pour Bixi d'augmenter la disponibilité des vélos lors des jours fériés.
 
-```{r}
+Selon le graphique \@ref(fig:stat), il est possible de modéliser les stations par leur durée totale de déplacements de la saison. On voit que la plupart des stations sont sous le seuil des 10 000 minutes.
+
+```{r stat}
 dat_station = dat %>% group_by(station) %>% summarise(dur = sum(dur))
 data <- dat_station[order(-dat_station$dur), ]
 
@@ -369,13 +367,15 @@ ggplot(data, aes(x = factor(station, levels = unique(data$station)), y = dur)) +
 top3_stat_dur = head(data, 3)
 ```
 
-En fonction de la duration, le top 3 des stations sont :
+En fonction de la durée totale durant la saison, le top 3 des stations sont :
 
--   de la Commune / Place Jacques-Cartier
+-   de la Commune / Place Jacques-Cartier (Vieux-Montréal)
 
--   de la Commune / St-Sulpice
+-   de la Commune / St-Sulpice (Vieux-Montréal)
 
--   Métro Mont-Royal (Rivard / du Mont-Royal)
+-   Métro Mont-Royal (Rivard / du Mont-Royal) (Plateau Mont-Royal)
+
+Ainsi, on remarque que les deux stations les plus populaires en terme de durée sont situées dans le Vieux-Montréal. Il est possible d'attribuer cela aux touristes.
 
 ### Exploration des relations avec l'utilisation des Bixi
 
@@ -657,7 +657,6 @@ dat_rev
 
 kable(dat_rev, col.names = c("", "Revenu moyen", "Revenu total"), caption = "Détails entre les journées fériées et le revenu rapporté par les non-membres")
 ```
-
 
 Dans le cas de la relation entre les journées fériées et la durée du trajet, il est possible d'apercevoir qu'en moyenne les non-membres utilisent plus bixi lors des journées fériées, puisque le revenu moyen est plus élevé lors de ces journées (\@ref(tab:holiday)). Cela étant dit, il y a un parallèle à faire avec la figure illustrée plus haut \@ref(fig:wday) où l'on peut voir que les non-membres ont plus tendance à se déplacer en bixi la fin de semaine. Par conséquent, on peut soutenir l'hypothèse que l'utilisation de bixi par les non-membres est liée à des fins plus récréatives.
 
