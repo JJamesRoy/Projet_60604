@@ -4,13 +4,13 @@ subtitle: "MATH60604 - Modélisation statistique"
 author: "James Roy,Alfred Assal,Samuel Croteau,Abdoul Wassi Badirou"
 date: "`r Sys.Date()`"
 output: 
-  #bookdown::pdf_document2:
+  pdf_document:
   bookdown::html_document2:
     toc: true 
     number_sections: true
     toc_float: # to float the table of contents to the left of the main document content.
       collapsed: false
-  pdf_document:
+  #bookdown::pdf_document2:
   html_document:
     toc: true 
     number_sections: true
@@ -32,6 +32,7 @@ library(tidyverse)
 library(ggthemes)
 library(RColorBrewer)
 library(knitr)
+library(corrplot)
 ```
 
 # Notes
@@ -195,7 +196,6 @@ corplot <- corrplot(cor(corplot_dat,use='pairwise.complete.obs'), method = "colo
 
 ```
 
-
 ### Exploration des relations avec la durée des trajets
 
 En croisant la variable `dur` avec la variable `wday` qui représente les jours de la semaine et `mem` qui représente l'abonnement, nous pouvons obtenir le figure \@ref(fig:wday). Plusieurs analyses sont pertinentes à partir de ce graphique. D'abord, les membres utilisent beaucoup plus les Bixi (au niveau de la durée) que les non-membres, et ce, peu importe le jour de la semaine. Les types d'utilisation semblent aussi changé, par exemple, les non-membres utilisent plus les Bixi les fin de semaines alors que pour les membres, la tendance semble moins claire. En effet, les membres semblent avoir une utilisation croissante la semaine et décroissante la fin de semaine. Naturellemement, on pourrait penser que c'est parce qu'ils utilisent le Bixi comme un moyen de transport régulier pour aller au travail ou à l'école par exemple.
@@ -247,7 +247,6 @@ En croisant la variable `dur` avec la variable `temp` qui représente la tempér
 Au niveau des déplacements moyens (avec la variable `avg`), il semble que la durée moyenne des déplacements diminue après les 15°C.
 
 Au niveau de la corrélation, elle est de 0.53 pour les non-membres et de 0.67 pour les membres pour le déplacement moyen total et de 0.26 pour les non-membres et de 0.34 pour les membres pour le déplacement moyen.
-
 
 ```{r}
 dat_temp <- dat %>%
@@ -334,8 +333,6 @@ kable(dat_mem, col.names = c("Membre", "Durée moyenne", "Durée totale", "Duré
 ```
 
 La durée moyenne des trajets est assez similaire entre les membres et les non-membres. Cela est assez intéressant, car il est facile de penser que les membres utiliseraient plus les Bixi pour des trajets plus long. En revanche, les membres ont une durée totale de trajets beaucoup plus haute que les non-membres, ce qui rejoint ce que nous avions observé précédemment. Il apparait aussi que les membres sont responsables de la majeure partie des déplacements (en durée). Ainsi, selon la rentabilité du programme d'adhéesion (donnée non disponible), il pourrait être opportun d'attirer des nouveaux membres avec des promotions et des campagnes publicitaires.
-
-
 
 En croisant la variable `dur` et `avg` avec `holiday` qui représente si le jour est férié ou non, nous pouvons obtenir le tableau \@ref(tab:tab-hol).
 
