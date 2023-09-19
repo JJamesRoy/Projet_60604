@@ -645,7 +645,6 @@ dat_rev <- df_Nmem_compl %>%
   summarise(rev_moyen = mean(rev),rev_total = sum(rev)) %>% 
   mutate(holiday = ifelse(holiday == 1, "Journée fériée", "journée normale"))
 
-dat_rev
 
 kable(dat_rev, col.names = c("", "Revenu moyen", "Revenu total"), caption = "Détails entre les journées fériées et le revenu rapporté par les non-membres")
 ```
