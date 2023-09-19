@@ -401,9 +401,9 @@ dat_temp_ntot_cor = dat_temp_ntot %>%
   summarise(cor = cor(temp,n_tot))
 ```
 
-D'après ce graphique, il est possible de constater qu'il semble exister une relation linéaire entre le nombre de déplacement effectué en Bixi et la température, que ce soit pour un membre et un non-membre. Dans les deux cas, on observe que le nombre de déplacement moyen a tendance à augmenter avec la température. Une forte corrélation positive de 0.65 pour les membres et une corrélation moyenne de 0.48 pour les non-membres.
+D'après ce graphique, il est possible de constater qu'il semble exister une relation linéaire entre le nombre de déplacement moyen effectué en Bixi et la température, que ce soit pour un membre et un non-membre. Dans les deux cas, on observe que le nombre de déplacement moyen a tendance à augmenter avec la température. Une forte corrélation positive de 0.65 pour les membres et une corrélation moyenne de 0.48 pour les non-membres.
 
-D'un point de vue d'affaires, si l'entreprise Bixi désirerait par exemple effectuer une mise à jour logiciel ou effectuer de la maintenance sur certains vélos et que ceci nécessiterait de récupérer une certaines quantité de Bixi, il faudrait que l'entreprise entreprenne ces changements pendant les journées où il fait plus froid, ou durant les périodes plus froides soit durant les mois d'avril, mai, octobre ou novembre comme le montre le tableau \@ref(table:graph_temp_vs_mois).
+D'un point de vue d'affaires, si l'entreprise Bixi désirerait par exemple effectuer une mise à jour logiciel ou effectuer de la maintenance sur certains vélos et que ceci nécessiterait de récupérer une certaines quantité de Bixi, il faudrait que l'entreprise entreprenne ces changements pendant les journées où il fait plus froid, ou durant les périodes plus froides soit durant les mois d'avril, mai, octobre ou novembre comme le montre le tableau \@ref(table:graph_temp_vs_mois) afin d'éviter de causer des problèmes de manque de vélos pour les usagers.
 
 ```{r graph_temp_vs_mois}
 
@@ -412,7 +412,7 @@ kable(mean_temp_vs_mm, col.names = c("Mois","Température moyenne (°C)"), capti
 
 ```
 
-La figure \@ref(fig:graph_n_tot_vs_rain) montre la relation entre le nombre de déplacement total moyen par jour d'après la quantité de précipitation tombés dans une journée.
+Par la suite, nous avons observé la relation entre le nombre de déplacement total moyen par jour d'après la quantité de précipitation tombés dans une journée. La figure \@ref(fig:graph_n_tot_vs_rain) montre cette relation.
 
 ```{r graph_n_tot_vs_rain}
 dat_rain_ntot <- dat %>%
