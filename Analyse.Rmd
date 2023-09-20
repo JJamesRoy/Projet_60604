@@ -432,7 +432,7 @@ dat_rain_ntot_cor = dat_rain_ntot %>%
   summarise(cor = cor(rain,n_tot))
 ```
 
-D'après ce graphique, il ne semble pas avoir de corrélation entre le nombre de déplacement et la quantité de précipitation dans une journée. En effet, la corrélation est de -0.26 pour les non-membres et -0.30 pour les membres, ce qui n'est pas assez significatif pour conclure qu'il existe une relation linéaire entre ces deux variables.
+D'après ce graphique, il semble y avoir une faible corrélation entre le nombre de déplacement et la quantité de précipitation dans une journée. En effet, la corrélation est de -0.26 pour les non-membres et -0.30 pour les membres.
 
 La figure \@ref(fig:n_tot_vs_day) montre la relation entre le nombre de déplacement moyen pour différents moment de la journée et le nombre total de déplacement d'après la journée.
 
@@ -469,13 +469,13 @@ ggplot(data = dat_n_tot_wday_2, aes(x = wday, y = nombre, fill = factor(moment))
 
 ```
 
-Pour les membres, on remarque qu'en moyenne, il y a plus de déplacements en après-midi qu'en avant-midi et durant la nuit. De façon générale, le nombre de déplacements en avant-midi est semblable à celui de la nuit. Il est aussi possible de remarquer que le nombre de déplacement total est très semblable pour tous les jours de la semaine et est un peu plus faible pour les jours de la fin de semaine. Finalement, on peut donc tirer de cela que les membres utilisent plus les Bixis durant la semaine pour aller au travail par exemple et que plus de membres les utilisent l'après-midi.
+Pour les membres, on remarque qu'en moyenne, il y a plus de déplacements en après-midi qu'en avant-midi et durant la nuit. De façon générale, le nombre de déplacements en avant-midi est semblable à celui de la nuit. Il est aussi possible de remarquer que le nombre de déplacement total est très semblable pour tous les jours de la semaine et est un peu plus faible pour les jours de la fin de semaine. Finalement, on peut tirer de cela que les membres utilisent plus les Bixis durant la semaine pour aller au travail par exemple et que plus de membres les utilisent l'après-midi.
 
-Pour les non-membres, il y a aussi plus de déplacements en après-midi qu'en avant-midi et durant la nuit. Puis, l'utilisation en avant-midi et la nuit est très semblable pour tous les jours aussi. Il est aussi possible de remarquer que le nombre de déplacement total est très semblable pour tous les jours. Cependant, contrairement aux membres, les jours de fin de semaine sont ceux avec le plus de déplacements. Finalement, on peut donc supposer que les non-membres sont plus enclin à utiliser les Bixis les fins de semaines pour des loisirs et moins pour le travail la semaine.
+Pour les non-membres, il y a aussi plus de déplacements en après-midi qu'en avant-midi et durant la nuit. Puis, l'utilisation en avant-midi et la nuit est très semblable pour tous les jours aussi. Il est aussi possible de remarquer que le nombre de déplacement total est très semblable pour tous les jours. Cependant, contrairement aux membres, les jours de fin de semaine sont ceux avec le plus de déplacements. Finalement, on peut donc supposer que les non-membres sont plus porter à utiliser les Bixis les fins de semaines pour des loisirs et moins pour le travail la semaine.
 
 En moyenne, le nombre de déplacement total pour les membres est plus élevé à 30.8 par jour et à 7.32 par jour pour les non-membres.
 
-D'un point de vue d'affaires...
+D'un point de vue d'affaires, comme les membres utilisent plus les Bixis la semaine et qu'il y a plus de déplacements pour les membres que les non-membres. Il serait judicieux de toujours s'assurer d'une bonne disponibilité de Bixi la semaine et ce surtout en après-midi. Si l'entreprise Bixi devait récupérer une certaine quantité de vélo pour la maintenance par exemple, nous suggérons qu'elle procède durant les avant-midi et/ou les fins de semaine.
 
 Le tableau \\\@ref(fig:n_tot_vs_holiday) montre la relation entre le nombre de déplacement et si la journée est férié ou non.
 
@@ -494,7 +494,7 @@ kable(dat_hol_n_tot, col.names = c("Jour", "Nb. déplacement moyen", "Nb. dépla
 
 Ce tableau montre qu'en moyenne il y a un peu plus de déplacements durant les jours férié, mais on parle ici d'un peu plus qu'un seul déplacement. Ce qui ne semble pas assez significatif pour conclure que le nombre de déplacement est affecté par le fait qu'il s'agit d'un jour férié ou non.
 
-La figure \\\@ref(fig:n_tot_vs_mois) représente la relation entre l'utilisation des Bixis et le mois de l'année. Comme l'analyse univariée la démontré, nous avons très peu de données pour les mois d'avril et novembre en comparaison aux autres mois faisant partie de l'étude, ainsi nous n'allons pas les prendre en compte pour cette relation.
+La figure \\\@ref(fig:n_tot_vs_mois) représente la relation entre l'utilisation moyenne des Bixis et le mois de l'année.
 
 ```{r n_tot_vs_mois}
 
@@ -512,7 +512,7 @@ ggplot(dat_n_tot_vs_mois, aes(x=mm, y=n_tot,
   geom_bar(stat = "identity") +
   facet_wrap(~ mem,labeller=labeller(mem=label))+
   theme(legend.position="none")+
-  labs(title = "Nombre de déplacement \npar jours selon les membres et les non membres")+
+  labs(title = "Nombre de déplacement moyen\npar jours selon les membres et les non membres")+
   xlab("")+
   ylab("Nombre de déplacement")+
   scale_x_discrete(labels = c("Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre"))+
@@ -520,9 +520,21 @@ ggplot(dat_n_tot_vs_mois, aes(x=mm, y=n_tot,
         axis.text.x = element_text(angle = 45, hjust = 1))+
   geom_text(aes(label = round(n_tot, 1)), position = position_dodge(width = 0.7), vjust = -0.5, size = 3)
 
+
+memmois = (select(filter(dat_n_tot_vs_mois,mem ==1),n_tot))
+nmemmois = (select(filter(dat_n_tot_vs_mois,mem ==0),n_tot))
+cor_mois_m_vs_nm <- cor(memmois$n_tot,nmemmois$n_tot)
+cor_mois_m_vs_avg_temp <- cor(memmois$n_tot,mean_temp_vs_mm$`dat$temp`)
+cor_mois_nm_vs_avg_temp <- cor(nmemmois$n_tot,mean_temp_vs_mm$`dat$temp`)
 ```
 
-On remarque que...
+On remarque que l'allure des deux graphiques est très semblable entre les membres et les non-membres. On parle ici d'une très forte corrélation de 0.86. On peut alors dire que le comportement des membres et des non-membres est très semblable par rapport au mois.
+
+Par la suite, en comparant ces données avec les données du tableau \@ref(table:graph_temp_vs_mois) illustrant la moyenne des températures par mois, on obtient une très forte corrélation d'environ 0.85 pour les membres et une forte corrélation d'environ 0.59 pour les non-membres. Nous pouvons donc faire l'hypothèse que la relation entre le nombre de déplacement moyen par mois est dépendante de la température de ce mois. Les gens ont tendance à plus utiliser le Bixi lors des mois plus chauds que les mois plus froids (avril, octobre et novembre).
+
+Cependant, on remarque que dans les deux cas (membre et non-membre), le mois avec le plus de déplacement moyen est le mois de septembre qui pourtant n'est pas le mois le plus chaud. Notre hypothèse est qu'il s'agit de la période de la rentrée scolaire et du retour au travail pour plusieurs, alors plusieurs optent pour un transport plus écologique comme le Bixi à ce moment de l'année avant de tomber dans la période plus froide de l'année avec les mois d'octobre et novembre.
+
+D'un point de vue d'affaires, l'entreprise Bixi devrait prioriser et s'assurer de pouvoir mettre à disposition une grande quantité de Bixi pour les périodes plus chaudes de l'année ainsi qu'en septembre.
 
 Par la suite, nous avons identifié les stations qui généraient le plus de déplacements pour les membres et les non-membres. Les deux tableaux \\\@ref(fig:n_tot_vs_station) présentent le nombre de déplacements total des 5 stations avec le plus de déplacements pour les membres et les non-membres ainsi que l'arrondissement de Montréal où se situe ces stations.
 
@@ -570,7 +582,14 @@ kable(top_station_nm, col.names = c("Stations","Emplacement","Arrondissement", "
 
 ```
 
-On remarque que l'arrondissement avec le plus de stations dans le top 5 est la Plateau Mont-Royal et Le Vieux-Montréal (pour deux stations). D'un point de vue d'affaires, il serait pertinent de prioriser ces arrondissements pour l'ajout de nouveaux Bixis par exemple pour s'assurer qu'il n'en manque jamais. Puis, aussi d'effectuer plus de maintenance préventive des installations de ces arrondissements, car celles-ci génèrent beaucoup de d'attraction et il ne faudrait pas qu'elles soient hors service.
+On remarque que l'arrondissement avec le plus de stations dans le top 5 est la Plateau Mont-Royal et Le Vieux-Montréal (pour deux stations). D'un point de vue d'affaires, il serait pertinent de prioriser ces arrondissements pour l'ajout de nouveaux Bixis par exemple pour s'assurer qu'il n'en manque jamais et toujours en avoir une grande quantité en fonction dans ces arrondissements. Puis, aussi d'effectuer plus de maintenance préventive des installations de ces arrondissements, car celles-ci génèrent beaucoup de d'attraction et il ne faudrait pas qu'elles soient hors service.
+
+
+
+À ajouter dans Conclusion (Conclusion Sam partie n_tot)
+
+Pour conclure, on peut constater que les périodes d'utilisation les plus faibles de Bixis sont: les journées plus froides, les mois plus froids (avril, octobre et novembre), la fin de semaine et l'avant-midi. Puis les périodes avec le plus de déplacements sont les journées plus chaudes, les mois plus chaud (les autres mois à l'étude), durant la semaine et en après-midi. De plus, les secteurs avec les stations qui génèrent le plus de déplacements sont le Plateau Mont-Royal et le Vieux-Montréal. Finalement, l'entreprise devraient donc s'assurer de toujours avoir le plus de Bixis possibles disponibles pour les périodes fortes, procéder aux maintenances lors des périodes plus faibles et s'assurer du bonne état des stations et des vélos dans les arrondissements avec les stations les plus en demande.
+
 
 ### Exploration des relations avec le revenu
 
