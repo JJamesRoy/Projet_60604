@@ -434,7 +434,7 @@ dat_rain_ntot_cor = dat_rain_ntot %>%
 
 D'après ce graphique, il ne semble pas avoir de corrélation entre le nombre de déplacement et la quantité de précipitation dans une journée. En effet, la corrélation est de -0.26 pour les non-membres et -0.30 pour les membres, ce qui n'est pas assez significatif pour conclure qu'il existe une relation linéaire entre ces deux variables.
 
-La figure \@ref(fig:n_tot_vs_day) montre la relation entre le nombre de déplacement moyen pour différents moment de la journée et le nombre total de déplacement d'après le jour de la semaine, ainsi que la semaine ou la fin de semaine.
+La figure \@ref(fig:n_tot_vs_day) montre la relation entre le nombre de déplacement moyen pour différents moment de la journée et le nombre total de déplacement d'après la journée.
 
 ```{r n_tot_vs_day}
 
@@ -444,7 +444,12 @@ dat_n_tot_wday <- dat %>%
   summarise(n_tot = mean(n_tot),
             n_AM =  mean(n_AM),
             n_PM =  mean(n_PM))%>%
-            mutate(n_nuit = n_tot-n_AM-n_PM)
+            mutate(n_nuit = n_tot-n_AM-n_PM) %>% 
+  select(wday,mem,n_AM,n_PM,n_nuit,n_tot)
+
+dat_mean_n_tot_wday <- dat_n_tot_wday %>%
+  group_by(mem) %>% 
+  summarise(n_tot = mean(n_tot))
 
 dat_n_tot_wday_2 <- tidyr::pivot_longer(dat_n_tot_wday, cols = starts_with("n_"), names_to = "moment", values_to = "nombre")
 
@@ -454,9 +459,9 @@ ggplot(data = dat_n_tot_wday_2, aes(x = wday, y = nombre, fill = factor(moment))
   labs(title = "Déplacements en Bixi d'aprés le jour de la semaine",
        x = "Jour de la semaine", y = "Nombre de déplacements",
        fill = "Variable") +
-  scale_fill_manual(values = c("n_AM" = "blue", "n_PM" = "green", "n_nuit" = "red", "n_tot" = "purple"),
-                    name = "Moment de la journée",
-                    labels = c("AM", "PM", "Nuit", "Total"))+
+  scale_fill_manual(values = c("n_AM" = "blue", "n_PM" = "red", "n_nuit" = "green", "n_tot" = "purple"),
+                    name = "Moment de la   journée",
+                    labels = c("AM", "Nuit", "PM", "Total"))+
   geom_text(aes(label = round(nombre, 1)), position = position_dodge(width = 0.7), vjust = -0.5, size = 2)+
   scale_x_discrete(labels = c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"))+
   theme(strip.text = element_text(size = 12, face = "bold"),
@@ -464,11 +469,13 @@ ggplot(data = dat_n_tot_wday_2, aes(x = wday, y = nombre, fill = factor(moment))
 
 ```
 
-Pour les membres, on remarque qu'en moyenne, il y a plus de déplacements en après-midi qu'en avant-midi et durant la nuit. De façon générale, il y a aussi un peu plus de déplacements en avant-midi que la nuit. Il est aussi possible de remarquer que le nombre de déplacement total est très semblable pour tous les jours. Finalement, on remarque aussi que le nombre moyen de déplacements entre la semaine et la fin de semaine sont très semblables.
+Pour les membres, on remarque qu'en moyenne, il y a plus de déplacements en après-midi qu'en avant-midi et durant la nuit. De façon générale, le nombre de déplacements en avant-midi est semblable à celui de la nuit. Il est aussi possible de remarquer que le nombre de déplacement total est très semblable pour tous les jours de la semaine et est un peu plus faible pour les jours de la fin de semaine. Finalement, on peut donc tirer de cela que les membres utilisent plus les Bixis durant la semaine pour aller au travail par exemple et que plus de membres les utilisent l'après-midi.
 
-Pour les non-membres, il y a aussi plus de déplacements en après-midi qu'en avant-midi et durant la nuit. Puis, l'utilisation en avant-midi et la nuit est très semblable pour tous les jours. Il est aussi possible de remarquer que le nombre de déplacement total est très semblable pour tous les jours. Ainsi, on remarque aussi que le nombre moyen de déplacements entre la semaine et la fin de semaine est semblables aussi.
+Pour les non-membres, il y a aussi plus de déplacements en après-midi qu'en avant-midi et durant la nuit. Puis, l'utilisation en avant-midi et la nuit est très semblable pour tous les jours aussi. Il est aussi possible de remarquer que le nombre de déplacement total est très semblable pour tous les jours. Cependant, contrairement aux membres, les jours de fin de semaine sont ceux avec le plus de déplacements. Finalement, on peut donc supposer que les non-membres sont plus enclin à utiliser les Bixis les fins de semaines pour des loisirs et moins pour le travail la semaine.
 
-D'un point de vue d'affaires, il n'y aurait pas d'avantage significatif à prioriser une journée ou une autre de la semaine si l'entreprise devait enlever une certaines quantité de Bixi des routes pour une journée.
+En moyenne, le nombre de déplacement total pour les membres est plus élevé à 30.8 par jour et à 7.32 par jour pour les non-membres.
+
+D'un point de vue d'affaires...
 
 Le tableau \\\@ref(fig:n_tot_vs_holiday) montre la relation entre le nombre de déplacement et si la journée est férié ou non.
 
@@ -485,25 +492,7 @@ kable(dat_hol_n_tot, col.names = c("Jour", "Nb. déplacement moyen", "Nb. dépla
 
 ```
 
-Ce tableau montre qu'en moyenne il y a un peu plus de déplacements durant les jours férié, mais on parle ici d'un peu plus qu'un seul déplacement. Ce qui ne semble pas assez signifiant pour conclure que le nombre de déplacement est affecté par le fait qu'il s'agit d'un jour férié ou non.
-
-```{r tab-mem-n_tot}
-
-dat_mem_n_tot <- dat %>%
-  select(mem, n_tot) %>% 
-  group_by(mem) %>%
-  mutate(mean_n_tot = n_tot) %>%
-  summarise(mean_n_tot = mean(n_tot), n_tot = sum(n_tot)) %>% 
-  mutate(mem = ifelse(mem == 1, "Membre", "Non-membre"))
-
-kable(dat_mem_n_tot, col.names = c("Membre", "Nb. de déplacement moyen", "Nb. de déplacement total"), caption = "Détail sur le nombre de déplacement selon les abonnements")
-```
-
-D'après ce tableau, il est possible d'observer qu'en général, les membres effectues plus de déplacements que les non-membres.
-
-D'un point de vue d'affaires,
-
-Reste à faire d'après la station...
+Ce tableau montre qu'en moyenne il y a un peu plus de déplacements durant les jours férié, mais on parle ici d'un peu plus qu'un seul déplacement. Ce qui ne semble pas assez significatif pour conclure que le nombre de déplacement est affecté par le fait qu'il s'agit d'un jour férié ou non.
 
 La figure \\\@ref(fig:n_tot_vs_mois) représente la relation entre l'utilisation des Bixis et le mois de l'année. Comme l'analyse univariée la démontré, nous avons très peu de données pour les mois d'avril et novembre en comparaison aux autres mois faisant partie de l'étude, ainsi nous n'allons pas les prendre en compte pour cette relation.
 
@@ -533,7 +522,9 @@ ggplot(dat_n_tot_vs_mois, aes(x=mm, y=n_tot,
 
 ```
 
-Vs les stations...
+On remarque que...
+
+Par la suite, nous avons identifié les stations qui généraient le plus de déplacements pour les membres et les non-membres. Les deux tableaux \\\@ref(fig:n_tot_vs_station) présentent le nombre de déplacements total des 5 stations avec le plus de déplacements pour les membres et les non-membres ainsi que l'arrondissement de Montréal où se situe ces stations.
 
 ```{r n_tot_vs_station}
 
@@ -578,6 +569,8 @@ kable(top_station_nm, col.names = c("Stations","Emplacement","Arrondissement", "
 
 
 ```
+
+On remarque que l'arrondissement avec le plus de stations dans le top 5 est la Plateau Mont-Royal et Le Vieux-Montréal (pour deux stations). D'un point de vue d'affaires, il serait pertinent de prioriser ces arrondissements pour l'ajout de nouveaux Bixis par exemple pour s'assurer qu'il n'en manque jamais. Puis, aussi d'effectuer plus de maintenance préventive des installations de ces arrondissements, car celles-ci génèrent beaucoup de d'attraction et il ne faudrait pas qu'elles soient hors service.
 
 ### Exploration des relations avec le revenu
 
