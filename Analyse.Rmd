@@ -456,11 +456,11 @@ dat_n_tot_wday_2 <- tidyr::pivot_longer(dat_n_tot_wday, cols = starts_with("n_")
 ggplot(data = dat_n_tot_wday_2, aes(x = wday, y = nombre, fill = factor(moment))) +
   geom_bar(stat = "identity", position = position_dodge(), width = 0.7) +
   facet_grid(mem ~ ., scales = "free_y", labeller = as_labeller(c('0' = "Non-membre", '1' = "Membre"))) +
-  labs(title = "Déplacements en Bixi d'aprés le jour de la semaine",
-       x = "Jour de la semaine", y = "Nombre de déplacements",
+  labs(title = "Nombre de déplacements moyen en Bixi d'aprés le jour de la semaine",
+       x = "Jour de la semaine", y = "Nombre de déplacements moyen",
        fill = "Variable") +
   scale_fill_manual(values = c("n_AM" = "blue", "n_PM" = "red", "n_nuit" = "green", "n_tot" = "purple"),
-                    name = "Moment de la   journée",
+                    name = "Moment de la journée",
                     labels = c("AM", "Nuit", "PM", "Total"))+
   geom_text(aes(label = round(nombre, 1)), position = position_dodge(width = 0.7), vjust = -0.5, size = 2)+
   scale_x_discrete(labels = c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"))+
@@ -514,7 +514,7 @@ ggplot(dat_n_tot_vs_mois, aes(x=mm, y=n_tot,
   theme(legend.position="none")+
   labs(title = "Nombre de déplacement moyen\npar jours selon les membres et les non membres")+
   xlab("")+
-  ylab("Nombre de déplacement")+
+  ylab("Nombre de déplacement moyen")+
   scale_x_discrete(labels = c("Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre"))+
   theme(strip.text = element_text(size = 12, face = "bold"),
         axis.text.x = element_text(angle = 45, hjust = 1))+
