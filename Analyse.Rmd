@@ -4,15 +4,7 @@ subtitle: "MATH60604 - Modélisation statistique"
 author: "James Roy,Alfred Assal,Samuel Croteau,Abdoul Wassi Badirou"
 date: "`r Sys.Date()`"
 output: 
-<<<<<<< HEAD
   #bookdown::pdf_document2:
-=======
-  html_document:
-    toc: true 
-    number_sections: true
-    toc_float: # to float the table of contents to the left of the main document content.
-      collapsed: false
->>>>>>> 8b67e08a13f8eab46374b0f69d68f1ca6c6f686a
   bookdown::html_document2:
     toc: true 
     number_sections: true
@@ -426,7 +418,8 @@ box(col="red")
 box(which = "figure", col="green")
 box(which = "outer", col="blue")
 ```
-```{r}
+
+```{r, results='hide'}
 bixi_df[bixi_df$dur >3000,]
 ```
 
