@@ -10,7 +10,6 @@ output:
     number_sections: true
     toc_float: # to float the table of contents to the left of the main document content.
       collapsed: false
-
   html_document:
     toc: true 
     number_sections: true
