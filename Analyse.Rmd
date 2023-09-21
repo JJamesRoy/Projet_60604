@@ -124,8 +124,13 @@ dat = read.csv("bixi1.csv")
 # Introduction
 
 1.  Contexte
+Dans le cadre du cours de modélisation statistique nous devons,à travers un projet, mettre en pratique les connaissances théoriques acquises. Le projet porte sur les activités de BIXI Montréal qui gère un système de vélopartage dans la grande région de Montréal. L'objectif du projet est d'identifier les facteurs qui influencent l'utilisation des Bixi, la durée des déplacements et les revenus qui en découlent. Le projet  est divisé en 4 parties. La première porte sur l'analyse exploratoire et les autres consistent à explorer différents modèles à savoir: des modèles de régression linéraire, modèles linéaires généralisés et des modèles linéaires mixtes. Un jeu de données est mis à notre disposition. Il est important de rappeler que les données utilisées sont un sous-ensemble purement aléatoire des données complètes, coligées par l'entreprise.
+
 2.  Objectif
+La présente analyse porte sur la première partie du projet: faire une analyse exploratoire des données pour mieux comprendre le contexte et modèle d'affaires.
+
 3.  Plan
+Pour y arriver, nous analysons d'abord les variables individuellement. Ensuite à travers une analyse mutivairée, nous explorons les relations entre les différentes variables par rapport aux variables cibles. Les faits saillants de nos résultats sont ensuite résumés dans la conclusion.
 
 # Exploration des données
 
@@ -403,9 +408,19 @@ bixi_qual_df=bixi_df[,var_qual]
 knitr::kable(summary(bixi_qual_df), caption="Sommaire descriptives des variables qualitatives")
 
 ```
-Le tableau \@ref(tab:sommaireQual) présente un sommaire descriptive des variables qualitatives.
+Le tableau \@ref(tab:sommaireQual) présente un sommaire descriptive des variables qualitatives. En moyenne la durée totale des trajets qui partent d'une station par jour est d'environ 5h. Par ailleurs, il y a trois journées qui totalisent des déplacements supérieurs à 50h. Deux d'entre eux sont associés à la station 256, les jeudi 2 et 9 septembre. L'autre est associé à la station 470, le samedi 21 août. Ces durées extrêmes sont tout de même surprenantes. Celles associées à la station 256 paraissent moins aberrants tout de même, puisque le nombre de déplacement de ces journées est aussi extrême tant en AM qu'en PM. Celà suggère qu'il y a probablement eu ces deux jeudis consécutifs des évènements dans le secteur qui pourraient expliquer ces utilisations extrêmes. De plus, ils sont associés à des usagers membres. Cependant, la durée totale associée à la station 470 est la plus extrême et la plus surprenante. En effet, le nombre de déplacement associé n'est pas le plus extrême en plus c'est associé à des usagers non-membres qui ont un profil de consommation de courte durée. Ce déplacement peut s'expliquer si un utilisateur non-membre prend un bixi et le conserve chez lui plutôt que de le déposer à une station.
 
-```{r}
+Toutes les variables quantitatives ont des valeurs extrêmes sauf la température moyenne quotidienne. Elle présente également une distribution quasiment symétrique. Les autres ont une distribution qui s'étale à droite. Une transformation sera nécessaire éventuellement dans la modélisation pour les rendre symétrique.
+
+
+```{r histEtBoxPlotDur, fig.cap="Histogramme et boîte à moustache de la durée totale"}
+par(mfrow=c(1,2))
+hist(bixi_df$dur, xlab="Durée total par jour par station", ylab = "Nombre d'observations", main="Histogramme de la durée totale")
+boxplot(bixi_df$dur, main="Durée totale")
+```
+
+
+```{r, results='hide', fig.keep='none'}
 par(mfrow=c(2,2), mar=c(2,4,2,2))
 
 boxplot(bixi_df$dur, main="Durée totale")
@@ -422,7 +437,46 @@ box(which = "outer", col="blue")
 ```{r, results='hide'}
 bixi_df[bixi_df$dur >3000,]
 ```
+```{r histEtBoxPlotavg, fig.cap="Histogramme et boîte à moustache de la durée moyenne"}
+par(mfrow=c(1,2))
+hist(bixi_df$avg, xlab="Durée moyenne par jour par station", ylab = "Nombre d'observations", main="Histogramme de la durée moyenne")
+boxplot(bixi_df$avg, main="Durée moyenne")
+```
 
+
+```{r histEtBoxPlotnTot, fig.cap="Histogramme et boîte à moustache du nombre total de déplacement"}
+par(mfrow=c(1,2))
+hist(bixi_df$n_tot, xlab="Nombre total par jour par station", ylab = "Nombre d'observations", main="Histogramme du nombre total")
+boxplot(bixi_df$n_tot, main="Nombre total")
+```
+
+```{r histEtBoxPlotRev, fig.cap="Histogramme et boîte à moustache des revenus"}
+par(mfrow=c(1,2))
+hist(bixi_df$rev, xlab="Revenu par jour par station", ylab = "Nombre d'observations", main="Histogramme des revenus")
+boxplot(bixi_df$rev, main="Revenu total")
+```
+
+```{r histEtBoxPlotAM, fig.cap="Histogramme et boîte à moustache du nombre de déplacement en matinée"}
+par(mfrow=c(1,2))
+hist(bixi_df$n_AM, xlab="Nombre de déplacements en AM", ylab = "Nombre d'observations", main="Histogramme du nombre de déplacements AM")
+boxplot(bixi_df$n_AM, main="Nombre de déplacements AM")
+```
+```{r histEtBoxPlotPM, fig.cap="Histogramme et boîte à moustache du nombre de déplacement en après-midi"}
+par(mfrow=c(1,2))
+hist(bixi_df$n_PM, xlab="Nombre de déplacements en PM", ylab = "Nombre d'observations", main="Histogramme du nombre de déplacements PM")
+boxplot(bixi_df$n_PM, main="Nombre de déplacements PM")
+```
+```{r histEtBoxPlotTemp, fig.cap="Histogramme et boîte à moustache de la température moyenne quotidienne"}
+par(mfrow=c(1,2))
+hist(bixi_df$temp, xlab="Température moyenne", ylab = "Nombre d'observations", main="Histogramme de la température moyenne quotidienne")
+boxplot(bixi_df$temp, main="Température moyenne quotidienne")
+```
+
+```{r histEtBoxPlotRain, fig.cap="Histogramme et boîte à moustache de la quantité de précipitations quotidienne"}
+par(mfrow=c(1,2))
+hist(bixi_df$rain, xlab="Précipitations quotidienne", ylab = "Nombre d'observations", main="Histogramme de la quantité de précipitations")
+boxplot(bixi_df$rain, main="Précipitations quotidienne")
+```
 
 
 ## Exploration multivariée {#explorationMultivariee}
