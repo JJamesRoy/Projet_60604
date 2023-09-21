@@ -4,7 +4,8 @@ subtitle: "MATH60604 - Modélisation statistique"
 author: "James Roy,Alfred Assal,Samuel Croteau,Abdoul Wassi Badirou"
 date: "`r Sys.Date()`"
 output: 
-  #bookdown::pdf_document2:
+  bookdown::pdf_document2:
+    toc: true
   bookdown::html_document2:
     toc: true 
     number_sections: true
@@ -35,88 +36,6 @@ library(knitr)
 library(corrplot)
 ```
 
-# Notes
-
-## Analyse exploratoire
-
-Les variables cibles sont:
-
--   Utilisation: `n_Tot`
-
--   Durée: `dur`
-
--   Revenu: `rev`
-
-### Analyse univariée
-
--   Encoder les variables qualitatives avec le as.factor
-
--   Histogramme de nombre de station par rapport à la fréquence (nom)
-
-    -   s'interroger sur les cas extrêmes
-
-    -   voir si la distribution est normal ou skewed
-
-    -   vérifier s'il y a des valeurs manquantes et essayer de les justifier
-
--   Pourcentage des membres et non membres
-
--   Pour les variables qualitatives
-
-    -   vérifier s'il y a des valeurs manquantes et essayer de les justifier
-
-    -   boxplot et distribution
-
-        -   Voir les valeurs abérantes et/ou extrêmes
-
-### Analyse multivariée
-
--   Samuel: n_Tot
-
--   Alfred: rev
-
--   James: dur
-
--   Identifier le meilleur moment qui maximise l'utilisation des bixi.
-
--   Avec les données géographiques, identifier le meilleur endroit où il y a le plus d'apétence pour les bixi.
-
--   Voir s'il y a une relation à faire entre les stations les plus fréquentées et l'arrondissement
-
--   Comparaison entre variables explicatives et variables objectives
-
-    -   moy n_tot vs température, pluie , jour de la semaine, weekend, AM, PM
-
-    -   jours de la semaine Vs weekend
-
-    -   Fériés Vs Non fériée
-
-    -   Nombre de
-
--   Comparaison entres variables explicatives (covariables)
-
--   Vérifier par exemple si n_tot=n_AM + n_PM
-
-    -   Rajouter la variable n_Nuit=n_tot-n_AM-n_PM
-
--   relation entre nombre total de déplacement et le revenu. Ca dépend de la proportion des membres. Car c'est possible qu'on ai des membres qui font beaucoup de déplacement mais pour lesquels on n'a pas de revenu.
-
--   Est-ce que les membres utilisent plus le bixi que les non-membres
-
--   Qui rapporte le plus entre les membres et non-membres
-
--   On peut calculer la corrélation entre les variables.
-
--   Extrapoler le cout unitaire à partir des revenu et durée totale des déplacements pour les membres. De ce coût unitaire, voir ce que serait le revenu si on l'appliquait aux membres. Ca peut même nous donner une indication de à combien doit-on vendre l'abonnement (en tenant compte de la durée moyenne des trajets des membres) pour générer au moins autant de revenu qu'avec les non-membres.
-
--   il y a t-il une corrélation entre la durée des trajets et le nombre de trajets?
-
-### Questions
-
--   Pour chaque station, avons-nous des données pour tous les jours de l'année et chaque catégorie de membre? grenre est-ce que nb_station X nb_jrs dans l'année X 2=nb_observations?
--   Quelles sont les stations qui génèrent le plus (ou le moins) de revenu?
-    -   Est-ce qu'il y a une corrélation entre les stations qui ont moins d'observations les stations qui ont moins de revenu? Idem pour ceux qui ont le plus d'observation.
--   Corrélation entre revenu et durée totale des déplacements.
 
 ```{r}
 dat = read.csv("bixi1.csv")
@@ -125,15 +44,13 @@ dat = read.csv("bixi1.csv")
 
 # Introduction
 
-1.  Contexte Dans le cadre du cours de modélisation statistique nous devons,à travers un projet, mettre en pratique les connaissances théoriques acquises. Le projet porte sur les activités de BIXI Montréal qui gère un système de vélopartage dans la grande région de Montréal. L'objectif du projet est d'identifier les facteurs qui influencent l'utilisation des Bixi, la durée des déplacements et les revenus qui en découlent. Le projet est divisé en 4 parties. La première porte sur l'analyse exploratoire et les autres consistent à explorer différents modèles à savoir: des modèles de régression linéraire, modèles linéaires généralisés et des modèles linéaires mixtes. Un jeu de données est mis à notre disposition. Il est important de rappeler que les données utilisées sont un sous-ensemble purement aléatoire des données complètes, coligées par l'entreprise.
+Dans le cadre du cours de modélisation statistique nous devons,à travers un projet, mettre en pratique les connaissances théoriques acquises. Le projet porte sur les activités de BIXI Montréal qui gère un système de vélopartage dans la grande région de Montréal. L'objectif du projet est d'identifier les facteurs qui influencent l'utilisation des Bixi, la durée des déplacements et les revenus qui en découlent. Le projet est divisé en 4 parties. La première porte sur l'analyse exploratoire et les autres consistent à explorer différents modèles à savoir: des modèles de régression linéraire, modèles linéaires généralisés et des modèles linéaires mixtes. Un jeu de données est mis à notre disposition. Il est important de rappeler que les données utilisées sont un sous-ensemble purement aléatoire des données complètes, coligées par l'entreprise.
 
-2.  Objectif La présente analyse porte sur la première partie du projet: faire une analyse exploratoire des données pour mieux comprendre le contexte et modèle d'affaires.
+La présente analyse porte sur la première partie du projet: faire une analyse exploratoire des données pour mieux comprendre le contexte et modèle d'affaires.
 
-3.  Plan Pour y arriver, nous analysons d'abord les variables individuellement. Ensuite à travers une analyse mutivairée, nous explorons les relations entre les différentes variables par rapport aux variables cibles. Les faits saillants de nos résultats sont ensuite résumés dans la conclusion.
+Plan Pour y arriver, nous analysons d'abord les variables individuellement. Ensuite à travers une analyse mutivairée, nous explorons les relations entre les différentes variables par rapport aux variables cibles. Les faits saillants de nos résultats sont ensuite résumés dans la conclusion.
 
 # Exploration des données
-
-Le jeu de données utilisé est fourni dans le fichier `bixi1.csv`. La première ligne du fichier est constituée des noms des différentes variables. La virgule est le séparateur du fichier `csv` et la décimale est représentée par un point.La description du jeu de données est fournie dans xxx.
 
 ```{r imp-data}
 #Importation des données
@@ -141,25 +58,17 @@ bixi_raw_data_df= dat
 #bixi_raw_data_df=read.table("raw_data/bixi1.csv", sep = ",", header = T)
 ```
 
-Les tables \@ref(tab:6PremieresObservations) et \@ref(tab:6DernieresObservations) nous montrent à titre informatif, respectivement les 6 premières et 6 dernières observations du jeu de données. Nous y retrouvons toutes les variables décrites dans le dictionnaire des données (ref vers document xxx). Il semble y avoir des valeurs différentes des variables réponses pour chaque observation, ce qui suggère que les données sont en format long. De plus, la variable réponse représentant le revenu (`rev`) comporte des valeurs manquantes. En effet, l'énoncé mentionne que les données de revenues ne sont pas disponibles pour les membres. Donc pour toutes les observations qui concernent les membres, on ne devrait retrouver aucune valeur de revenu dans les données. Nous le validerons dans l'analyse exploratoire multivariée à la section \@ref(explorationMultivariee).
+La table \@ref(tab:6PremieresObservations) nous montre à titre informatif les 6 premières observations du jeu de données. Nous y retrouvons toutes les variables décrites dans l'énonncé.
 
 ```{r 6PremieresObservations}
 knitr::kable(head(bixi_raw_data_df), caption="6 premières observations du jeu de données")
 ```
 
-```{r 6DernieresObservations}
-knitr::kable(tail(bixi_raw_data_df), caption="6 dernières observations du jeu de données")
-```
 
-La visualisation de la structure compacte des données exposée ci-dessous, nous montre que le jeu de données est constitué de 10000 observations et 14 variables. Toutes les variables sont encodées numériquement à l'exception de la variable `wday` qui indique le jour de la semaine. Les six premières variables (de `station` à `holiday`) sont à priori des variables catégorielles. Nous les encoderons donc comme tels. Par ailleurs, certaines devraient être ordinalles, comme le mois (variable `mm`), le jour du mois (variable `dd`) et le jour de la semaine (variable `wday`). Nous y reviendrons plus en détails dans l'analyse exploratoire associée à chacune d'elles.
+La visualisation de la structure compacte des données nous montre que le jeu de données est constitué de 10000 observations et 14 variables. 
 
-```{r dataStr, fig.cap="Structure du jeu de données"}
-str(bixi_raw_data_df)
-```
 
-Après avoir encodé les 6 premières variables sous-forme qualitatives, le tableau présente une description sommaire des différentes variables. Regardons à présent de facon détaillée chacune d'elle.
-
-```{r}
+```{r results='hide'}
 options(knitr.kable.NA = "")
 bixi_df=data.frame(station=as.factor(bixi_raw_data_df$station),
                    mm=factor(bixi_raw_data_df$mm, ordered=T),
@@ -175,6 +84,7 @@ knitr::kable(summary(bixi_df), caption="Sommaire des observations")
 ## Exploration univariée
 
 ### Les variables qualitatives
+ Rajouter ici le tableau sommaire des variables qualitatives
 
 #### Station
 
@@ -182,10 +92,7 @@ La variable station est une variable qualitative qui représente les différente
 
 La figure \@ref(fig:histNbObservationStation) montre le nombre de stations en fonction du nombre de leur observations dans les données. On constate qu'il n'y a pas le même nombre d'observations pour toutes les stations. Donc pour certaines stations, il y a des observations manquantes, soit pour une journée, soit pour un mois, soit pour une catégorie de membre. Celà est due au fait que le jeu de donnée que nous utilisons est un sous-ensemble aléatoire des données réelles.
 
-**Cette partie n'est surement pas pertinente**\
-Pour en apprendre d'avantage, nous définissons une variable catégorielle ordonnée (`n_obs_cat`) qui représente l'intervalle de nombre d'observations dans laquelle chaque station se situe. Les catégories d'intervalles sont celles décrites sur l'axe des abscisses de la figure \@ref(fig:histNbObservationStation).
-
-```{r histNbObservationStation, fig.cap="Histogramme du nombre d'observations des stations"}
+```{r histNbObservationStation,out.height="30%",fig.align='center', fig.cap="Histogramme du nombre d'observations des stations"}
 freqTable_station=table(bixi_df$station)
 #hist(freqTable_station, xlab = "Nombre d'observations", ylab = "Nombre de stations", main = "Histogramme du nombre d'observations des stations")
 
@@ -193,7 +100,7 @@ hist_step=5
 max_freqTable_station=max(freqTable_station)
 station_breaks=seq(0,ceiling(max_freqTable_station/hist_step)*hist_step,hist_step)
 hist(freqTable_station,breaks=station_breaks,
-     labels=T,ylim=c(0,300),xlab = "Nombre d'observations", ylab = "Nombre de stations", main = "Histogramme du nombre d'observations des stations")
+     labels=T,ylim=c(0,300),xlab = "Nombre d'observations", ylab = "Nombre de stations")
 ```
 
 ```{r}
@@ -220,13 +127,11 @@ station_df <- bixi_df %>%
 station_df=merge(station_df, freqTable_station_df)
 station_df
 ```
-
 ```{r boxplotNbmmVsNbObs, fig.cap="Boîte à moustache du nombre de mois dans les observations par station en fonction des différentes catégories de nombre d'observations par station"}
 boxplot(station_df$dc_mm~station_df$n_obs_cat, xlab = "Catégories d'intervalles du nombre d'observations par station",
         ylab = "Nombre de mois dans les observations par station")
 ```
 
-La figure \@ref(fig:boxplotNbmmVsNbObs) nous montre que pour une station, nous avons entre 2 et 8 mois dans l'année pour lesquels nous avons des observations. Est-ce que l'absence d'observation pour les autres mois de l'année pour chaque station est due à la méthode de génération des sous-ensembles des données ou simplement au fait qu'il n'y a aucune activité à ces période.
 
 #### Mois {#mois}
 
@@ -706,9 +611,9 @@ Ainsi, on remarque que les deux stations les plus populaires en terme de durée 
 
 Dans la prochaine section, nous allons explorer les relations entre l'utilisation des Bixis, soit la variable `n_tot` (ainsi que `n_AM` et `n_PM` dans certains cas) et diverses variables de notre base de données.
 
-La figure \@ref(fig:graph_n_tot_vs_temp) montre la relation entre le nombre de déplacement total moyen par jour par rapport à la température pour les membres et les non-membres.
+La figure \@ref(fig:graphntotvstemp) montre la relation entre le nombre de déplacement total moyen par jour par rapport à la température pour les membres et les non-membres.
 
-```{r graph_n_tot_vs_temp}
+```{r graphntotvstemp}
 dat_temp_ntot <- dat %>%
   select(mem, n_tot, temp) %>% 
   group_by(temp, mem) %>%
@@ -728,18 +633,17 @@ dat_temp_ntot_cor = dat_temp_ntot %>%
 
 D'après ce graphique, il est possible de constater qu'il semble exister une relation linéaire entre le nombre de déplacement moyen effectué en Bixi et la température, que ce soit pour un membre et un non-membre. Dans les deux cas, on observe que le nombre de déplacement moyen a tendance à augmenter avec la température. Une forte corrélation positive de 0.65 pour les membres et une corrélation moyenne de 0.48 pour les non-membres.
 
-D'un point de vue d'affaires, si l'entreprise Bixi désirerait par exemple effectuer une mise à jour logiciel ou effectuer de la maintenance sur certains vélos et que ceci nécessiterait de récupérer une certaines quantité de Bixi, il faudrait que l'entreprise entreprenne ces changements pendant les journées où il fait plus froid, ou durant les périodes plus froides soit durant les mois d'avril, mai, octobre ou novembre comme le montre le tableau \@ref(table:graph_temp_vs_mois) afin d'éviter de causer des problèmes de manque de vélos pour les usagers.
+D'un point de vue d'affaires, si l'entreprise Bixi désirerait par exemple effectuer une mise à jour logiciel ou effectuer de la maintenance sur certains vélos et que ceci nécessiterait de récupérer une certaines quantité de Bixi, il faudrait que l'entreprise entreprenne ces changements pendant les journées où il fait plus froid, ou durant les périodes plus froides soit durant les mois d'avril, mai, octobre ou novembre comme le montre le tableau  afin d'éviter de causer des problèmes de manque de vélos pour les usagers.
 
-```{r graph_temp_vs_mois}
 
-mean_temp_vs_mm <- round(aggregate(dat$temp~dat$mm, FUN=mean, na.rm = TRUE), digits=2)
-kable(mean_temp_vs_mm, col.names = c("Mois","Température moyenne (°C)"), caption = "Température moyenne par mois")
-
+```{r graphTempVsMois}
+ mean_temp_vs_mm <- round(aggregate(dat$temp~dat$mm, FUN=mean, na.rm = TRUE), digits=2)
+ knitr::kable(mean_temp_vs_mm, col.names = c("Mois","Température moyenne (°C)"), caption = "Température moyenne par mois")
 ```
 
-Par la suite, nous avons observé la relation entre le nombre de déplacement total moyen par jour d'après la quantité de précipitation tombés dans une journée. La figure \@ref(fig:graph_n_tot_vs_rain) montre cette relation.
+Par la suite, nous avons observé la relation entre le nombre de déplacement total moyen par jour d'après la quantité de précipitation tombés dans une journée. La figure \@ref(fig:graphNTotVsRain) montre cette relation.
 
-```{r graph_n_tot_vs_rain}
+```{r graphNTotVsRain}
 dat_rain_ntot <- dat %>%
   select(mem, n_tot, rain) %>% 
   group_by(rain, mem) %>%
@@ -759,9 +663,9 @@ dat_rain_ntot_cor = dat_rain_ntot %>%
 
 D'après ce graphique, il semble y avoir une faible corrélation entre le nombre de déplacement et la quantité de précipitation dans une journée. En effet, la corrélation est de -0.26 pour les non-membres et -0.30 pour les membres.
 
-La figure \@ref(fig:n_tot_vs_day) montre la relation entre le nombre de déplacement moyen pour différents moment de la journée et le nombre total de déplacement d'après la journée.
+La figure \@ref(fig:nTotVsDay) montre la relation entre le nombre de déplacement moyen pour différents moment de la journée et le nombre total de déplacement d'après la journée.
 
-```{r n_tot_vs_day}
+```{r nTotVsDay}
 
 dat_n_tot_wday <- dat %>%
   select(mem, n_tot, wday, n_AM, n_PM) %>%
@@ -802,9 +706,9 @@ En moyenne, le nombre de déplacement total pour les membres est plus élevé à
 
 D'un point de vue d'affaires, comme les membres utilisent plus les Bixis la semaine et qu'il y a plus de déplacements pour les membres que les non-membres. Il serait judicieux de toujours s'assurer d'une bonne disponibilité de Bixi la semaine et ce surtout en après-midi. Si l'entreprise Bixi devait récupérer une certaine quantité de vélo pour la maintenance par exemple, nous suggérons qu'elle procède durant les avant-midi et/ou les fins de semaine.
 
-Le tableau \\\@ref(fig:n_tot_vs_holiday) montre la relation entre le nombre de déplacement et si la journée est férié ou non.
+Le tableau \@ref(tab:nTotVsHoliday) montre la relation entre le nombre de déplacement et si la journée est férié ou non.
 
-```{r n_tot_vs_holiday}
+```{r nTotVsHoliday}
 
 dat_hol_n_tot <- dat %>%
   select(holiday, n_tot) %>% 
@@ -819,9 +723,9 @@ kable(dat_hol_n_tot, col.names = c("Jour", "Nb. déplacement moyen", "Nb. dépla
 
 Ce tableau montre qu'en moyenne il y a un peu plus de déplacements durant les jours férié, mais on parle ici d'un peu plus qu'un seul déplacement. Ce qui ne semble pas assez significatif pour conclure que le nombre de déplacement est affecté par le fait qu'il s'agit d'un jour férié ou non.
 
-La figure \\\@ref(fig:n_tot_vs_mois) représente la relation entre l'utilisation moyenne des Bixis et le mois de l'année.
+La figure \@ref(fig:nTotVsMois) représente la relation entre l'utilisation moyenne des Bixis et le mois de l'année.
 
-```{r n_tot_vs_mois}
+```{r nTotVsMois}
 
 dat_n_tot_vs_mois <- dat %>%
   select(mem, n_tot, mm) %>% 
@@ -853,6 +757,7 @@ cor_mois_m_vs_avg_temp <- cor(memmois$n_tot,mean_temp_vs_mm$`dat$temp`)
 cor_mois_nm_vs_avg_temp <- cor(nmemmois$n_tot,mean_temp_vs_mm$`dat$temp`)
 ```
 
+
 On remarque que l'allure des deux graphiques est très semblable entre les membres et les non-membres. On parle ici d'une très forte corrélation de 0.86. On peut alors dire que le comportement des membres et des non-membres est très semblable par rapport au mois.
 
 Par la suite, en comparant ces données avec les données du tableau \@ref(table:graph_temp_vs_mois) illustrant la moyenne des températures par mois, on obtient une très forte corrélation d'environ 0.85 pour les membres et une forte corrélation d'environ 0.59 pour les non-membres. Nous pouvons donc faire l'hypothèse que la relation entre le nombre de déplacement moyen par mois est dépendante de la température de ce mois. Les gens ont tendance à plus utiliser le Bixi lors des mois plus chauds que les mois plus froids (avril, octobre et novembre).
@@ -861,9 +766,9 @@ Cependant, on remarque que dans les deux cas (membre et non-membre), le mois ave
 
 D'un point de vue d'affaires, l'entreprise Bixi devrait prioriser et s'assurer de pouvoir mettre à disposition une grande quantité de Bixi pour les périodes plus chaudes de l'année ainsi qu'en septembre.
 
-Par la suite, nous avons identifié les stations qui généraient le plus de déplacements pour les membres et les non-membres. Les deux tableaux \\\@ref(fig:n_tot_vs_station) présentent le nombre de déplacements total des 5 stations avec le plus de déplacements pour les membres et les non-membres ainsi que l'arrondissement de Montréal où se situe ces stations.
+Par la suite, nous avons identifié les stations qui généraient le plus de déplacements pour les membres et les non-membres. Les deux tableaux \@ref(tab:nTotVsStation) présentent le nombre de déplacements total des 5 stations avec le plus de déplacements pour les membres et les non-membres ainsi que l'arrondissement de Montréal où se situe ces stations.
 
-```{r n_tot_vs_station}
+```{r nTotVsStation}
 
 dat_n_tot_station <- dat %>%
   select(mem, n_tot, station) %>% 
