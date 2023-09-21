@@ -561,7 +561,7 @@ dat_temp <- dat %>%
             avg = mean(avg))
 ```
 
-```{r temp}
+```{r temp, fig.show="hold", out.width="50%"}
 ggplot(dat_temp, aes(temp, dur)) +
   geom_point() +
   facet_wrap(~mem,labeller=labeller(mem=label))+
@@ -599,7 +599,7 @@ dat_rain <- dat %>%
 
 ```
 
-```{r rain}
+```{r rain, fig.show="hold", out.width="50%"}
 ggplot(dat_rain, aes(rain, dur)) +
   geom_point() +
   facet_wrap(~mem,labeller=labeller(mem=label)) +
