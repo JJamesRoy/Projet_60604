@@ -4,18 +4,18 @@ subtitle: "MATH60604 - Modélisation statistique"
 author: "James Roy,Alfred Assal,Samuel Croteau,Abdoul Wassi Badirou"
 date: "`r Sys.Date()`"
 output: 
-  pdf_document:
+  html_document:
+    toc: true 
+    number_sections: true
+    toc_float: # to float the table of contents to the left of the main document content.
+      collapsed: false
   bookdown::html_document2:
     toc: true 
     number_sections: true
     toc_float: # to float the table of contents to the left of the main document content.
       collapsed: false
   #bookdown::pdf_document2:
-  html_document:
-    toc: true 
-    number_sections: true
-    toc_float: # to float the table of contents to the left of the main document content.
-      collapsed: false
+  pdf_document:
 params:
   created_date: '2023-09-12'
 ---
@@ -483,7 +483,7 @@ ggplot(dat_rain, aes(rain, dur)) +
   facet_wrap(~mem,labeller=labeller(mem=label)) +
   geom_smooth(method='lm', se=FALSE) +
   labs(title = "Durée totale moyenne des déplacement \npar jours selon les membres et les non membres")+
-  xlab("Précipitation")+
+  xlab("Précipitation de pluie (en mm)")+
   ylab("Durée journalière totale moyenne des déplacement")
 
 ggplot(dat_rain, aes(rain, avg)) +
