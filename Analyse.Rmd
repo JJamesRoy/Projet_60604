@@ -307,7 +307,7 @@ plot(bixi_df$dur,bixi_df$rev, xlab = "Revenu", ylab="durée totale des déplacem
 
 #### Membres {.unnumbered}
 
-Il s'agit d'une variable catégorielle nominale. La figure \@ref(fig:histmem) nous montre qu'il y a légèrement un peu plus d'observations pour la catégorie membre que de non-membre. Mais celà ne nous permet pas de savoir si le portefeuille de clientèle de Bixi est composé plus de membre que de non-membre.
+Il s'agit d'une variable catégorielle nominale. La figure \@ref(fig:histNbObservationsVarQual) nous montre qu'il y a légèrement un peu plus d'observations pour la catégorie membre que de non-membre. Mais celà ne nous permet pas de savoir si le portefeuille de clientèle de Bixi est composé plus de membre que de non-membre.
 
 ```{r histmem, fig.cap="Histogramme des types d'usager", results='hide', fig.keep='none'}
 freqTable_mem=table(bixi_df$mem)
@@ -750,7 +750,7 @@ D'un point de vue d'affaires, si l'entreprise Bixi désirerait par exemple effec
 
 D'un point de vue d'affaires, si l'entreprise Bixi désirerait par exemple effectuer une mise à jour logiciel ou effectuer de la maintenance sur certains vélos et que ceci nécessiterait de récupérer une certaines quantité de Bixi, il faudrait que l'entreprise entreprenne ces changements pendant les journées où il fait plus froid, ou durant les périodes plus froides soit durant les mois d'avril, mai, octobre ou novembre comme le montre le tableau afin d'éviter de causer des problèmes de manque de vélos pour les usagers.
 
-```{r graphTempVsMois,out.height="30%",fig.align='center',fig.cap="Température moyenne par mois"}
+```{r graphTempVsMois,out.height="30%",fig.align='center'}
  mean_temp_vs_mm <- round(aggregate(dat$temp~dat$mm, FUN=mean, na.rm = TRUE), digits=2)
 
 mean_temp_vs_mm_t <- data.frame(
@@ -765,7 +765,7 @@ colnames(mean_temp_vs_mm_t) <- NULL
 noms_lignes <- c("Mois", "Température (°C)")
 rownames(mean_temp_vs_mm_t) <- noms_lignes
 
-knitr::kable(mean_temp_vs_mm_t, format = "pipe", col.names = rep("", ncol(dat_transpose)))
+knitr::kable(mean_temp_vs_mm_t, format = "pipe", col.names = rep("", ncol(mean_temp_vs_mm_t)), caption="Température moyenne par mois")
 #knitr::kable(mean_temp_vs_mm, col.names = c("Mois","Température moyenne (°C)"))
 ```
 
@@ -792,7 +792,7 @@ D'après ce graphique, il semble y avoir une faible corrélation entre le nombre
 
 La figure \@ref(fig:nTotVsDay) montre la relation entre le nombre de déplacements moyen pour différents moments de la journée et le nombre total de déplacements d'après la journée par station.
 
-```{r nTotVsDay,out.height="30%",fig.align='center',fig.cap="Nombre de déplacements moyen en bixi d'après le jour de la semaine"}
+```{r nTotVsDay,out.height="50%",fig.align='center',fig.cap="Nombre de déplacements moyen en bixi d'après le jour de la semaine"}
 
 dat_n_tot_wday <- dat %>%
   select(mem, n_tot, wday, n_AM, n_PM) %>%
@@ -834,7 +834,7 @@ D'un point de vue d'affaires, comme les membres utilisent plus les Bixis la sema
 
 Le tableau \@ref(tab:nTotVsHoliday) montre la relation entre le nombre de déplacements par jour par station et si la journée est férié ou non.
 
-```{r nTotVsHoliday,out.height="30%",fig.align='center',fig.cap="Détail sur le nombre de déplacement selon les fériés"}
+```{r nTotVsHoliday,out.height="30%",fig.align='center'}
 
 dat_hol_n_tot <- dat %>%
   select(holiday, n_tot) %>% 
@@ -843,7 +843,7 @@ dat_hol_n_tot <- dat %>%
   summarise(mean_n_tot = mean(n_tot), n_tot = sum(n_tot)) %>%
   mutate(holiday = ifelse(holiday == 1, "Férié", "Non férié"))
 
-kable(dat_hol_n_tot, col.names = c("Jour", "Nb. déplacement moyen", "Nb. déplacement total"))
+kable(dat_hol_n_tot, col.names = c("Jour", "Nb. déplacement moyen", "Nb. déplacement total"), caption="Détail sur le nombre de déplacement selon les fériés")
 
 ```
 
@@ -885,7 +885,7 @@ cor_mois_m_vs_nm <- cor(memmois$n_tot,nmemmois$n_tot)
 
 On remarque que l'allure des deux graphiques est très semblable entre les membres et les non-membres. On parle ici d'une très forte corrélation de 0.86.
 
-Par la suite, en comparant ces données avec les données du tableau \@ref(table:graphTempVsMois), on obtient une très forte corrélation d'environ 0.85 pour les membres et une forte corrélation d'environ 0.59 pour les non-membres. Nous pouvons donc faire l'hypothèse que la relation entre le nombre de déplacements moyen par mois est dépendant de la température de ce mois. Les gens ont tendance à plus utiliser le bixi lors des mois plus chauds que les mois plus froids (avril, octobre et novembre).
+Par la suite, en comparant ces données avec les données du tableau \@ref(tab:graphTempVsMois), on obtient une très forte corrélation d'environ 0.85 pour les membres et une forte corrélation d'environ 0.59 pour les non-membres. Nous pouvons donc faire l'hypothèse que la relation entre le nombre de déplacements moyen par mois est dépendant de la température de ce mois. Les gens ont tendance à plus utiliser le bixi lors des mois plus chauds que les mois plus froids (avril, octobre et novembre).
 
 On remarque que l'allure des deux graphiques est très semblable entre les membres et les non-membres. On parle ici d'une très forte corrélation de 0.86. On peut alors dire que le comportement des membres et des non-membres est très semblable par rapport au mois.
 
@@ -893,7 +893,7 @@ Cependant, on remarque que dans les deux cas (membre et non-membre), le mois ave
 
 D'un point de vue d'affaires, l'entreprise Bixi devrait prioriser et s'assurer de pouvoir mettre à disposition une grande quantité de bixi pour les périodes plus chaudes de l'année ainsi qu'en septembre.
 
-Par la suite, nous avons identifié les stations qui généraient le plus de déplacements pour les membres et les non-membres. Les deux tableaux \@ref(tab:nTotVsStation) présentent ces résutats.
+Par la suite, nous avons identifié les stations qui généraient le plus de déplacements pour les membres et les non-membres. Les deux tableaux \@ref(tab:nTotVsStation) et \@ref(tab:nTotVsStation2) présentent ces résutats.
 
 ```{r nTotVsStation}
 
@@ -934,16 +934,15 @@ top_station_nm <- top_station_nm%>%
 
 kable(top_station_m, col.names = c("Stations","Emplacement","Arrondissement", "Nb. de déplacement total"), caption = "Détail sur les stations les plus utilisées pour les membres") 
 
-kable(top_station_nm, col.names = c("Stations","Emplacement","Arrondissement", "Nb. de déplacement total"), caption = "Détail sur les stations les plus utilisées pour les non-membres") 
-
 
 ```
 
+```{r nTotVsStation2}
+kable(top_station_nm, col.names = c("Stations","Emplacement","Arrondissement", "Nb. de déplacement total"), caption = "Détail sur les stations les plus utilisées pour les non-membres") 
+```
+
+
 On remarque que l'arrondissement avec le plus de stations dans le top 5 est le Plateau Mont-Royal et Le Vieux-Montréal. D'un point de vue d'affaires, il serait pertinent de prioriser ces arrondissements pour l'ajout de nouveaux bixis pour toujours en garder une grande quantité dans ces arrondissements. Puis, aussi d'effectuer plus de maintenance préventive des installations de ces arrondissements, car celles-ci génèrent beaucoup d'attraction et il ne faudrait pas qu'elles soient hors service.
-
-À ajouter dans Conclusion (Conclusion Sam partie n_tot)
-
-Pour conclure, on peut constater que la durée d'utilisation est plus élevé l'été pour tous les usagers, plus elevé la fin de semaine pour les non-membres, mais pas pour les membres. Aussi, la pluie semble avoir un impact négatif sur la durée d'utilisation. On peut aussi constater que les périodes d'utilisation les plus faibles de Bixis sont: les journées plus froides, les mois plus froids (avril, octobre et novembre), la fin de semaine et l'avant-midi. Puis les périodes avec le plus de déplacements sont les journées plus chaudes, les mois plus chaud (les autres mois à l'étude), durant la semaine et en après-midi. De plus, les secteurs avec les stations qui génèrent le plus de déplacements sont le Plateau Mont-Royal et le Vieux-Montréal. Finalement, l'entreprise devrait donc s'assurer de toujours avoir le plus de Bixis possibles disponibles pour les périodes fortes, procéder aux maintenances lors des périodes plus faibles et s'assurer du bon état des stations et des vélos dans les arrondissements avec les stations les plus en demande.
 
 ### Exploration des relations avec le revenu
 
@@ -968,3 +967,18 @@ kable(dat_rev, col.names = c("", "Revenu moyen", "Revenu total"), caption = "Dé
 ```
 
 # Conclusion
+
+En conclusion, on peut constater que la durée d'utilisation est plus élevé l'été pour tous les usagers, plus elevé la fin de semaine pour les non-membres, mais pas pour les membres. Aussi, la pluie semble avoir un impact négatif sur la durée d'utilisation. On peut aussi constater que les périodes d'utilisation les plus faibles de Bixis sont: les journées plus froides, les mois plus froids (avril, octobre et novembre), la fin de semaine et l'avant-midi. Puis les périodes avec le plus de déplacements sont les journées plus chaudes, les mois plus chaud (les autres mois à l'étude), durant la semaine et en après-midi. De plus, les secteurs avec les stations qui génèrent le plus de déplacements sont le Plateau Mont-Royal et le Vieux-Montréal. Finalement, l'entreprise devrait donc s'assurer de toujours avoir le plus de Bixis possibles disponibles pour les périodes fortes, procéder aux maintenances lors des périodes plus faibles et s'assurer du bon état des stations et des vélos dans les arrondissements avec les stations les plus en demande.
+
+1) En gros, les périodes creuses de l’année sont avril et novembre (surtout
+avril). Et les périodes pointent de l’année sont entre juin et septembre (surtout septembre).
+3) Les trajets du 2 et 9 septembre à la sation 256 et ceux du samedi 21 août à la station 470 nous semblent étranges. Le détail des trajets dans ces 
+stations nous aurait permis de vérifier si les observations qui y sont associées sont aberrantes ou non. 
+4) Toutes les variables sauf la température on une distribution qui s'étale à droite. Une transformation sera nécessaire lors de la modélisation
+pour les rendre symétriques en fonction des modèles qui seront utilisés.
+
+# Contribution des membres de l'équipe
+- Abdoul Wassi Badirou: Introduction, analyse univariée et conclusion
+- Alfred Assal: Analyse multivariée (toutes les covariables et la variable cible `rev`) et conclusion
+- Samuel Croteau: Analyse multivariée (toutes les covariables et la variable cible `n_tot`) et conclusion
+- James Roy: Analyse multivariée (toutes les covariables et la variable cible `dur`) et conclusion
