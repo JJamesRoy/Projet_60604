@@ -1,11 +1,13 @@
 ---
 title: "Projet BIXI - Partie 1: Analyse exploratoire"
 subtitle: "MATH60604 - Modélisation statistique"
-author: "James Roy,Alfred Assal,Samuel Croteau,Abdoul Wassi Badirou"
+author: "Abdoul Wassi Badirou, Alfred Assal, James Roy, Samuel Croteau"
 date: "`r Sys.Date()`"
 output: 
   bookdown::pdf_document2:
     toc: true
+    toc_depth: 3
+    extra_dependencies: ["flafter"]
   bookdown::html_document2:
     toc: true 
     number_sections: true
@@ -22,10 +24,10 @@ params:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-knitr::opts_chunk$set(message = FALSE)
-knitr::opts_chunk$set(warning = FALSE)
-knitr::opts_chunk$set(error = FALSE)
+knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = FALSE,error = FALSE)
+# knitr::opts_chunk$set(message = FALSE)
+# knitr::opts_chunk$set(warning = FALSE)
+# knitr::opts_chunk$set(error = FALSE)
 ```
 
 ```{r}
@@ -34,7 +36,9 @@ library(ggthemes)
 library(RColorBrewer)
 library(knitr)
 library(corrplot)
+library(kableExtra)
 ```
+
 
 
 ```{r}
@@ -48,7 +52,7 @@ Dans le cadre du cours de modélisation statistique nous devons,à travers un pr
 
 La présente analyse porte sur la première partie du projet: faire une analyse exploratoire des données pour mieux comprendre le contexte et modèle d'affaires.
 
-Plan Pour y arriver, nous analysons d'abord les variables individuellement. Ensuite à travers une analyse mutivairée, nous explorons les relations entre les différentes variables par rapport aux variables cibles. Les faits saillants de nos résultats sont ensuite résumés dans la conclusion.
+Pour y arriver, nous analysons d'abord les variables individuellement. Ensuite à travers une analyse mutivairée, nous explorons les relations entre les différentes variables par rapport aux variables cibles. Les faits saillants de nos résultats sont ensuite résumés dans la conclusion.
 
 # Exploration des données
 
@@ -58,15 +62,16 @@ bixi_raw_data_df= dat
 #bixi_raw_data_df=read.table("raw_data/bixi1.csv", sep = ",", header = T)
 ```
 
-La table \@ref(tab:6PremieresObservations) nous montre à titre informatif les 6 premières observations du jeu de données. Nous y retrouvons toutes les variables décrites dans l'énonncé.
+<!-- La table \@ref(tab:6PremieresObservations) nous montre à titre informatif les 6 premières observations du jeu de données. Nous y retrouvons toutes les variables décrites dans l'énonncé. -->
 
-```{r 6PremieresObservations}
+```{r 6PremieresObservations, results='hide'}
 knitr::kable(head(bixi_raw_data_df), caption="6 premières observations du jeu de données")
 ```
 
-
-La visualisation de la structure compacte des données nous montre que le jeu de données est constitué de 10000 observations et 14 variables. 
-
+La visualisation de la structure compacte des données ci-dessous, nous montre que le jeu de données est constitué de 10000 observations et 14 variables. Nous y retrouvons toutes les variables décrites dans l'énoncé du projet. Nous allons dans un premier temps explorer chacune des variables individuellement, puis analyser les relations entres elles et les variables cibles. Les variables cibles sont: la durée totale des déplacements partant de chaque station par jour (`dur`), le revenu total qui en découle (`rev`) et le nombre total de déplacements correspondant (`n_tot`). 
+```{r dataStr,out.height="20%", fig.cap="Structure du jeu de données"}
+str(bixi_raw_data_df)
+```
 
 ```{r results='hide'}
 options(knitr.kable.NA = "")
@@ -84,15 +89,55 @@ knitr::kable(summary(bixi_df), caption="Sommaire des observations")
 ## Exploration univariée
 
 ### Les variables qualitatives
- Rajouter ici le tableau sommaire des variables qualitatives
+Le tableau \@ref(tab:sommaireQual) présente un sommaire descriptif des variables qualitatives.
+```{r sommaireQual}
+var_qual=c('station','mm','dd','wday','mem','holiday')
+options(knitr.kable.NA = "")
+bixi_qual_df=bixi_df[,var_qual]
+knitr::kable(summary(bixi_qual_df), caption="Sommaire descriptives des variables qualitatives")
+```
 
-#### Station
+```{r histNbObservationsVarQual, out.height="30%", fig.align='center', fig.cap="Diagrammes en bâton des variables qualitatives"}
+
+par(mfrow=c(2,3))
+#Station
+freqTable_station=table(bixi_df$station)
+#hist(freqTable_station, xlab = "Nombre d'observations", ylab = "Nombre de stations", main = "Histogramme du nombre d'observations des stations")
+hist_step=5
+max_freqTable_station=max(freqTable_station)
+station_breaks=seq(0,ceiling(max_freqTable_station/hist_step)*hist_step,hist_step)
+hist(freqTable_station,breaks=station_breaks,
+     labels=F,ylim=c(0,300),xlab = "Nombre d'observations", ylab = "Nombre de stations", main="Station")
+
+#Mois
+freqTable_mm=table(bixi_df$mm)
+bplot=barplot(freqTable_mm, ylim = c(0,max(freqTable_mm)+100), xlab="Mois", ylab="Nombre d'observations", main="Mois")
+#text(bplot,freqTable_mm+50, labels=as.character(freqTable_mm))
+
+#Jours
+freqTable_dd=table(bixi_df$dd)
+bplot=barplot(freqTable_dd, ylim = c(0,max(freqTable_dd)+100), xlab="Jour", ylab="Nombre d'observations", main="Jours")
+
+#Jours de semaines
+freqTable_wday=table(bixi_df$wday)
+bplot=barplot(freqTable_wday, ylim = c(0,max(freqTable_wday)+100), xlab="Jour de semaine", ylab="Nombre d'observations", main="Jours de semaine")
+
+#Membres
+freqTable_mem=table(bixi_df$mem)
+bplot=barplot(freqTable_mem, ylim = c(0,max(freqTable_mem)+100), xlab="0=non-membre | 1=membre", ylab="Nombre d'observations", main="Types d'usagers")
+
+#Jours fériés
+freqTable_holidays=table(bixi_df$holiday)
+bplot=barplot(freqTable_holidays, ylim = c(0,max(freqTable_holidays)+100), xlab="0=non-férié | 1=férié", ylab="Nombre d'observations", main="Indicateurs de jour férié")
+```
+
+#### Station {.unnumbered}
 
 La variable station est une variable qualitative qui représente les différentes stations de départ des trajets en BIXI. Nous l'avons encodé sous forme de variable catégorielle nominale car il n'y a pas de relation d'ordre entre les différentes stations. Le jeu de données couvre `r n_distinct(bixi_df$station)` stations Bixi.
 
-La figure \@ref(fig:histNbObservationStation) montre le nombre de stations en fonction du nombre de leur observations dans les données. On constate qu'il n'y a pas le même nombre d'observations pour toutes les stations. Donc pour certaines stations, il y a des observations manquantes, soit pour une journée, soit pour un mois, soit pour une catégorie de membre. Celà est due au fait que le jeu de donnée que nous utilisons est un sous-ensemble aléatoire des données réelles.
+Sur la figure \@ref(fig:histNbObservationsVarQual) nous voyons le nombre de stations en fonction du nombre de leurs observations dans les données. On constate qu'il n'y a pas le même nombre d'observations pour toutes les stations. Donc pour certaines stations, il y a des observations manquantes, soit pour une journée, soit pour un mois, soit pour une catégorie de membre. Celà est due au fait que le jeu de donnée que nous utilisons est un sous-ensemble aléatoire des données réelles.
 
-```{r histNbObservationStation,out.height="30%",fig.align='center', fig.cap="Histogramme du nombre d'observations des stations"}
+```{r histNbObservationStation,out.height="30%",fig.align='center', fig.cap="Histogramme du nombre d'observations des stations", fig.keep='none', results='hide'}
 freqTable_station=table(bixi_df$station)
 #hist(freqTable_station, xlab = "Nombre d'observations", ylab = "Nombre de stations", main = "Histogramme du nombre d'observations des stations")
 
@@ -127,39 +172,38 @@ station_df <- bixi_df %>%
 station_df=merge(station_df, freqTable_station_df)
 station_df
 ```
-```{r boxplotNbmmVsNbObs, fig.cap="Boîte à moustache du nombre de mois dans les observations par station en fonction des différentes catégories de nombre d'observations par station"}
+```{r boxplotNbmmVsNbObs, fig.cap="Boîte à moustache du nombre de mois dans les observations par station en fonction des différentes catégories de nombre d'observations par station", results='hide', fig.keep='none'}
 boxplot(station_df$dc_mm~station_df$n_obs_cat, xlab = "Catégories d'intervalles du nombre d'observations par station",
         ylab = "Nombre de mois dans les observations par station")
 ```
 
-
-#### Mois {#mois}
+#### Mois {.unnumbered}
 
 ```{r}
 saison_first_month=min(bixi_df$mm)
 saison_last_month=max(bixi_df$mm)
 ```
 
-Il s'agit d'une variable catégorielle ordonnée car les mois arrivent dans un ordre donné. La saison Bixi s'étend d'avril (`r saison_first_month`) à novembre (`r saison_last_month`) comme on peut le voir à la figure \@ref(fig:histMois). En dehors des mois d'avril et novembre, nous avons approximativement le même nombre d'observations par mois. Il y a environ 2 fois moins d'observations pour les mois d'avril et novembre. C'est cohérent avec le fait que la saison s'étend de la mi-avril à la mi-novembre. De ce point de vue, notre sous-ensemble de jeu de donnée est représentatif de la saison réelle.
+Il s'agit d'une variable catégorielle ordonnée car les mois arrivent dans un ordre donné. La saison Bixi s'étend d'avril (`r saison_first_month`) à novembre (`r saison_last_month`) comme on peut le voir à la figure \@ref(fig:histNbObservationsVarQual). En dehors des mois d'avril et novembre, nous avons approximativement le même nombre d'observations par mois. Il y a environ 2 fois moins d'observations pour les mois d'avril et novembre. C'est cohérent avec le fait que la saison s'étend de la mi-avril à la mi-novembre. De ce point de vue, notre sous-ensemble de jeu de données est représentatif de la saison réelle.
 
-```{r histMois, fig.cap="Histogramme des mois"}
+```{r histMois, fig.cap="Histogramme des mois", results='hide', fig.keep='none'}
 freqTable_mm=table(bixi_df$mm)
 bplot=barplot(freqTable_mm, ylim = c(0,max(freqTable_mm)+100), xlab="Mois", ylab="Nombre d'observations", main="Histogramme des mois")
 text(bplot,freqTable_mm+50, labels=as.character(freqTable_mm))
 ```
 
-La figure \@ref(fig:bpRevDurNtotParMois) nous montre que les mois d'avril et novembre (avril plus que novembre) sont ceux où il y a le moins de revenu, les bixi sont les moins utilisés et les utilisateurs font de plus courtes distances. Les mois d'août et septembre génèrent le plus de revenu. L'utilisation des bixi et la durée des trajets est plus importante de juin à septembre. En gros, les périodes creuses de l'année sont avril et novembre (surtout avril). Et les périodes pointent de l'année sont entre juin et septembre (surtout septembre).
+<!-- La figure \@ref(fig:bpRevDurNtotParMois) nous montre que les mois d'avril et novembre (avril plus que novembre) sont ceux où il y a le moins de revenu, les bixi sont les moins utilisés et les utilisateurs font de plus courtes distances. Les mois d'août et septembre génèrent le plus de revenu. L'utilisation des bixi et la durée des trajets est plus importante de juin à septembre. En gros, les périodes creuses de l'année sont avril et novembre (surtout avril). Et les périodes pointent de l'année sont entre juin et septembre (surtout septembre). -->
 
-```{r bpRevDurNtotParMois,fig.cap="Boîtes à moustaches des revenus, durée et nombre totale de déplacement en fonction du mois"}
+```{r bpRevDurNtotParMois,fig.cap="Boîtes à moustaches des revenus, durée et nombre totale de déplacement en fonction du mois", results='hide', fig.keep='none'}
 par(mfrow=c(1,3))
 boxplot(bixi_df$rev~bixi_df$mm, xlab = "Mois", ylab = "revenu total par déplacement")
 boxplot(bixi_df$dur~bixi_df$mm, xlab = "Mois", ylab = "durée totale des déplacements")
 boxplot(bixi_df$n_tot~bixi_df$mm, xlab = "Mois", ylab = "nombre total de déplacements")
 ```
 
-Étant donné que le revenu des membres est manquant, faisons-nous le même constat pour les non-membres uniquement? La figure \@ref(fig:boxPlotVarCibleParMoisNonMembre) nous montre que le constat est identique et plus évident. Par ailleurs on observe l'absence des deux valeurs les plus extrêmes pour le nombre de total de déplacement en septembre. Celà suggère donc que le plus grand nombre de déplacement journalier a été fait par des usagers membres en septembre. Mais le plus long déplacement a été fait par des usagers non-memebres en août. On se demande donc si les usagers membres ont plus tendance à effectuer de nombreux trajets mais de courte distance et les usagers non-membres moins de trajet mais plus long. Nous y répondrons dans la section \@ref(univarieMembres).
+<!-- Étant donné que le revenu des membres est manquant, faisons-nous le même constat pour les non-membres uniquement? La figure \@ref(fig:boxPlotVarCibleParMoisNonMembre) nous montre que le constat est identique et plus évident. Par ailleurs on observe l'absence des deux valeurs les plus extrêmes pour le nombre de total de déplacement en septembre. Celà suggère donc que le plus grand nombre de déplacement journalier a été fait par des usagers membres en septembre. Mais le plus long déplacement a été fait par des usagers non-memebres en août. On se demande donc si les usagers membres ont plus tendance à effectuer de nombreux trajets mais de courte distance et les usagers non-membres moins de trajet mais plus long. Nous y répondrons dans la section \@ref(univarieMembres). -->
 
-```{r boxPlotVarCibleParMoisNonMembre,fig.cap="Boîtes à moustaches des revenus, durée et nombre totale de déplacement en fonction du mois pour les non-membre uniquement"}
+```{r boxPlotVarCibleParMoisNonMembre,fig.cap="Boîtes à moustaches des revenus, durée et nombre totale de déplacement en fonction du mois pour les non-membre uniquement", results='hide', fig.keep='none'}
 bixi_nm_df=bixi_df[bixi_df$mem==0,]
 par(mfrow=c(1,3))
 boxplot(bixi_nm_df$rev~bixi_nm_df$mm, xlab = "Mois", ylab = "revenu total par déplacement")
@@ -173,7 +217,7 @@ bixi_df %>%
   summarise(mean.rev=mean(rev,na.rm = T), mean.dur=mean(dur,na.rm=T), mean.n_tot=mean(n_tot,na.rm = T))
 ```
 
-#### Jour {#jour}
+#### Jour {.unnumbered}
 
 ```{r}
 saison_first_day=min(bixi_df$dd[bixi_df$mm==saison_first_month])
@@ -184,22 +228,22 @@ Il s'agit d'une variable catégorielle ordonnée. Les jours s'étendent du `r mi
 
 Il y a environ 2 fois moins d'observations pour la journée du 31 par rapport aux autres mois. La distribution des autres jours semble approximativement uniforme.
 
-```{r histJour, fig.cap="Histogramme des jours"}
+```{r histJour, fig.cap="Histogramme des jours", results='hide', fig.keep='none'}
 freqTable_dd=table(bixi_df$dd)
 bplot=barplot(freqTable_dd, ylim = c(0,max(freqTable_dd)+100), xlab="Jour", ylab="Nombre d'observations", main="Histogramme des jours")
 #text(bplot,freqTable_dd+50, labels=as.character(freqTable_dd))
 ```
 
-Les figures \@ref(fig:bpRevDurNtotParJour) et \@ref(fig:bpRevDurNtotParJourNonMembre) nous montrent que la journée du 24, une journée dans la dernière semaine de chaque mois, semble être la plus lucratif en revenu et la plus achalandée, aussi bien en terme de nombre de déplacement que de durée.
+<!-- Les figures \@ref(fig:bpRevDurNtotParJour) et \@ref(fig:bpRevDurNtotParJourNonMembre) nous montrent que la journée du 24, une journée dans la dernière semaine de chaque mois, semble être la plus lucratif en revenu et la plus achalandée, aussi bien en terme de nombre de déplacement que de durée. -->
 
-```{r bpRevDurNtotParJour,fig.cap="Boîtes à moustaches des revenus, durée et nombre totale de déplacement en fonction du jour."}
+```{r bpRevDurNtotParJour,fig.cap="Boîtes à moustaches des revenus, durée et nombre totale de déplacement en fonction du jour.", results='hide', fig.keep='none'}
 par(mfrow=c(1,3))
 boxplot(bixi_df$rev~bixi_df$dd, xlab = "Jour", ylab = "revenu total par déplacement")
 boxplot(bixi_df$dur~bixi_df$dd, xlab = "Jour", ylab = "durée totale des déplacements")
 boxplot(bixi_df$n_tot~bixi_df$dd, xlab = "Jour", ylab = "nombre total de déplacements")
 ```
 
-```{r bpRevDurNtotParJourNonMembre,fig.cap="Boîtes à moustaches des revenus, durée et nombre totale de déplacement en fonction du jour pour les non-membre uniquement."}
+```{r bpRevDurNtotParJourNonMembre,fig.cap="Boîtes à moustaches des revenus, durée et nombre totale de déplacement en fonction du jour pour les non-membre uniquement.", results='hide', fig.keep='none'}
 par(mfrow=c(1,3))
 boxplot(bixi_nm_df$rev~bixi_nm_df$dd, xlab = "Jour", ylab = "revenu total par déplacement")
 boxplot(bixi_nm_df$dur~bixi_nm_df$dd, xlab = "Jour", ylab = "durée totale des déplacements")
@@ -213,19 +257,19 @@ meanVarCibleByDay=bixi_df %>%
 knitr::kable(meanVarCibleByDay, caption="To add")
 ```
 
-#### Jour de semaine
+#### Jour de semaine {.unnumbered}
 
-Il s'agit d'une variable catégorielle ordonnée. Mais le choix du premier jour est relatif. La figure \@ref(fig:histWday) nous montre que la distribution des jours de semaine est approximativement uniforme car nous avons environ le même nombre d'observations pour les différents jours de la semaine.
+Il s'agit d'une variable catégorielle ordonnée. Mais le choix du premier jour est relatif. La figure \@ref(fig:histNbObservationsVarQual) nous montre que la distribution des jours de semaine est approximativement uniforme car nous avons environ le même nombre d'observations pour les différents jours de la semaine.
 
-```{r histWday, fig.cap="Histogramme des jour de semaine"}
+```{r histWday, fig.cap="Histogramme des jour de semaine", results='hide', fig.keep='none'}
 freqTable_wday=table(bixi_df$wday)
 bplot=barplot(freqTable_wday, ylim = c(0,max(freqTable_wday)+100), xlab="Jour de semaine", ylab="Nombre d'observations", main="Histogramme des jour de semaine")
 #text(bplot,freqTable_dd+50, labels=as.character(freqTable_dd))
 ```
 
-La figure \@ref(fig:bpRevDurNtotParwday) nous montre que les revenus générés sont plus importants en fin de semaine (Samedi et dimanche). Les déplacements d'une journée qui ont généré le plus de revenu sont également ceux qui ont été le plus long. Par contre, ils ne sont pas ceux qui ont totalisé le plus grand nombre de déplacement. On peut donc se demander si les déplacements les plus lucratifs sont les longs.La figure \@ref(fig:corrRevDur) confirme cette évidence. En effet, étant donné que la tarification est liée à la durée d'utilisation du bixi pour les non-membres, ont peut s'attendre à avoir une forte corrélation entre le revenu et la durée des déplacements. On observe également qu'il y a un plus grand nombre de déplacement du mardi au vendredi. Les déplacements les plus importants ont eu lieu le jeudi. En fait, comme remarqué aux sections \@ref(mois) et \@ref(jour), il s'agit des déplacements des jeudis 2 et 9 septembre.
+<!-- La figure \@ref(fig:bpRevDurNtotParwday) nous montre que les revenus générés sont plus importants en fin de semaine (Samedi et dimanche). Les déplacements d'une journée qui ont généré le plus de revenu sont également ceux qui ont été le plus long. Par contre, ils ne sont pas ceux qui ont totalisé le plus grand nombre de déplacement. On peut donc se demander si les déplacements les plus lucratifs sont les longs.La figure \@ref(fig:corrRevDur) confirme cette évidence. En effet, étant donné que la tarification est liée à la durée d'utilisation du bixi pour les non-membres, ont peut s'attendre à avoir une forte corrélation entre le revenu et la durée des déplacements. On observe également qu'il y a un plus grand nombre de déplacement du mardi au vendredi. Les déplacements les plus importants ont eu lieu le jeudi. En fait, comme remarqué aux sections \@ref(mois) et \@ref(jour), il s'agit des déplacements des jeudis 2 et 9 septembre. -->
 
-```{r bpRevDurNtotParwday,fig.cap="Boîtes à moustaches des revenus, durée et nombre totale de déplacement en fonction des jours de semaine."}
+```{r bpRevDurNtotParwday,fig.cap="Boîtes à moustaches des revenus, durée et nombre totale de déplacement en fonction des jours de semaine.", results='hide',fig.keep='none'}
 mar=c(7,4,2,2)
 dmar=par('mar')
 par(mfrow=c(1,3), mar=mar)
@@ -257,25 +301,23 @@ bixi_thursday=bixi_thursday[order(bixi_thursday$n_tot, decreasing = T),]
 bixi_thursday
 ```
 
-```{r corrRevDur, fig.cap="Revenu en fonction de la durée totale des déplacements"}
+```{r corrRevDur, fig.cap="Revenu en fonction de la durée totale des déplacements", fig.keep='none', results='hide'}
 plot(bixi_df$dur,bixi_df$rev, xlab = "Revenu", ylab="durée totale des déplacement", main="Revenu en fonction de la durée")
 ```
 
-#### Membres {#univarieMembres}
+#### Membres {.unnumbered}
 
-Est-ce que les usagers membres ont plus tendance à effectuer de nombreux trajets mais de courte distance et les usagers non-membres, moins de trajet mais plus long? NON
+Il s'agit d'une variable catégorielle nominale. La figure \@ref(fig:histmem) nous montre qu'il y a légèrement un peu plus d'observations pour la catégorie membre que de non-membre. Mais celà ne nous permet pas de savoir si le portefeuille de clientèle de Bixi est composé plus de membre que de non-membre.
 
-Il s'agit d'une variable catégorielle nominale. La figure \@ref(fig:histmem) nous montre qu'il y a légèrement un peu plus de membre que de non-membre.
-
-```{r histmem, fig.cap="Histogramme des types d'usager"}
+```{r histmem, fig.cap="Histogramme des types d'usager", results='hide', fig.keep='none'}
 freqTable_mem=table(bixi_df$mem)
 bplot=barplot(freqTable_mem, ylim = c(0,max(freqTable_mem)+100), xlab="Types d'usagers: 1=membre, 0=non-membre", ylab="Nombre d'observations", main="Histogramme des types d'usagers")
 #text(bplot,freqTable_dd+50, labels=as.character(freqTable_dd))
 ```
 
-La figure \@ref(fig:bpRevDurNtotParMem) nous montre que les usagers membres ont tendance à utiliser plus souvent et plus longtemps les bixi que les non-membre.
+<!-- La figure \@ref(fig:bpRevDurNtotParMem) nous montre que les usagers membres ont tendance à utiliser plus souvent et plus longtemps les bixi que les non-membre. -->
 
-```{r bpRevDurNtotParMem,fig.cap="Boîtes à moustaches des revenus, durée et nombre totale de déplacement en fonction du type d'usager."}
+```{r bpRevDurNtotParMem,fig.cap="Boîtes à moustaches des revenus, durée et nombre totale de déplacement en fonction du type d'usager.", results='hide', fig.keep='none'}
 par(mfrow=c(1,3))
 
 bp_rev=boxplot(bixi_df$rev~bixi_df$mem, xlab = "Type d'usager", ylab = "revenu total par déplacement")
@@ -283,16 +325,17 @@ bp_dur=boxplot(bixi_df$dur~bixi_df$mem, xlab = "Type d'usager", ylab = "durée t
 bp_n_tot=boxplot(bixi_df$n_tot~bixi_df$mem, xlab = "Type d'usager", ylab = "nombre total de déplacements")
 ```
 
-#### Jour férié
+#### Jour férié {.unnumbered}
 
 ```{r results='hide'}
 freqTable_holidays=table(bixi_df$holiday)
 knitr::kable(freqTable_holidays, caption="Proportion des jours fériés dans les observations")
 ```
 
-Les observations sur des jours fériés représentent environ `r round(min(freqTable_holidays)*100/sum(freqTable_holidays))`%. Nous devrons plustard y accorder une attention particulère dans la modélisation afin d'éviter que cette catégorie soit négligée. En effet, la figure \@ref(fig:bpRevDurNtotParHolidays) nous montre que les revenus générés sont un peu plus important les jours fériés que les autres jours. La durée des déplacements est aussi un peu plus important les jours fériés que les autres jours. Mais il n'y a pas une différence remarquable pour le nombre de déplacement. Probablement que ce comportement réflète des usages différents. Les jours fériés les usagers utilisent peut-être les bixi pour des promenades contrairement aux autres jours où ils s'en servent pour aller une destination précise.
+Les observations sur des jours fériés représentent environ `r round(min(freqTable_holidays)*100/sum(freqTable_holidays))`%. Nous devrons plustard y accorder une attention particulère dans la modélisation afin d'éviter que cette catégorie soit négligée, car le revenu engrengé ces jours ne sont pas négligeable. 
+<!-- En effet, la figure \@ref(fig:bpRevDurNtotParHolidays) nous montre que les revenus générés sont un peu plus important les jours fériés que les autres jours. La durée des déplacements est aussi un peu plus important les jours fériés que les autres jours. Mais il n'y a pas une différence remarquable pour le nombre de déplacement. Probablement que ce comportement réflète des usages différents. Les jours fériés les usagers utilisent peut-être les bixi pour des promenades contrairement aux autres jours où ils s'en servent pour aller une destination précise. -->
 
-```{r bpRevDurNtotParHolidays,fig.cap="Boîtes à moustaches des revenus, durée et nombre totale de déplacement en fonction des jours fériés."}
+```{r bpRevDurNtotParHolidays,fig.cap="Boîtes à moustaches des revenus, durée et nombre totale de déplacement en fonction des jours fériés.", results='hide', fig.keep='none'}
 par(mfrow=c(1,3))
 
 bp_rev=boxplot(bixi_df$rev~bixi_df$holiday, xlab = "Indicateur jour férié", ylab = "revenu total par déplacement")
@@ -325,19 +368,87 @@ mtext("Line 2", side=1, line=2, adj=0.0, cex=1, col="blue", outer=TRUE)
 
 ### Les variables quantitatives
 
-```{r sommaireQual}
-var_qual=c('dur','avg','rev','n_AM','n_PM','n_tot','temp','rain')
+```{r sommaireQt, out.height="10%", fig.align='center'}
+#| column: margin
+var_qt=c('dur','avg','rev','n_AM','n_PM','n_tot','temp','rain')
 options(knitr.kable.NA = "")
-bixi_qual_df=bixi_df[,var_qual]
-knitr::kable(summary(bixi_qual_df), caption="Sommaire descriptives des variables qualitatives")
+bixi_qt_df=bixi_df[,var_qt]
+knitr::kable(summary(bixi_qt_df), 
+             caption="Sommaire descriptives des variables quantitatives", format='latex')
 
 ```
 
-Le tableau \@ref(tab:sommaireQual) présente un sommaire descriptive des variables qualitatives. En moyenne la durée totale des trajets qui partent d'une station par jour est d'environ 5h. Par ailleurs, il y a trois journées qui totalisent des déplacements supérieurs à 50h. Deux d'entre eux sont associés à la station 256, les jeudi 2 et 9 septembre. L'autre est associé à la station 470, le samedi 21 août. Ces durées extrêmes sont tout de même surprenantes. Celles associées à la station 256 paraissent moins aberrants tout de même, puisque le nombre de déplacement de ces journées est aussi extrême tant en AM qu'en PM. Celà suggère qu'il y a probablement eu ces deux jeudis consécutifs des évènements dans le secteur qui pourraient expliquer ces utilisations extrêmes. De plus, ils sont associés à des usagers membres. Cependant, la durée totale associée à la station 470 est la plus extrême et la plus surprenante. En effet, le nombre de déplacement associé n'est pas le plus extrême en plus c'est associé à des usagers non-membres qui ont un profil de consommation de courte durée. Ce déplacement peut s'expliquer si un utilisateur non-membre prend un bixi et le conserve chez lui plutôt que de le déposer à une station.
 
-Toutes les variables quantitatives ont des valeurs extrêmes sauf la température moyenne quotidienne. Elle présente également une distribution quasiment symétrique. Les autres ont une distribution qui s'étale à droite. Une transformation sera nécessaire éventuellement dans la modélisation pour les rendre symétrique.
+Le tableau \@ref(tab:sommaireQt) présente un sommaire descriptif des variables quantitatives. En moyenne la durée totale des trajets qui partent d'une station par jour est d'environ 5h. Par ailleurs, il y a trois journées qui totalisent des déplacements supérieurs à 50h. Deux d'entre eux sont associés à la station 256, les jeudi 2 et 9 septembre. L'autre est associé à la station 470, le samedi 21 août. Ces durées extrêmes sont tout de même surprenantes. Celles associées à la station 256 paraissent moins aberrants tout de même, puisque le nombre de déplacement de ces journées est aussi extrême tant en AM qu'en PM. Celà suggère qu'il y a probablement eu ces deux jeudis consécutifs des évènements dans le secteur qui pourraient expliquer ces utilisations extrêmes. De plus, ils sont associés à des usagers membres. Cependant, la durée totale associée à la station 470 est la plus extrême et la plus surprenante. En effet, le nombre de déplacement associé n'est pas le plus extrême en plus c'est associé à des usagers non-membres qui ont un profil de consommation de courte durée. Ce déplacement peut s'expliquer si un utilisateur non-membre prend un bixi et le conserve chez lui plutôt que de le déposer à une station.
 
-```{r histEtBoxPlotDur, fig.cap="Histogramme et boîte à moustache de la durée totale"}
+Toutes les variables quantitatives ont des valeurs extrêmes sauf la température moyenne quotidienne comme on peut le voir sur la figure \@ref(fig:BoxPlotVarQt). Elle présente également une distribution quasiment symétrique (voir figure \@ref(fig:histPlotVarQt). Les autres ont une distribution qui s'étale à droite. Une transformation sera nécessaire éventuellement dans la modélisation pour les rendre symétrique.
+
+```{r histPlotVarQt, out.height="30%", fig.align='center', fig.cap="Histogramme des variables quantitatives"}
+par(mfrow=c(4,2), mar=c(3,2,1,1))
+#Durée totale
+hist(bixi_df$dur, xlab="", ylab = "Nombre d'observations", main="Hist: Durée totale")
+
+#Durée moyenne
+hist(bixi_df$avg, xlab="", ylab = "Nombre d'observations", main="Hist: Durée moyenne")
+
+#Nombre total de déplacement
+hist(bixi_df$n_tot, xlab="", ylab = "Nombre d'observations", main="Hist: Nombre total de déplacement")
+
+#Revenu
+hist(bixi_df$rev, xlab="", ylab = "Nombre d'observations", main="Hist: Revenus")
+
+#Nombre de déplacement en AM
+hist(bixi_df$n_AM, xlab="", ylab = "Nombre d'observations", main="Hist: Nombre de déplacements AM")
+
+#Nombre de déplacements en PM
+hist(bixi_df$n_PM, xlab="", ylab = "Nombre d'observations", main="Hist: Nombre de déplacements PM")
+
+#Température moyenne quotidienne
+hist(bixi_df$temp, xlab="", ylab = "Nombre d'observations", main="Hist: Température moyenne quotidienne")
+
+#Précipitations quotidienne
+hist(bixi_df$rain, xlab="", ylab = "Nombre d'observations", main="Hist: Quantité de précipitations")
+
+```
+
+
+```{r BoxPlotVarQt, out.height="40%", fig.align='center', fig.cap="Boîte à moustache des variables quantitatives"}
+
+par(mfrow=c(2,4),mar=c(3,2,2.5,1))
+#Durée totale
+#hist(bixi_df$dur, xlab="", ylab = "Nombre d'observations", main="Hist: Durée totale")
+boxplot(bixi_df$dur, main="Durée totale")
+
+#Durée moyenne
+#hist(bixi_df$avg, xlab="", ylab = "Nombre d'observations", main="Hist: Durée moyenne")
+boxplot(bixi_df$avg, main="Durée moyenne")
+
+#Nombre total de déplacement
+#hist(bixi_df$n_tot, xlab="", ylab = "Nombre d'observations", main="Hist: Nb de déplacement")
+boxplot(bixi_df$n_tot, main="Nombre total")
+
+#Revenu
+#hist(bixi_df$rev, xlab="", ylab = "Nombre d'observations", main="Hist: Revenus")
+boxplot(bixi_df$rev, main="Revenu total")
+
+#Nombre de déplacement en AM
+#hist(bixi_df$n_AM, xlab="", ylab = "Nombre d'observations", main="Hist: Nb de déplacements AM")
+boxplot(bixi_df$n_AM, main="Nombre\n de déplacements AM")
+
+#Nombre de déplacements en PM
+#hist(bixi_df$n_PM, xlab="", ylab = "Nombre d'observations", main="Hist: Nb de déplacements PM")
+boxplot(bixi_df$n_PM, main="Nombre\n de déplacements PM")
+
+#Température moyenne
+boxplot(bixi_df$temp, main="Température\n moyenne quotidienne")
+
+#Précipitations
+boxplot(bixi_df$rain, main="Précipitations\n quotidienne")
+
+```
+
+
+```{r histEtBoxPlotDur, fig.cap="Histogramme et boîte à moustache de la durée totale", results='hide', fig.keep='none'}
 par(mfrow=c(1,2))
 hist(bixi_df$dur, xlab="Durée total par jour par station", ylab = "Nombre d'observations", main="Histogramme de la durée totale")
 boxplot(bixi_df$dur, main="Durée totale")
@@ -361,43 +472,43 @@ box(which = "outer", col="blue")
 bixi_df[bixi_df$dur >3000,]
 ```
 
-```{r histEtBoxPlotavg, fig.cap="Histogramme et boîte à moustache de la durée moyenne"}
+```{r histEtBoxPlotavg, fig.cap="Histogramme et boîte à moustache de la durée moyenne", fig.keep='none', results='hide'}
 par(mfrow=c(1,2))
 hist(bixi_df$avg, xlab="Durée moyenne par jour par station", ylab = "Nombre d'observations", main="Histogramme de la durée moyenne")
 boxplot(bixi_df$avg, main="Durée moyenne")
 ```
 
-```{r histEtBoxPlotnTot, fig.cap="Histogramme et boîte à moustache du nombre total de déplacement"}
+```{r histEtBoxPlotnTot, fig.cap="Histogramme et boîte à moustache du nombre total de déplacement", fig.keep='none', results='hide'}
 par(mfrow=c(1,2))
 hist(bixi_df$n_tot, xlab="Nombre total par jour par station", ylab = "Nombre d'observations", main="Histogramme du nombre total")
 boxplot(bixi_df$n_tot, main="Nombre total")
 ```
 
-```{r histEtBoxPlotRev, fig.cap="Histogramme et boîte à moustache des revenus"}
+```{r histEtBoxPlotRev, fig.cap="Histogramme et boîte à moustache des revenus", fig.keep='none', results='hide'}
 par(mfrow=c(1,2))
 hist(bixi_df$rev, xlab="Revenu par jour par station", ylab = "Nombre d'observations", main="Histogramme des revenus")
 boxplot(bixi_df$rev, main="Revenu total")
 ```
 
-```{r histEtBoxPlotAM, fig.cap="Histogramme et boîte à moustache du nombre de déplacement en matinée"}
+```{r histEtBoxPlotAM, fig.cap="Histogramme et boîte à moustache du nombre de déplacement en matinée", results='hide', fig.keep='none'}
 par(mfrow=c(1,2))
 hist(bixi_df$n_AM, xlab="Nombre de déplacements en AM", ylab = "Nombre d'observations", main="Histogramme du nombre de déplacements AM")
 boxplot(bixi_df$n_AM, main="Nombre de déplacements AM")
 ```
 
-```{r histEtBoxPlotPM, fig.cap="Histogramme et boîte à moustache du nombre de déplacement en après-midi"}
+```{r histEtBoxPlotPM, fig.cap="Histogramme et boîte à moustache du nombre de déplacement en après-midi", fig.keep='none', results='hide'}
 par(mfrow=c(1,2))
 hist(bixi_df$n_PM, xlab="Nombre de déplacements en PM", ylab = "Nombre d'observations", main="Histogramme du nombre de déplacements PM")
 boxplot(bixi_df$n_PM, main="Nombre de déplacements PM")
 ```
 
-```{r histEtBoxPlotTemp, fig.cap="Histogramme et boîte à moustache de la température moyenne quotidienne"}
+```{r histEtBoxPlotTemp, fig.cap="Histogramme et boîte à moustache de la température moyenne quotidienne", fig.keep='none', results='hide'}
 par(mfrow=c(1,2))
 hist(bixi_df$temp, xlab="Température moyenne", ylab = "Nombre d'observations", main="Histogramme de la température moyenne quotidienne")
 boxplot(bixi_df$temp, main="Température moyenne quotidienne")
 ```
 
-```{r histEtBoxPlotRain, fig.cap="Histogramme et boîte à moustache de la quantité de précipitations quotidienne"}
+```{r histEtBoxPlotRain, fig.cap="Histogramme et boîte à moustache de la quantité de précipitations quotidienne", results='hide', fig.keep='none'}
 par(mfrow=c(1,2))
 hist(bixi_df$rain, xlab="Précipitations quotidienne", ylab = "Nombre d'observations", main="Histogramme de la quantité de précipitations")
 boxplot(bixi_df$rain, main="Précipitations quotidienne")
@@ -840,4 +951,4 @@ dat_rev <- df_Nmem_compl %>%
 kable(dat_rev, col.names = c("", "Revenu moyen", "Revenu total"), caption = "Détails entre les journées fériées et le revenu rapporté par les non-membres")
 ```
 
-# Conclusion {.unnumbered}
+# Conclusion
