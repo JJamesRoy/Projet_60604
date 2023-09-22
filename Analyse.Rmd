@@ -721,7 +721,7 @@ En fonction de la durée totale durant la saison, le top 3 des stations sont :
 
 Ainsi, on remarque que les deux stations les plus populaires en terme de durée sont situées dans le Vieux-Montréal. Il est possible d'attribuer cela aux touristes.
 
-### Exploration des relations avec l'utilisation des Bixi
+### Exploration des relations avec l'utilisation des bixis
 
 Dans la prochaine section, nous allons explorer les relations entre l'utilisation des Bixis, soit la variable `n_tot` qui représente le nombre total de déplacement, ainsi que `n_AM` (nombre de déplacement en avant-midi) et `n_PM` (nombre de déplacement en après-midi) dans certains cas et diverses variables de notre base de données.
 
@@ -753,24 +753,20 @@ D'un point de vue d'affaires, si l'entreprise Bixi désirerait par exemple effec
 ```{r graphTempVsMois,out.height="30%",fig.align='center',fig.cap="Température moyenne par mois"}
  mean_temp_vs_mm <- round(aggregate(dat$temp~dat$mm, FUN=mean, na.rm = TRUE), digits=2)
 
-datt <- data.frame(
-  mm = mean_temp_vs_mm$`dat$mm`,
-  temp = mean_temp_vs_mm$`dat$temp`)
-mois_fr <- c("Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre")
-datt$mm <- mois_fr[datt$mm]
-dat_transpose <- t(datt)
-#knitr::kable(dat_transpose, format = "pipe", col.names = rep("", ncol(dat_transpose)))
+mean_temp_vs_mm_t <- data.frame(
+  Mois = mean_temp_vs_mm$`dat$mm`,
+  Température = mean_temp_vs_mm$`dat$temp`)
 
+mois_fr <- c("Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre")
+mean_temp_vs_mm_t$Mois <- mois_fr[mean_temp_vs_mm_t$Mois]
+mean_temp_vs_mm_t <- as.data.frame(t(mean_temp_vs_mm_t))
+colnames(mean_temp_vs_mm_t) <- NULL
 
+noms_lignes <- c("Mois", "Température (°C)")
+rownames(mean_temp_vs_mm_t) <- noms_lignes
 
-mean_temp_vs_mm_t <-(mean_temp_vs_mm)
-mean_temp_vs_mm_t$`dat$mm` <- month.name[mean_temp_vs_mm_t$`dat$mm`]
-mean_temp_vs_mm_t<-t(mean_temp_vs_mm_t)
-
-# Afficher le tableau à l'horizontale
-#knitr::kable(mean_temp_vs_mm_t, format = "pipe", col.names = rep("", ncol(dat_transpose)))
-
-knitr::kable(mean_temp_vs_mm, col.names = c("Mois","Température moyenne (°C)"))
+knitr::kable(mean_temp_vs_mm_t, format = "pipe", col.names = rep("", ncol(dat_transpose)))
+#knitr::kable(mean_temp_vs_mm, col.names = c("Mois","Température moyenne (°C)"))
 ```
 
 Par la suite, nous avons observé la relation entre le nombre de déplacements total moyen par jour par station d'après la quantité de précipitation tombé dans une journée. La figure \@ref(fig:graphNTotVsRain) montre cette relation.
