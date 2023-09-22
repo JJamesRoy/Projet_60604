@@ -425,9 +425,9 @@ corplot <- corrplot(cor(corplot_dat,use='pairwise.complete.obs'),
 
 ### Exploration des relations avec la durée des trajets
 
-En croisant la variable `dur` avec la variable `wday` et `mem`, nous pouvons obtenir le figure \@ref(fig:wday). D'abord, on remarque que les membres utilisent beaucoup plus les Bixi (au niveau de la durée) que les non-membres, et ce, peu importe le jour de la semaine. Les types d'utilisation semblent aussi changer, par exemple, les non-membres utilisent relativement plus les Bixi les fin de semaines que les membres. En effet, les membres semblent avoir une utilisation croissante la semaine et décroissante la fin de semaine. Naturellemement, on pourrait penser que c'est parce qu'ils utilisent le Bixi comme un moyen de transport régulier pour aller au travail ou à l'école par exemple.
+En croisant la variable `dur` avec la variable `wday` et `mem`, nous pouvons obtenir le figure \@ref(fig:wday). D'abord, on remarque que les membres utilisent beaucoup plus les Bixi (au niveau de la durée) que les non-membres, et ce, peu importe le jour de la semaine. Les types d'utilisation semblent aussi changer, par exemple, les non-membres utilisent relativement plus les Bixi les fin de semaine que les membres. En effet, les membres semblent avoir une utilisation croissante la semaine et décroissante la fin de semaine. Naturellement, on pourrait penser que c'est parce qu'ils utilisent le Bixi comme un moyen de transport régulier pour aller au travail ou à l'école par exemple.
 
-D'un point de vue d'affaire, il pourrait être intéressant pour l'entreprise Bixi de faire des accords avec les gros employeurs de Montréal pour augmenter ses clients et accélérer la transition vers des moyens de transport plus doux. Dans ce même ordre d'idée, la localisation des Bixi proche des milieux de travail et des milieux scolaires devient une avenue intéressante si l'entreprise a pour but d'augmenter son nombre d'abonnés mensuel.
+D'un point de vue d'affaires, il pourrait être intéressant pour l'entreprise Bixi de faire des accords avec les gros employeurs de Montréal pour augmenter ses clients et accélérer la transition vers des moyens de transport plus doux. Dans ce même ordre d'idée, la localisation des Bixi proche des milieux de travail et des milieux scolaires devient une avenue intéressante si l'entreprise a pour but d'augmenter son nombre d'abonnés mensuel.
 
 ```{r}
 dat$wday <- factor(dat$wday,
@@ -457,7 +457,7 @@ dat$wday <- factor(dat$wday,
 label <- c(`1` = "Membre", `0` = "Non membre")
 ```
 
-En croisant la variable `dur` avec la variable `mm` et `mem`, nous pouvons obtenir le figure \@ref(fig:mm). Plusieurs analyses sont pertinentes à partir de ce graphique. D'abord, les membres utilisent beaucoup plus les Bixi (au niveau de la durée) que les non-membres, et ce, peu importe le mois de l'année. D'une façon similaire, l'utilisation semble atteindre son pic vers août pour les deux types de clients.
+En croisant la variable `dur` avec la variable `mm` et `mem`, nous pouvons obtenir la figure \@ref(fig:mm). Plusieurs analyses sont pertinentes à partir de ce graphique. D'abord, les membres utilisent beaucoup plus les Bixi (au niveau de la durée) que les non-membres, et ce, peu importe le mois de l'année. D'une façon similaire, l'utilisation semble atteindre son pic vers août pour les deux types de clients.
 
 ```{r mm, out.height = "50%", fig.cap="Durée totale des déplacement par jours selon les membres et les non membres"}
 ggplot(dat, aes(as.factor(mm), dur, fill = as.factor(mm))) +
@@ -472,7 +472,7 @@ ggplot(dat, aes(as.factor(mm), dur, fill = as.factor(mm))) +
   ylab("Durée totale (en minutes) des déplacement")
 ```
 
-En croisant la variable `dur` avec la variable `temp` et `mem`, nous pouvons obtenir le figure @ref(fig:temp). Naturellement, on voit une relation positive entre la température totale moyenne et la durée totale de déplacement. La relation semble toutefois ralentir voir stagner vers les 20°C. Cela peut pourrait venir du fdit que l'utilisation des Bixi est plus élevé en été (donc les mois avec une température plus élevé). Ainsi, ce graphique donne globalement les mêmes informations que le précédent étant donné que la température est fortemement corrélée avec les mois.
+En croisant la variable `dur` avec la variable `temp` et `mem`, nous pouvons obtenir la figure @ref(fig:temp). Naturellement, on voit une relation positive entre la température totale moyenne et la durée totale de déplacement. La relation semble toutefois ralentir voir stagner vers les 20°C. Cela peut pourrait venir du fait que l'utilisation des Bixi est plus élevée en été (donc les mois avec une température plus élevée). Ainsi, ce graphique donne globalement les mêmes informations que le précédent étant donné que la température est fortement corrélée avec les mois.
 
 Au niveau des déplacements moyens (avec la variable `avg`), il semble que la durée moyenne des déplacements diminue après les 15°C.
 
@@ -509,7 +509,7 @@ dat_temp_cor = dat_temp %>%
             cor_avg = cor(temp,avg))
 ```
 
-En croisant la variable `dur` avec la variable `rain` et `mem`, nous pouvons obtenir le figure \@ref(fig:rain). Pour les non-membres l'effet de la pluie sur la durée totale moyenne n'est pas autant significative que pour les membres. Cela est assez étonnant, car il semble que les membres devraient avoir un usage régulier et ainsi moins sensible aux facteurs exogènes comme la pluie.
+En croisant la variable `dur` avec la variable `rain` et `mem`, nous pouvons obtenir le figure \@ref(fig:rain). Pour les non-membres l'effet de la pluie sur la durée totale moyenne n'est pas autant significatif que pour les membres. Cela est assez étonnant, car il semble que les membres devraient avoir un usage régulier et ainsi moins sensible aux facteurs exogènes comme la pluie.
 
 Au niveau des déplacements moyens (avec la variable `avg`), l'effet est assez similaire entre les membres et les non-membres, les déplacements sont en moyennes plus courts avec la pluie.
 
@@ -830,7 +830,7 @@ On remarque que l'arrondissement avec le plus de stations dans le top 5 est le P
 
 À ajouter dans Conclusion (Conclusion Sam partie n_tot)
 
-Pour conclure, on peut constater que les périodes d'utilisation les plus faibles de Bixis sont: les journées plus froides, les mois plus froids (avril, octobre et novembre), la fin de semaine et l'avant-midi. Puis les périodes avec le plus de déplacements sont les journées plus chaudes, les mois plus chaud (les autres mois à l'étude), durant la semaine et en après-midi. De plus, les secteurs avec les stations qui génèrent le plus de déplacements sont le Plateau Mont-Royal et le Vieux-Montréal. Finalement, l'entreprise devrait donc s'assurer de toujours avoir le plus de Bixis possibles disponibles pour les périodes fortes, procéder aux maintenances lors des périodes plus faibles et s'assurer du bon état des stations et des vélos dans les arrondissements avec les stations les plus en demande.
+Pour conclure, on peut constater que la durée d'utilisation est plus élevé l'été pour tous les usagers, plus elevé la fin de semaine pour les non-membres, mais pas pour les membres. Aussi, la pluie semble avoir un impact négatif sur la durée d'utilisation. On peut aussi constater que les périodes d'utilisation les plus faibles de Bixis sont: les journées plus froides, les mois plus froids (avril, octobre et novembre), la fin de semaine et l'avant-midi. Puis les périodes avec le plus de déplacements sont les journées plus chaudes, les mois plus chaud (les autres mois à l'étude), durant la semaine et en après-midi. De plus, les secteurs avec les stations qui génèrent le plus de déplacements sont le Plateau Mont-Royal et le Vieux-Montréal. Finalement, l'entreprise devrait donc s'assurer de toujours avoir le plus de Bixis possibles disponibles pour les périodes fortes, procéder aux maintenances lors des périodes plus faibles et s'assurer du bon état des stations et des vélos dans les arrondissements avec les stations les plus en demande.
 
 ### Exploration des relations avec le revenu
 
