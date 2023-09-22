@@ -21,6 +21,8 @@ output:
 
 params:
   created_date: '2023-09-12'
+geometry: 
+  top=1cm, bottom=2cm, hmargin=2cm
 ---
 
 ```{r setup, include=FALSE}
@@ -374,14 +376,15 @@ var_qt=c('dur','avg','rev','n_AM','n_PM','n_tot','temp','rain')
 options(knitr.kable.NA = "")
 bixi_qt_df=bixi_df[,var_qt]
 knitr::kable(summary(bixi_qt_df), 
-             caption="Sommaire descriptives des variables quantitatives", format='latex')
+             caption="Sommaire descriptives des variables quantitatives", format='latex') %>% 
+  kable_styling(latex_options = c("scale_down"))
 
 ```
 
 
-Le tableau \@ref(tab:sommaireQt) présente un sommaire descriptif des variables quantitatives. En moyenne la durée totale des trajets qui partent d'une station par jour est d'environ 5h. Par ailleurs, il y a trois journées qui totalisent des déplacements supérieurs à 50h. Deux d'entre eux sont associés à la station 256, les jeudi 2 et 9 septembre. L'autre est associé à la station 470, le samedi 21 août. Ces durées extrêmes sont tout de même surprenantes. Celles associées à la station 256 paraissent moins aberrants tout de même, puisque le nombre de déplacement de ces journées est aussi extrême tant en AM qu'en PM. Celà suggère qu'il y a probablement eu ces deux jeudis consécutifs des évènements dans le secteur qui pourraient expliquer ces utilisations extrêmes. De plus, ils sont associés à des usagers membres. Cependant, la durée totale associée à la station 470 est la plus extrême et la plus surprenante. En effet, le nombre de déplacement associé n'est pas le plus extrême en plus c'est associé à des usagers non-membres qui ont un profil de consommation de courte durée. Ce déplacement peut s'expliquer si un utilisateur non-membre prend un bixi et le conserve chez lui plutôt que de le déposer à une station.
+Le tableau \@ref(tab:sommaireQt) présente un sommaire descriptif des variables quantitatives. En moyenne la durée totale des trajets qui partent d'une station par jour est d'environ 5h. Par ailleurs, il y a trois journées qui totalisent des déplacements supérieurs à 50h. Deux d'entre elles sont associées à la station 256, les jeudis 2 et 9 septembre. L'autre est associée à la station 470, le samedi 21 août. Ces durées extrêmes sont tout de même surprenantes. Celles associées à la station 256 paraissent moins aberrantes tout de même, puisque le nombre de déplacement de ces journées est aussi extrême tant en AM qu'en PM. Celà suggère qu'il y a probablement eu ces deux jeudis consécutifs des évènements dans le secteur qui pourraient expliquer ces utilisations extrêmes. De plus, ils sont associés à des usagers membres. Cependant, la durée totale associée à la station 470 est la plus extrême et la plus surprenante. En effet, le nombre de déplacement associé n'est pas le plus extrême. En plus, c'est associé à des usagers non-membres qui ont un profil de consommation de courte durée. Ce déplacement peut s'expliquer si un utilisateur non-membre prend un bixi et le conserve chez lui plutôt que de le déposer à une station.
 
-Toutes les variables quantitatives ont des valeurs extrêmes sauf la température moyenne quotidienne comme on peut le voir sur la figure \@ref(fig:BoxPlotVarQt). Elle présente également une distribution quasiment symétrique (voir figure \@ref(fig:histPlotVarQt). Les autres ont une distribution qui s'étale à droite. Une transformation sera nécessaire éventuellement dans la modélisation pour les rendre symétrique.
+Toutes les variables quantitatives ont des valeurs extrêmes sauf la température moyenne quotidienne, comme on peut le voir sur la figure \@ref(fig:BoxPlotVarQt). Elle présente également une distribution quasiment symétrique (voir figure \@ref(fig:histPlotVarQt)). Les autres ont une distribution qui s'étale à droite. Une transformation sera nécessaire éventuellement dans la modélisation pour les rendre symétrique.
 
 ```{r histPlotVarQt, out.height="30%", fig.align='center', fig.cap="Histogramme des variables quantitatives"}
 par(mfrow=c(4,2), mar=c(3,2,1,1))
@@ -414,7 +417,7 @@ hist(bixi_df$rain, xlab="", ylab = "Nombre d'observations", main="Hist: Quantit�
 
 ```{r BoxPlotVarQt, out.height="40%", fig.align='center', fig.cap="Boîte à moustache des variables quantitatives"}
 
-par(mfrow=c(2,4),mar=c(3,2,2.5,1))
+par(mfrow=c(2,4),mar=c(1.5,2,2.5,1))
 #Durée totale
 #hist(bixi_df$dur, xlab="", ylab = "Nombre d'observations", main="Hist: Durée totale")
 boxplot(bixi_df$dur, main="Durée totale")
