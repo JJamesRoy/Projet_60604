@@ -403,14 +403,14 @@ boxplot(bixi_df$rain, main="Précipitations quotidienne")
 
 ## Exploration multivariée {#explorationMultivariee}
 
-Avant de débuter l'exploration multivariée des variables cibles, il est important d'avoir une vue d'ensemble des relations entre les variables. Pour ce faire, une matrice de corrélation comme illustrer dans la figure \@ref(fig:MatricCorr) est une représentation simple qui permet de visualiser les tendances entre chaque variable. Par exemple, il est possible de voir que la corrélation entre `dur`et `rev` est de 0.99. De plus, les relations de `dur`et de `rev` vont se comporter de façon quasi identique avec les autres variables. Ainsi, il est possible d'en représenter qu'une seule des deux lors de l'analyse multivariée. Cette problématique sera abordée plus en détail dans la section \@ref(exploration-des-relations-avec-le-revenu).
+Avant de débuter l'exploration multivariée des variables cibles, il est important d'avoir une vue d'ensemble des relations entre les variables. Pour ce faire, une matrice de corrélation comme illustrer dans la figure \@ref(fig:MatricCorr) est une représentation simple qui permet de visualiser les tendances entre chaque variable. Par exemple, il est possible de voir que la corrélation linéaire entre la durée des trajets `dur` et le revenu `rev` est de 0.99. De plus, les relations de `dur`et de `rev` vont se comporter de façon quasi identique avec les autres variables. Ainsi, il est possible d'en représenter qu'une seule des deux lors de l'analyse multivariée. Cette problématique sera abordée plus en détail dans la section \@ref(exploration-des-relations-avec-le-revenu).
 
-En ce qui concerne la matrice de corrélation, deux variables ont été enlevées à des fins pratiques. La première est `wday` (les journées de la semaine) et la deuxième est `mem` (membre de bixi ou non ). Par contre, il est logique d'affirmer par déduction que ces deux variables restent tout de même intéressantes à croiser avec nos variables d'intérêt.
+En ce qui concerne la matrice de corrélation, les variables qualitatives ont été enlevées puisque la signification de leur corrélation est négligeable. De plus, la variable membre `mem` a été retirée, puisqu'elle causait des NAs. Aussi, il faut prendre en compte le fait que le revenu est disponible que pour les non-membres. C'est-à-dire que toutes les corrélations linéaires du revenu sont basées sur les données des non-membres.
 
 ```{r MatricCorr, fig.cap= "Matrice de corrlélation", fig.width=10,fig.height=6}
 my_colors  <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))(200)
 corplot_dat <- dat %>% 
-  select(-c(wday,mem))
+  select(-c(wday,mem,station,mm,))
 
 corplot <- corrplot(cor(corplot_dat,use='pairwise.complete.obs'), 
                     method = "color",col = my_colors,
@@ -420,7 +420,6 @@ corplot <- corrplot(cor(corplot_dat,use='pairwise.complete.obs'),
                     sig.level = 0.01, insig = "blank",
                     diag = FALSE
                     )
-
 ```
 
 ### Exploration des relations avec la durée des trajets
@@ -773,12 +772,12 @@ cor_mois_m_vs_nm <- cor(memmois$n_tot,nmemmois$n_tot)
 #cor_mois_nm_vs_avg_temp <- cor(nmemmois$n_tot,mean_temp_vs_mm$`dat$temp`)
 
 ```
+
 On remarque que l'allure des deux graphiques est très semblable entre les membres et les non-membres. On parle ici d'une très forte corrélation de 0.86.
 
 Par la suite, en comparant ces données avec les données du tableau \@ref(table:graphTempVsMois), on obtient une très forte corrélation d'environ 0.85 pour les membres et une forte corrélation d'environ 0.59 pour les non-membres. Nous pouvons donc faire l'hypothèse que la relation entre le nombre de déplacements moyen par mois est dépendant de la température de ce mois. Les gens ont tendance à plus utiliser le bixi lors des mois plus chauds que les mois plus froids (avril, octobre et novembre).
 
 On remarque que l'allure des deux graphiques est très semblable entre les membres et les non-membres. On parle ici d'une très forte corrélation de 0.86. On peut alors dire que le comportement des membres et des non-membres est très semblable par rapport au mois.
-
 
 Cependant, on remarque que dans les deux cas (membre et non-membre), le mois avec le plus de déplacement moyen est le mois de septembre qui pourtant n'est pas le mois le plus chaud. Notre hypothèse est qu'il s'agit de la période de la rentrée scolaire et du retour au travail pour plusieurs, alors plusieurs optent pour un transport plus écologique comme le bixi à ce moment de l'année avant de tomber dans la période plus froide de l'année avec les mois d'octobre et novembre.
 
