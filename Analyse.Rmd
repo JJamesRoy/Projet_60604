@@ -36,7 +36,6 @@ library(knitr)
 library(corrplot)
 ```
 
-
 ```{r}
 dat = read.csv("bixi1.csv")
 
@@ -64,9 +63,7 @@ La table \@ref(tab:6PremieresObservations) nous montre à titre informatif les 6
 knitr::kable(head(bixi_raw_data_df), caption="6 premières observations du jeu de données")
 ```
 
-
-La visualisation de la structure compacte des données nous montre que le jeu de données est constitué de 10000 observations et 14 variables. 
-
+La visualisation de la structure compacte des données nous montre que le jeu de données est constitué de 10000 observations et 14 variables.
 
 ```{r results='hide'}
 options(knitr.kable.NA = "")
@@ -84,7 +81,8 @@ knitr::kable(summary(bixi_df), caption="Sommaire des observations")
 ## Exploration univariée
 
 ### Les variables qualitatives
- Rajouter ici le tableau sommaire des variables qualitatives
+
+Rajouter ici le tableau sommaire des variables qualitatives
 
 #### Station
 
@@ -127,11 +125,11 @@ station_df <- bixi_df %>%
 station_df=merge(station_df, freqTable_station_df)
 station_df
 ```
+
 ```{r boxplotNbmmVsNbObs, fig.cap="Boîte à moustache du nombre de mois dans les observations par station en fonction des différentes catégories de nombre d'observations par station"}
 boxplot(station_df$dc_mm~station_df$n_obs_cat, xlab = "Catégories d'intervalles du nombre d'observations par station",
         ylab = "Nombre de mois dans les observations par station")
 ```
-
 
 #### Mois {#mois}
 
@@ -438,14 +436,16 @@ dat$wday <- factor(dat$wday,
 label <- c(`1` = "Membre", `0` = "Non membre")
 ```
 
-```{r wday, out.height = "80%"}
+```{r wday, out.height = "50%", fig.cap="Durée totale des déplacement par jours selon les membres et les non membres"}
 ggplot(dat, aes(x=wday, y=dur,
            fill = wday)) +
   geom_bar(stat = "identity") +
   scale_fill_brewer(palette = "Blues")+
   facet_wrap(~ mem,labeller=labeller(mem=label))+
   theme(legend.position="none")+
-  labs(title = "Durée totale des déplacement \npar jours selon les membres et les non membres")+
+  scale_x_discrete(labels = c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"))+
+  theme(strip.text = element_text(size = 12, face = "bold"),
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
   xlab("")+
   ylab("Durée totale (en minutes) des déplacement")
 ```
@@ -459,14 +459,15 @@ label <- c(`1` = "Membre", `0` = "Non membre")
 
 En croisant la variable `dur` avec la variable `mm` et `mem`, nous pouvons obtenir le figure \@ref(fig:mm). Plusieurs analyses sont pertinentes à partir de ce graphique. D'abord, les membres utilisent beaucoup plus les Bixi (au niveau de la durée) que les non-membres, et ce, peu importe le mois de l'année. D'une façon similaire, l'utilisation semble atteindre son pic vers août pour les deux types de clients.
 
-```{r mm, out.height = "80%"}
+```{r mm, out.height = "50%", fig.cap="Durée totale des déplacement par jours selon les membres et les non membres"}
 ggplot(dat, aes(as.factor(mm), dur, fill = as.factor(mm))) +
   geom_bar(stat = "identity") +
   scale_fill_brewer(palette = "Blues")+
   facet_wrap(~ mem,labeller=labeller(mem=label))+
   theme(legend.position="none")+
   scale_x_discrete(breaks = 4:11,labels=c("Avril","Mai","Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre")) +
-  labs(title = "Durée totale des déplacement \npar jours selon les membres et les non membres")+
+  theme(strip.text = element_text(size = 12, face = "bold"),
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
   xlab("")+
   ylab("Durée totale (en minutes) des déplacement")
 ```
@@ -485,7 +486,7 @@ dat_temp <- dat %>%
             avg = mean(avg))
 ```
 
-```{r temp, fig.show="hold", out.width="50%"}
+```{r temp, fig.show="hold", out.width="50%", fig.cap=" "}
 ggplot(dat_temp, aes(temp, dur)) +
   geom_point() +
   facet_wrap(~mem,labeller=labeller(mem=label))+
@@ -523,7 +524,7 @@ dat_rain <- dat %>%
 
 ```
 
-```{r rain, fig.show="hold", out.width="50%"}
+```{r rain, fig.show="hold", out.width="50%", fig.cap=" "}
 ggplot(dat_rain, aes(rain, dur)) +
   geom_point() +
   facet_wrap(~mem,labeller=labeller(mem=label)) +
@@ -582,28 +583,28 @@ La durée moyenne des trajets est légérement supérieure pour les jours féri�
 
 Selon le graphique \@ref(fig:stat), il est possible de modéliser les stations par leur durée totale de déplacements de la saison. On voit que la plupart des stations sont sous le seuil des 10 000 minutes.
 
-```{r stat}
+```{r stat, fig.cap="Répartition des stations selon la durée totale", out.height="50%"}
 dat_station = dat %>% group_by(station) %>% summarise(dur = sum(dur))
 data <- dat_station[order(-dat_station$dur), ]
 
 # Créer un graphique à barres classant les stations en ordre décroissant
 ggplot(data, aes(x = factor(station, levels = unique(data$station)), y = dur)) +
   geom_bar(stat = "identity", fill = "blue") +
-  labs(x = "Station", y = "Somme de la Durée", title = "Stations Classées en Ordre Décroissant par Somme de Durée") +
+  labs(x = "Station", y = "Durée totale ") +
   scale_x_discrete(labels = rep("", length(data$station))) +
   theme(panel.grid.major.x = element_blank(),
         axis.ticks.x = element_blank())
   
-top3_stat_dur = head(data, 3)
+top3_stat_dur = head(data, 5)
 ```
 
 En fonction de la durée totale durant la saison, le top 3 des stations sont :
 
 -   de la Commune / Place Jacques-Cartier (Vieux-Montréal)
-
 -   de la Commune / St-Sulpice (Vieux-Montréal)
-
 -   Métro Mont-Royal (Rivard / du Mont-Royal) (Plateau Mont-Royal)
+-   de Brébeuf / du Mont-Royal (Plateau Mont-Royal)
+-   BAnQ (Berri / de Maisonneuve) (Quartier des Spectacles)
 
 Ainsi, on remarque que les deux stations les plus populaires en terme de durée sont situées dans le Vieux-Montréal. Il est possible d'attribuer cela aux touristes.
 
@@ -633,8 +634,7 @@ dat_temp_ntot_cor = dat_temp_ntot %>%
 
 D'après ce graphique, il est possible de constater qu'il semble exister une relation linéaire entre le nombre de déplacement moyen effectué en Bixi et la température, que ce soit pour un membre et un non-membre. Dans les deux cas, on observe que le nombre de déplacement moyen a tendance à augmenter avec la température. Une forte corrélation positive de 0.65 pour les membres et une corrélation moyenne de 0.48 pour les non-membres.
 
-D'un point de vue d'affaires, si l'entreprise Bixi désirerait par exemple effectuer une mise à jour logiciel ou effectuer de la maintenance sur certains vélos et que ceci nécessiterait de récupérer une certaines quantité de Bixi, il faudrait que l'entreprise entreprenne ces changements pendant les journées où il fait plus froid, ou durant les périodes plus froides soit durant les mois d'avril, mai, octobre ou novembre comme le montre le tableau  afin d'éviter de causer des problèmes de manque de vélos pour les usagers.
-
+D'un point de vue d'affaires, si l'entreprise Bixi désirerait par exemple effectuer une mise à jour logiciel ou effectuer de la maintenance sur certains vélos et que ceci nécessiterait de récupérer une certaines quantité de Bixi, il faudrait que l'entreprise entreprenne ces changements pendant les journées où il fait plus froid, ou durant les périodes plus froides soit durant les mois d'avril, mai, octobre ou novembre comme le montre le tableau afin d'éviter de causer des problèmes de manque de vélos pour les usagers.
 
 ```{r graphTempVsMois}
  mean_temp_vs_mm <- round(aggregate(dat$temp~dat$mm, FUN=mean, na.rm = TRUE), digits=2)
@@ -756,7 +756,6 @@ cor_mois_m_vs_nm <- cor(memmois$n_tot,nmemmois$n_tot)
 cor_mois_m_vs_avg_temp <- cor(memmois$n_tot,mean_temp_vs_mm$`dat$temp`)
 cor_mois_nm_vs_avg_temp <- cor(nmemmois$n_tot,mean_temp_vs_mm$`dat$temp`)
 ```
-
 
 On remarque que l'allure des deux graphiques est très semblable entre les membres et les non-membres. On parle ici d'une très forte corrélation de 0.86. On peut alors dire que le comportement des membres et des non-membres est très semblable par rapport au mois.
 
