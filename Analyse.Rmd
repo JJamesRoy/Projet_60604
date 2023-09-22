@@ -403,14 +403,14 @@ boxplot(bixi_df$rain, main="Précipitations quotidienne")
 
 ## Exploration multivariée {#explorationMultivariee}
 
-Avant de débuter l'exploration multivariée des variables cibles, il est important d'avoir une vue d'ensemble des relations entre les variables. Pour ce faire, une matrice de corrélation comme illustrer dans la figure \@ref(fig:MatricCorr) est une représentation simple qui permet de visualiser les tendances entre chaque variable. Par exemple, il est possible de voir que la corrélation linéaire entre la durée des trajets `dur` et le revenu `rev` est de 0.99. De plus, les relations de `dur`et de `rev` vont se comporter de façon quasi identique avec les autres variables. Ainsi, il est possible d'en représenter qu'une seule des deux lors de l'analyse multivariée. Cette problématique sera abordée plus en détail dans la section \@ref(exploration-des-relations-avec-le-revenu).
+Avant de débuter l'exploration multivariée des variables cibles, il est important d'avoir une vue d'ensemble des relations entre les variables. Pour ce faire, une matrice de corrélation comme illustrer dans la figure \@ref(fig:MatricCorr) est une représentation simple qui permet de visualiser les tendances entre chaque variable. Par exemple, il est possible de voir que la corrélation entre `dur`et `rev` est de 0.99. De plus, les relations de `dur`et de `rev` vont se comporter de façon quasi identique avec les autres variables. Ainsi, il est possible d'en représenter qu'une seule des deux lors de l'analyse multivariée. Cette problématique sera abordée plus en détail dans la section \@ref(exploration-des-relations-avec-le-revenu).
 
-En ce qui concerne la matrice de corrélation, les variables qualitatives ont été enlevées puisque la signification de leur corrélation est négligeable. De plus, la variable membre `mem` a été retirée, puisqu'elle causait des NAs. Aussi, il faut prendre en compte le fait que le revenu est disponible que pour les non-membres. C'est-à-dire que toutes les corrélations linéaires du revenu sont basées sur les données des non-membres.
+En ce qui concerne la matrice de corrélation, deux variables ont été enlevées à des fins pratiques. La première est `wday` (les journées de la semaine) et la deuxième est `mem` (membre de bixi ou non ). Par contre, il est logique d'affirmer par déduction que ces deux variables restent tout de même intéressantes à croiser avec nos variables d'intérêt.
 
 ```{r MatricCorr, fig.cap= "Matrice de corrlélation", fig.width=10,fig.height=6}
 my_colors  <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))(200)
 corplot_dat <- dat %>% 
-  select(-c(wday,mem,station,mm,))
+  select(-c(wday,mem))
 
 corplot <- corrplot(cor(corplot_dat,use='pairwise.complete.obs'), 
                     method = "color",col = my_colors,
@@ -420,6 +420,7 @@ corplot <- corrplot(cor(corplot_dat,use='pairwise.complete.obs'),
                     sig.level = 0.01, insig = "blank",
                     diag = FALSE
                     )
+
 ```
 
 ### Exploration des relations avec la durée des trajets
@@ -833,7 +834,7 @@ On remarque que l'arrondissement avec le plus de stations dans le top 5 est le P
 
 À ajouter dans Conclusion (Conclusion Sam partie n_tot)
 
-Pour conclure, on peut constater que les périodes d'utilisation les plus faibles de Bixis sont: les journées plus froides, les mois plus froids (avril, octobre et novembre), la fin de semaine et l'avant-midi. Puis les périodes avec le plus de déplacements sont les journées plus chaudes, les mois plus chaud (les autres mois à l'étude), durant la semaine et en après-midi. De plus, les secteurs avec les stations qui génèrent le plus de déplacements sont le Plateau Mont-Royal et le Vieux-Montréal. Finalement, l'entreprise devrait donc s'assurer de toujours avoir le plus de Bixis possibles disponibles pour les périodes fortes, procéder aux maintenances lors des périodes plus faibles et s'assurer du bon état des stations et des vélos dans les arrondissements avec les stations les plus en demande.
+Pour conclure, on peut constater que la durée d'utilisation est plus élevé l'été pour tous les usagers, plus elevé la fin de semaine pour les non-membres, mais pas pour les membres. Aussi, la pluie semble avoir un impact négatif sur la durée d'utilisation. On peut aussi constater que les périodes d'utilisation les plus faibles de Bixis sont: les journées plus froides, les mois plus froids (avril, octobre et novembre), la fin de semaine et l'avant-midi. Puis les périodes avec le plus de déplacements sont les journées plus chaudes, les mois plus chaud (les autres mois à l'étude), durant la semaine et en après-midi. De plus, les secteurs avec les stations qui génèrent le plus de déplacements sont le Plateau Mont-Royal et le Vieux-Montréal. Finalement, l'entreprise devrait donc s'assurer de toujours avoir le plus de Bixis possibles disponibles pour les périodes fortes, procéder aux maintenances lors des périodes plus faibles et s'assurer du bon état des stations et des vélos dans les arrondissements avec les stations les plus en demande.
 
 ### Exploration des relations avec le revenu
 
