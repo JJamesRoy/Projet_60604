@@ -1,0 +1,42 @@
+---
+title: "Projet BIXI - Partie 2: Modèle de régression linéaire"
+subtitle: "MATH60604 - Modélisation statistique"
+author: "Abdoul Wassi Badirou, Alfred Assal, James Roy, Samuel Croteau"
+date: "`r Sys.Date()`"
+output: 
+  bookdown::pdf_document2:
+    toc: true
+    toc_depth: 3
+    extra_dependencies: ["flafter"]
+  bookdown::html_document2:
+    toc: true 
+    number_sections: true
+    toc_float: # to float the table of contents to the left of the main document content.
+      collapsed: false
+  html_document:
+    toc: true 
+    number_sections: true
+    toc_float: # to float the table of contents to the left of the main document content.
+      collapsed: false
+
+params:
+  created_date: '2023-09-12'
+---
+
+# Note
+
+Question : Comment maximiser les déplacements en Bixi pour accélérer la transition vers une économie verte et réduire l'impact sur l'environnement des moyens de transports.
+
+Sous question : 
+- Impact de l'événementiel (James)
+- Est-ce que la densité de population du quartier a un impact sur l'utilisation des Bixi (Alfred)
+- Attraits touristiques (https://donnees.montreal.ca/dataset/installations-recreatives-sportives-et-culturelles/resource/1c239e86-8b36-476c-bd51-91a3cd20f687) (https://donnees.montreal.ca/dataset/lieux-d-interet/resource/edce22aa-f7cc-495e-9c53-b367f68309f6) (Abdoul)
+- Parc (https://donnees.montreal.ca/dataset/grands-parcs-parcs-d-arrondissements-et-espaces-publics) (Sam)
+
+Leviers de Bixi : Publicité et marketing sur le service et l'abonnement. Programme incitation Bixi (alléger les stations ou remplir)
+
+Binaire pluie ou catégorielle. (James)
+
+Variables cibles : n_tot et dur
+
+Variables à ajouter : Festival, merge les données d'arrondissement, merge avec les autres données pasr sous-question (James)
