@@ -35,8 +35,6 @@ Sous question :
 
 Leviers de Bixi : Publicité et marketing sur le service et l'abonnement. Programme incitation Bixi (alléger les stations ou remplir)
 
-Binaire pluie ou catégorielle. (James)
-
 Variables cibles : n_tot et dur
 
 Variables à ajouter : merge avec les autres données par sous-question
@@ -47,11 +45,6 @@ library(tidyverse)
 
 ```{r}
 dat = read.csv("bixifull.csv")
-```
-
-```{r}
-dat = dat %>% 
-  mutate(festival)
 ```
 
 ```{r festival}
@@ -89,7 +82,9 @@ dat <- dat %>%
 dat$festival[is.na(dat$festival)] = 0
 ```
 
-```{r}
-
+```{r rain}
+dat = dat %>% mutate(rain_bin = ifelse(rain == 0, 0, 1))
 ```
+
+# Modèle avec festival
 
