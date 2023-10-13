@@ -39,4 +39,57 @@ Binaire pluie ou catégorielle. (James)
 
 Variables cibles : n_tot et dur
 
-Variables à ajouter : Festival, merge les données d'arrondissement, merge avec les autres données pasr sous-question (James)
+Variables à ajouter : merge avec les autres données par sous-question
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+dat = read.csv("bixifull.csv")
+```
+
+```{r}
+dat = dat %>% 
+  mutate(festival)
+```
+
+```{r festival}
+festivals <- data.frame(
+  Start_Date = as.Date(c("2021-05-10", "2021-05-22", "2021-05-27", "2021-06-06", "2021-06-07",
+                         "2021-06-07", "2021-06-07", "2021-06-11", "2021-06-13", "2021-06-14",
+                         "2021-06-20", "2021-06-26", "2021-06-27", "2021-06-29", "2021-07-04",
+                         "2021-07-05", "2021-07-06", "2021-07-09", "2021-07-10",
+                         "2021-07-11", "2021-07-11", "2021-07-22", "2021-07-27", "2021-07-28",
+                         "2021-08-02", "2021-08-06", "2021-08-07", "2021-08-08", "2021-08-09",
+                         "2021-08-09", "2021-08-19", "2021-08-20", "2021-08-29", "2021-08-30")),
+  End_Date = as.Date(c("2021-05-17", "2021-06-04", "2021-06-16", "2021-06-16", "2021-06-09",
+                       "2021-06-16", "2021-06-09", "2021-06-16", "2021-06-16", "2021-06-22",
+                       "2021-06-23", "2021-06-30", "2021-07-06", "2021-07-27", "2021-07-14",
+                       "2021-07-07", "2021-07-06", "2021-07-14", "2021-07-21", "2021-07-28",
+                       "2021-07-27", "2021-08-01", "2021-07-28", "2021-07-28", "2021-08-04",
+                       "2021-08-14", "2021-08-11", "2021-08-18", "2021-08-10", "2021-08-18",
+                       "2021-08-24", "2021-08-25", "2021-09-02", "2021-09-02"))
+)
+
+dates <- festivals %>%
+  rowwise() %>%
+  mutate(Date = list(seq(Start_Date, End_Date, by = "day"))) %>%
+  unnest(Date)
+
+result_df <- dates %>%
+  group_by(Date) %>%
+  summarize(festival = n())
+
+dat$Date <- as.Date(paste("2021", dat$mm, dat$dd, sep = "-"))
+
+dat <- dat %>%
+  left_join(result_df, by = "Date")
+
+dat$festival[is.na(dat$festival)] = 0
+```
+
+```{r}
+
+```
+
