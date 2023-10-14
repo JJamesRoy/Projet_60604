@@ -41,6 +41,7 @@ Variables à ajouter : merge avec les autres données par sous-question
 
 ```{r}
 library(tidyverse)
+library(readxl)
 ```
 
 ```{r}
@@ -87,4 +88,63 @@ dat = dat %>% mutate(rain_bin = ifelse(rain == 0, 0, 1))
 ```
 
 # Modèle avec festival
+
+
+# Parc
+
+Données utilisées:
+https://donnees.montreal.ca/dataset/installations-recreatives-sportives-et-culturelles/resource/1c239e86-8b36-476c-bd51-91a3cd20f687
+https://donnees.montreal.ca/dataset/grands-parcs-parcs-d-arrondissements-et-espaces-publics
+https://donnees.montreal.ca/dataset/lieux-culturels
+
+```{r}
+#get data
+data_parc <- read.csv("espace_vert.csv")
+data_es <- read.csv("terrain_sport_ext.csv")
+data_lc <- read_excel("lieuxculturels.xls")
+
+
+#Parcs
+nb_arrond_parc <- (table(data_parc$GESTION))
+dat_nb_parc <- data.frame(arrond = names(nb_arrond_parc), nb_parc = as.numeric(nb_arrond_parc))
+dat_parc <- dat %>%
+  select(dur, n_tot, rev, arrond) %>% 
+  group_by(arrond) %>%
+  summarise(dur = (sum(dur)))
+dat_nb_parc$arrond <- tolower(gsub("\\s+", "", dat_nb_parc$arrond))
+dat_nb_parc$arrond<-gsub("-", "", dat_nb_parc$arrond)
+dat_parc$arrond <- tolower(gsub("\\s+", "", dat_parc$arrond))
+dat_parc$arrond<-gsub("-", "", dat_parc$arrond)
+
+df_parc <- merge(dat_parc, dat_nb_parc, by = "arrond", all.x = TRUE)
+df_parc$nb_parc <- ifelse(is.na(df_parc$nb_parc), 0, df_parc$nb_parc)
+
+#Espaces sportives
+nb_arrond_es <- table(data_es$ARROND)
+dat_nb_es <- data.frame(arrond = names(nb_arrond_es), nb_es = as.numeric(nb_arrond_es))
+dat_nb_es$arrond <- tolower(gsub("\\s+", "", dat_nb_es$arrond))
+dat_nb_es$arrond<-gsub("-", "", dat_nb_es$arrond)
+
+dat_es <- dat_parc
+df_es <- merge(dat_es, dat_nb_es, by = "arrond", all.x = TRUE)
+
+#Lieux culturels
+nb_arrond_lc <- table(data_lc$Arrondissement)
+dat_nb_lc <- data.frame(arrond = names(nb_arrond_lc), nb_lc = as.numeric(nb_arrond_lc))
+dat_nb_lc$arrond <- tolower(gsub("\\s+", "", dat_nb_lc$arrond))
+dat_nb_lc$arrond<-gsub("-", "", dat_nb_lc$arrond)
+dat_nb_lc$arrond <- gsub("[-–]", "", dat_nb_lc$arrond)
+
+dat_lc <- dat_parc
+df_lc <- merge(dat_lc, dat_nb_lc, by = "arrond", all.x = TRUE)
+
+
+#Modèles vs rev
+df_parc_es <- merge(df_parc, dat_nb_es, by = "arrond", all.x = TRUE)
+df_parc_es_lc <- merge(df_parc_es, dat_nb_lc, by = "arrond", all.x = TRUE)
+df_parc_es_lc <- replace(df_parc_es_lc, is.na(df_parc_es_lc), 0)
+
+modele4 = lm(dur~nb_parc + nb_es + nb_lc, data = df_parc_es_lc)
+
+```
 
