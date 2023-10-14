@@ -3,3 +3,5 @@
 *.RData
 *.Ruserdata
 .Rproj.user
+br_projet*
+*.log
