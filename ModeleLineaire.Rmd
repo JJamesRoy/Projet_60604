@@ -117,16 +117,24 @@ dat_mod[col] = lapply(dat_mod[col], factor)
 
 # Transformation variables d'intérêts
 
-```{r histn}
-hist(dat_mod$n_tot)
+```{r histn, out.height = "30%", fig.cap="Distribution des déplacements totaux", fig.align='center'}
+hist(dat_mod$n_tot, 
+     ylab = "Fréquence", 
+     xlab = "Nombre de déplacement totaux",
+     main = "")
 ```
 
-On voit que les données de la variable `n_tot` ne sont pas normales, il faudrait les normaliser pour être capable de faire des analyses statistiques à l'aide de régression linéaire.
+Dans la \@ref(fig:histn), on voit que les données de la variable `n_tot` ne sont pas normales, il faudrait les normaliser pour être capable de faire des analyses statistiques à l'aide de régression linéaire.
 
-```{r}
+```{r histn2, out.height = "30%", fig.cap="Distribution du log des déplacements totaux", fig.align='center'}
 dat_mod = dat_mod %>% mutate(n_tot_mod = log(n_tot))
-hist(dat_mod$n_tot_mod)
+hist(dat_mod$n_tot_mo, 
+     ylab = "Fréquence", 
+     xlab = "Nombre de déplacement totaux",
+     main = "")
 ```
+
+Maintenant, dans la \@ref(fig:histn2), on voit qu'avec une transformation logarithmique, les données se normalisent. Par contre, le côté gauche de la courbe est encore relevé, cela peut impacter l'inférence statistique que nous allons faire prochainement.
 
 # Parc
 
@@ -185,17 +193,20 @@ modele4 = lm(dur~nb_parc + nb_es + nb_lc, data = df_parc_es_lc)
 
 # Modèle avec les festivals
 
+Dans cette section, nous allons analyser si les festivals tenus dans la ville de Montréal ont un impact sur l'utilisation des Bixi. Cette question est intéressante, car elle permet, selon les résultats obtenus, de s'allier avec la ville de Montréal et différente organisations et organismes en lien avec les festivals pour promouvoir un moyen de déplacement moins intensif sur les émission de polluants. Plusieur stratégies d'affaires peuvent être pris selon les résultats. Par exemple : offrir des promotions dans les stations proches des festivals, augmenter la disponibilité des Bixi lors des festivals ou encore promouvoir le service à l'approche des différents festivals.
+
+Pour tester cette question, nous allons produire plusieurs modèles de régression linéaire et faire de l'inférence sur les résultats obtenus.
+
 ## Modèle linéaire simple
 
-```{r fest1}
-hist(dat_mod$n_tot)
+```{r fest1, out.height = "30%"}
 mod_fest_1 = lm(n_tot_mod ~ festival, data = dat_mod)
 summary(mod_fest_1)
 ```
 
 Avec un modèle linéaire simple, la tenue de festival semble avoir un effet positif et significatif sur le nombre total de déplacements. En effet, un festival de plus par jour augmente en moyenne le nombre total de déplacement de 1.7 par jour par arrondissement (toutes choses étant égales par ailleurs). De plus, cette augmentation est significatif à un niveau de 95%.
 
-Or, il est important de discuter des limitations d'un tel modèle. Plusieurs autres variables agissent sur le nombre total de déplacements et sur la tenue de festival, il faut ainsi controler pour ces variables. Pour mieux comprendre ce problème, voici un graphe orienté acyclique (GOA).
+Or, il est important de discuter des limitations d'un tel modèle. Plusieurs autres variables agissent sur le nombre total de déplacements et sur la tenue de festival, il faut ainsi controler pour ces variables. Pour mieux comprendre ce problème, voici un graphe orienté acyclique (GOA) \@ref(fig:firstgroup). 
 
 ```{=tex}
 \begin{figure}[h!]
@@ -204,7 +215,7 @@ Or, il est important de discuter des limitations d'un tel modèle. Plusieurs aut
 \begin{tikzpicture}[->]
 \node (X) at (0,0) {$festival$};
 \node (Z2) at (1.5,-1) {$Z_1$};
-\node (Y) at (3,0) {$n_tot$};
+\node (Y) at (3,0) {$n\_tot$};
 \path (X) edge (Y);
 \path (Z2) edge (X);
 \path (Z2) edge (Y);
@@ -215,7 +226,7 @@ Ainsi, s'il existe des variables $Z_1$ qui affectent à la fois `festival` et `n
 
 Au niveau de la normalité des résidus, on doit les analyser après la transformation logarithmique.
 
-```{r fest-res1}
+```{r fest-res1, out.height = "30%", fig.align='center', fig.cap="Distribution des résidus"}
 resid <- rstudent(mod_fest_1)
 fitted <- mod_fest_1$fitted.values
 res.dat <- cbind(dat_mod, fitted, resid)
@@ -225,20 +236,20 @@ xlab("Résidus") +
 ylab("Densité")
 ```
 
-```{r fest-qq1}
+```{r fest-qq1, out.height = "30%", fig.align='center', fig.cap="QQ-Plot Résidus Student"}
 ggplot(data = res.dat, mapping = aes(sample = resid)) + stat_qq(distribution = qt,
 dparams = mod_fest_1$df.residua) + stat_qq_line(distribution = qt,
 dparams = mod_fest_1$df.residual) + labs(x = "Quantiles théoriques",
-y = "Quantiles empiriques") + ggtitle("QQ-Plot Résidus Student")
+y = "Quantiles empiriques")
 ```
 
-En observant les figures @ref(fig:fest-res1) et @ref(fig:fest-qq1), on voit que les résidus semblent ne pas être normales dans le premier tiers des données. Par la suite, les résidus semblent se rapprocher d'un distribution normale. Or, étant donné que les résidus ne sont pas parfaitement normales, cela va poser des limitations dans l'analyse et l'inférence des résultats.
+En observant les figures \@ref(fig:fest-res1) et \@ref(fig:fest-qq1), on voit que les résidus semblent ne pas être normales dans le premier tiers des données. Par la suite, les résidus semblent se rapprocher d'un distribution normale. Or, étant donné que les résidus ne sont pas parfaitement normales, cela va poser des limitations dans l'analyse et l'inférence des résultats.
 
 ## Modèle linéaire ajusté
 
 Comme expliqué précédemment, nous devons ajouter des variables dans le modèles pour avoir une estimation plus précise. Il serait utile d'ajouter la variable `holiday`, `mm` et `wkend`. En effet, ces variables agissent à la fois sur `festival` et `n_tot`.
 
-```{r}
+```{r, out.height = "30%"}
 mod_fest_2 = lm(n_tot_mod ~ festival + mm + holiday + wkend, data = dat_mod)
 summary(mod_fest_2)
 ```
@@ -247,7 +258,7 @@ En controlant pour les variables omises, nous observons maintenant un changement
 
 Si nous analysons rapidement les résidus, nous voyons dans les figures \@ref(fig:fest-res2) et \@ref(fig:fest-qq2) qu'ils semblent légèrement plus normales que dans le premier modèle.
 
-```{r fest-res2}
+```{r fest-res2, out.height = "30%", fig.align='center', fig.cap="Distribution des résidus"}
 resid <- rstudent(mod_fest_2)
 fitted <- mod_fest_1$fitted.values
 res.dat <- cbind(dat_mod, fitted, resid)
@@ -257,11 +268,23 @@ xlab("Résidus") +
 ylab("Densité")
 ```
 
-```{r fest-qq2}
+```{r fest-qq2, out.height = "30%", fig.align='center', fig.cap="QQ-Plot Résidus Student"}
 ggplot(data = res.dat, mapping = aes(sample = resid)) + stat_qq(distribution = qt,
 dparams = mod_fest_2$df.residua) + stat_qq_line(distribution = qt,
 dparams = mod_fest_2$df.residual) + labs(x = "Quantiles théoriques",
-y = "Quantiles empiriques") + ggtitle("QQ-Plot Résidus Student")
+y = "Quantiles empiriques")
 ```
+
+### Modèle avec seulement les non-membres
+
+```{r, out.height = "30%"}
+mod_fest_3 = lm(n_tot_mod ~ festival + mm + holiday + wkend, data = dat_mod[dat_mod$mem == 0,])
+summary(mod_fest_3)
+```
+De façon similaire au modèle précédemment, les festivals n'ont pas d'effets significatifs même lorsqu'on regarde seulement les non-membres de Bixi.
+
+## Discussion sur les résultats
+
+Étant donné les résultats des modèles que nous avons fait précédemment, les festivals ne semblent pas avoir d'effets significatifs sur l'utilisation des Bixi que cela soit pour les membres ou les non-membres.
 
 # Conclusion
