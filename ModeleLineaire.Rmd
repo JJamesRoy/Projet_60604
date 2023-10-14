@@ -1,26 +1,31 @@
 ---
 title: "Projet BIXI - Partie 2: Modèle de régression linéaire"
-subtitle: "MATH60604 - Modélisation statistique"
 author: "Abdoul Wassi Badirou, Alfred Assal, James Roy, Samuel Croteau"
 date: "`r Sys.Date()`"
-output: 
-  bookdown::pdf_document2:
-    toc: true
-    toc_depth: 3
-    extra_dependencies: ["flafter"]
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
   bookdown::html_document2:
-    toc: true 
-    number_sections: true
-    toc_float: # to float the table of contents to the left of the main document content.
-      collapsed: false
+    toc: yes
+    number_sections: yes
+    toc_float:
+      collapsed: no
+  bookdown::pdf_document2:
+    toc: yes
+    toc_depth: 3
+    extra_dependencies: flafter
   html_document:
-    toc: true 
-    number_sections: true
-    toc_float: # to float the table of contents to the left of the main document content.
-      collapsed: false
-
+    toc: yes
+    number_sections: yes
+    toc_float:
+      collapsed: no
+subtitle: "MATH60604 - Modélisation statistique"
 params:
-  created_date: '2023-09-12'
+  created_date: "2023-09-12"
+header-includes:
+- \usepackage{tikz}
+- \usepackage{subcaption}
 ---
 
 # Note
@@ -39,12 +44,17 @@ Variables cibles : n_tot et dur
 
 Variables à ajouter : merge avec les autres données par sous-question
 
-```{r}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = FALSE,error = FALSE)
+```
+
+
+```{r lib}
 library(tidyverse)
 library(readxl)
 ```
 
-```{r}
+```{r read}
 dat = read.csv("bixifull.csv")
 ```
 
@@ -84,11 +94,34 @@ dat$festival[is.na(dat$festival)] = 0
 ```
 
 ```{r rain}
-dat = dat %>% mutate(rain_bin = ifelse(rain == 0, 0, 1))
+dat = dat %>% mutate(rain_bin = ifelse(rain == 0, 0, 1)) %>% select(-X)
 ```
 
-# Modèle avec festival
+```{r wkend}
+dat = dat %>% mutate(wkend = ifelse(wday == "Saturday" | wday == "Sunday",1,0))
+col = c("mm", "dd", "mem", "arrond")
+dat[col] = lapply(dat[col], factor)
+```
 
+```{r dat.mod}
+var_mean= c("holiday", "temp", "rain", "festival", "rain_bin", "wkend")
+var_sum = c("dur", "rev", "n_tot", "n_AM", "n_PM", "avg")
+
+dat_mod = dat %>% select(-station, -name, -wday, -Date) %>% 
+  group_by(mem, mm, dd, arrond) %>%
+  summarise(across(all_of(var_mean), ~mean(., na.rm = TRUE)),
+            across(all_of(var_sum), ~sum(., na.rm = TRUE))) # Sert à compiler les données selon les arrondissements par jour. On se débarasse ainsi des variables station. Cela fait qu'on peut analyser les données par arrondissement plutot que par station.
+
+dat_mod = as.data.frame(dat_mod)
+
+col = c("holiday", "wkend", "rain_bin")
+dat_mod[col] = lapply(dat_mod[col], factor)
+```
+
+# Introduction
+
+# Transformation variables d'intérêts
+# Modèle avec festival
 
 # Parc
 
@@ -119,7 +152,7 @@ dat_parc$arrond<-gsub("-", "", dat_parc$arrond)
 df_parc <- merge(dat_parc, dat_nb_parc, by = "arrond", all.x = TRUE)
 df_parc$nb_parc <- ifelse(is.na(df_parc$nb_parc), 0, df_parc$nb_parc)
 
-#Espaces sportives
+#Espaces sportifs
 nb_arrond_es <- table(data_es$ARROND)
 dat_nb_es <- data.frame(arrond = names(nb_arrond_es), nb_es = as.numeric(nb_arrond_es))
 dat_nb_es$arrond <- tolower(gsub("\\s+", "", dat_nb_es$arrond))
@@ -147,4 +180,45 @@ df_parc_es_lc <- replace(df_parc_es_lc, is.na(df_parc_es_lc), 0)
 modele4 = lm(dur~nb_parc + nb_es + nb_lc, data = df_parc_es_lc)
 
 ```
+
+
+## Modèle linéaire simple
+```{r fest1}
+hist(dat_mod$n_tot)
+mod_fest_1 = lm(n_tot ~ festival, data = dat_mod)
+summary(mod_fest_1)
+```
+
+Avec un modèle linéaire simple, la tenue de festival semble avoir un effet positif et significatif sur le nombre total de déplacements. En effet, un festival de plus par jour augmente en moyenne le nombre total de déplacement de 1.7 par jour par arrondissement (toutes choses étant égales par ailleurs). De plus, cette augmentation est significatif à un niveau de 95%.
+
+Or, il est important de discuter des limitations d'un tel modèle. Plusieurs autres variables agissent sur le nombre total de déplacements et sur la tenue de festival, il faut ainsi controler pour ces variables. Pour mieux comprendre ce problème, voici un graphe orienté acyclique (GOA).
+
+\begin{figure}[h!]
+\caption{\label{fig:firstgroup}}
+\centering
+\begin{tikzpicture}[->]
+\node (X) at (0,0) {$festival$};
+\node (Z2) at (1.5,-1) {$Z_1$};
+\node (Y) at (3,0) {$n_tot$};
+\path (X) edge (Y);
+\path (Z2) edge (X);
+\path (Z2) edge (Y);
+\end{tikzpicture}
+\end{figure}
+
+Ainsi, s'il existe des variables $Z_1$ qui affectent à la fois `festival` et `n_tot`, il faut ajouter ces variables dans le modèle pour avoir une estimation plus précises des effets des prédicteurs.
+
+## Modèle linéaire ajusté
+
+Comme expliqué précédemment, nous devons ajouter des variables dans le modèles pour avoir une estimation plus précise. Il serait utile d'ajouter la variable `holiday`, `mm` et `wkend`. En effet, ces variables agissent à la fois sur `festival` et `n_tot`.
+
+```{r}
+mod_fest_2 = lm(n_tot ~ festival + mm + holiday + wkend, data = dat_mod)
+summary(mod_fest_2)
+```
+
+
+
+# Conclusion
+
 
