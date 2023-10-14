@@ -117,6 +117,8 @@ dat_mod[col] = lapply(dat_mod[col], factor)
 
 # Transformation variables d'intérêts
 
+Nous allons observer nos variables d'intérêts pour voir si elles se prêtent à l'analyse statistique.
+
 ```{r histn, out.height = "30%", fig.cap="Distribution des déplacements totaux", fig.align='center'}
 hist(dat_mod$n_tot, 
      ylab = "Fréquence", 
@@ -195,7 +197,7 @@ modele4 = lm(dur~nb_parc + nb_es + nb_lc, data = df_parc_es_lc)
 
 Dans cette section, nous allons analyser si les festivals tenus dans la ville de Montréal ont un impact sur l'utilisation des Bixi. Cette question est intéressante, car elle permet, selon les résultats obtenus, de s'allier avec la ville de Montréal et différente organisations et organismes en lien avec les festivals pour promouvoir un moyen de déplacement moins intensif sur les émission de polluants. Plusieur stratégies d'affaires peuvent être pris selon les résultats. Par exemple : offrir des promotions dans les stations proches des festivals, augmenter la disponibilité des Bixi lors des festivals ou encore promouvoir le service à l'approche des différents festivals.
 
-Pour tester cette question, nous allons produire plusieurs modèles de régression linéaire et faire de l'inférence sur les résultats obtenus.
+Pour tester cette question, nous allons produire plusieurs modèles de régression linéaire et faire de l'inférence sur les résultats obtenus. Les données des festivals viennent d'une archive disponible sur ce site web : https://web.archive.org/web/20210928074344/https://www.mtl.org/fr/experience/guide-des-festivals-dete-montreal et elles ont été compilées manuellement.
 
 ## Modèle linéaire simple
 
@@ -204,7 +206,7 @@ mod_fest_1 = lm(n_tot_mod ~ festival, data = dat_mod)
 summary(mod_fest_1)
 ```
 
-Avec un modèle linéaire simple, la tenue de festival semble avoir un effet positif et significatif sur le nombre total de déplacements. En effet, un festival de plus par jour augmente en moyenne le nombre total de déplacement de 1.7 par jour par arrondissement (toutes choses étant égales par ailleurs). De plus, cette augmentation est significatif à un niveau de 95%.
+Avec un modèle linéaire simple, la tenue de festival semble avoir un effet positif et significatif sur le nombre total de déplacements. En effet, un festival de plus par jour augmente en moyenne le nombre total de déplacement de 3.4% par jour par arrondissement (toutes choses étant égales par ailleurs). De plus, cette augmentation est significatif à un niveau de 95%.
 
 Or, il est important de discuter des limitations d'un tel modèle. Plusieurs autres variables agissent sur le nombre total de déplacements et sur la tenue de festival, il faut ainsi controler pour ces variables. Pour mieux comprendre ce problème, voici un graphe orienté acyclique (GOA) \@ref(fig:firstgroup). 
 
@@ -254,7 +256,7 @@ mod_fest_2 = lm(n_tot_mod ~ festival + mm + holiday + wkend, data = dat_mod)
 summary(mod_fest_2)
 ```
 
-En controlant pour les variables omises, nous observons maintenant un changement dans l'interprétation des résultats. L'effet des festival semble être négatif et non-significatif. Dans ce modèle, chaque festival diminue le nombre total de déplacement de 1,3% par jour par quartier de façon non-significative. Il semblerait que l'effet passe maintenant par les mois et non par les festivals.
+En controlant pour les variables omises, nous observons maintenant un changement dans l'interprétation des résultats. L'effet des festival semble être négatif et non-significatif. Dans ce modèle, chaque festival diminue le nombre total de déplacement de 2,4% par jour par quartier de façon non-significative. Il semblerait que l'effet passe maintenant par les mois et non par les festivals.
 
 Si nous analysons rapidement les résidus, nous voyons dans les figures \@ref(fig:fest-res2) et \@ref(fig:fest-qq2) qu'ils semblent légèrement plus normales que dans le premier modèle.
 
@@ -275,16 +277,28 @@ dparams = mod_fest_2$df.residual) + labs(x = "Quantiles théoriques",
 y = "Quantiles empiriques")
 ```
 
+### Modèle avec interaction
+
+Il peut être intéressant de tester un modèle avec interactions étant donné que les utilisations seront peut-être augmenté si un festival est pendant une fin de semaine ou une journée férié.
+
+```{r}
+mod_fest_3 = lm(n_tot_mod ~ festival*holiday +festival*wkend +festival + mm + holiday + wkend, data = dat_mod)
+summary(mod_fest_3)
+```
+Or, il ne semble pas avoir d'effets non plus.
+
 ### Modèle avec seulement les non-membres
 
+Il serait aussi intéressant de tester si les non-membres (qui ont une utilisation différente des Bixi) utilisent plus les Bixi lors des festivals. Pour cela, nous allons tester le deuxième modèle sur les non-membres seulement.
+
 ```{r, out.height = "30%"}
-mod_fest_3 = lm(n_tot_mod ~ festival + mm + holiday + wkend, data = dat_mod[dat_mod$mem == 0,])
-summary(mod_fest_3)
+mod_fest_4 = lm(n_tot_mod ~ festival + mm + holiday + wkend, data = dat_mod[dat_mod$mem == 0,])
+summary(mod_fest_4)
 ```
 De façon similaire au modèle précédemment, les festivals n'ont pas d'effets significatifs même lorsqu'on regarde seulement les non-membres de Bixi.
 
 ## Discussion sur les résultats
 
-Étant donné les résultats des modèles que nous avons fait précédemment, les festivals ne semblent pas avoir d'effets significatifs sur l'utilisation des Bixi que cela soit pour les membres ou les non-membres.
+Étant donné les résultats des modèles que nous avons fait précédemment, les festivals ne semblent pas avoir d'effets significatifs sur l'utilisation des Bixi que cela soit pour les membres ou les non-membres. Ainsi, nous ne pouvons pas nous prononcer sur des politiques et stratégies que l'entreprise pourrait appliquer.
 
 # Conclusion
