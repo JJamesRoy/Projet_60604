@@ -32,11 +32,7 @@ header-includes:
 
 Question : Comment maximiser les déplacements en Bixi pour accélérer la transition vers une économie verte et réduire l'impact sur l'environnement des moyens de transports.
 
-Sous question : 
-- Impact de l'événementiel (James)
-- Est-ce que la densité de population du quartier a un impact sur l'utilisation des Bixi (Alfred)
-- Attraits touristiques (https://donnees.montreal.ca/dataset/installations-recreatives-sportives-et-culturelles/resource/1c239e86-8b36-476c-bd51-91a3cd20f687) (https://donnees.montreal.ca/dataset/lieux-d-interet/resource/edce22aa-f7cc-495e-9c53-b367f68309f6) (Abdoul)
-- Parc (https://donnees.montreal.ca/dataset/grands-parcs-parcs-d-arrondissements-et-espaces-publics) (Sam)
+Sous question : - Impact de l'événementiel (James) - Est-ce que la densité de population du quartier a un impact sur l'utilisation des Bixi (Alfred) - Attraits touristiques (<https://donnees.montreal.ca/dataset/installations-recreatives-sportives-et-culturelles/resource/1c239e86-8b36-476c-bd51-91a3cd20f687>) (<https://donnees.montreal.ca/dataset/lieux-d-interet/resource/edce22aa-f7cc-495e-9c53-b367f68309f6>) (Abdoul) - Parc (<https://donnees.montreal.ca/dataset/grands-parcs-parcs-d-arrondissements-et-espaces-publics>) (Sam)
 
 Leviers de Bixi : Publicité et marketing sur le service et l'abonnement. Programme incitation Bixi (alléger les stations ou remplir)
 
@@ -48,9 +44,9 @@ Variables à ajouter : merge avec les autres données par sous-question
 knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = FALSE,error = FALSE)
 ```
 
-
 ```{r lib}
 library(tidyverse)
+library(readxl)
 ```
 
 ```{r read}
@@ -120,12 +116,84 @@ dat_mod[col] = lapply(dat_mod[col], factor)
 # Introduction
 
 # Transformation variables d'intérêts
+
+```{r histn}
+hist(dat_mod$n_tot)
+```
+
+On voit que les données de la variable `n_tot` ne sont pas normales, il faudrait les normaliser pour être capable de faire des analyses statistiques à l'aide de régression linéaire.
+
+```{r}
+dat_mod = dat_mod %>% mutate(n_tot_mod = log(n_tot))
+hist(dat_mod$n_tot_mod)
+```
+
 # Modèle avec festival
 
+# Parc
+
+Données utilisées:
+https://donnees.montreal.ca/dataset/installations-recreatives-sportives-et-culturelles/resource/1c239e86-8b36-476c-bd51-91a3cd20f687
+https://donnees.montreal.ca/dataset/grands-parcs-parcs-d-arrondissements-et-espaces-publics
+https://donnees.montreal.ca/dataset/lieux-culturels
+
+```{r}
+#get data
+data_parc <- read.csv("espace_vert.csv")
+data_es <- read.csv("terrain_sport_ext.csv")
+data_lc <- read_excel("lieuxculturels.xls")
+
+
+#Parcs
+nb_arrond_parc <- (table(data_parc$GESTION))
+dat_nb_parc <- data.frame(arrond = names(nb_arrond_parc), nb_parc = as.numeric(nb_arrond_parc))
+dat_parc <- dat %>%
+  select(dur, n_tot, rev, arrond) %>% 
+  group_by(arrond) %>%
+  summarise(dur = (sum(dur)))
+dat_nb_parc$arrond <- tolower(gsub("\\s+", "", dat_nb_parc$arrond))
+dat_nb_parc$arrond<-gsub("-", "", dat_nb_parc$arrond)
+dat_parc$arrond <- tolower(gsub("\\s+", "", dat_parc$arrond))
+dat_parc$arrond<-gsub("-", "", dat_parc$arrond)
+
+df_parc <- merge(dat_parc, dat_nb_parc, by = "arrond", all.x = TRUE)
+df_parc$nb_parc <- ifelse(is.na(df_parc$nb_parc), 0, df_parc$nb_parc)
+
+#Espaces sportifs
+nb_arrond_es <- table(data_es$ARROND)
+dat_nb_es <- data.frame(arrond = names(nb_arrond_es), nb_es = as.numeric(nb_arrond_es))
+dat_nb_es$arrond <- tolower(gsub("\\s+", "", dat_nb_es$arrond))
+dat_nb_es$arrond<-gsub("-", "", dat_nb_es$arrond)
+
+dat_es <- dat_parc
+df_es <- merge(dat_es, dat_nb_es, by = "arrond", all.x = TRUE)
+
+#Lieux culturels
+nb_arrond_lc <- table(data_lc$Arrondissement)
+dat_nb_lc <- data.frame(arrond = names(nb_arrond_lc), nb_lc = as.numeric(nb_arrond_lc))
+dat_nb_lc$arrond <- tolower(gsub("\\s+", "", dat_nb_lc$arrond))
+dat_nb_lc$arrond<-gsub("-", "", dat_nb_lc$arrond)
+dat_nb_lc$arrond <- gsub("[-–]", "", dat_nb_lc$arrond)
+
+dat_lc <- dat_parc
+df_lc <- merge(dat_lc, dat_nb_lc, by = "arrond", all.x = TRUE)
+
+
+#Modèles vs rev
+df_parc_es <- merge(df_parc, dat_nb_es, by = "arrond", all.x = TRUE)
+df_parc_es_lc <- merge(df_parc_es, dat_nb_lc, by = "arrond", all.x = TRUE)
+df_parc_es_lc <- replace(df_parc_es_lc, is.na(df_parc_es_lc), 0)
+
+modele4 = lm(dur~nb_parc + nb_es + nb_lc, data = df_parc_es_lc)
+
+```
+
+
 ## Modèle linéaire simple
+
 ```{r fest1}
 hist(dat_mod$n_tot)
-mod_fest_1 = lm(n_tot ~ festival, data = dat_mod)
+mod_fest_1 = lm(n_tot_mod ~ festival, data = dat_mod)
 summary(mod_fest_1)
 ```
 
@@ -133,6 +201,7 @@ Avec un modèle linéaire simple, la tenue de festival semble avoir un effet pos
 
 Or, il est important de discuter des limitations d'un tel modèle. Plusieurs autres variables agissent sur le nombre total de déplacements et sur la tenue de festival, il faut ainsi controler pour ces variables. Pour mieux comprendre ce problème, voici un graphe orienté acyclique (GOA).
 
+```{=tex}
 \begin{figure}[h!]
 \caption{\label{fig:firstgroup}}
 \centering
@@ -145,20 +214,58 @@ Or, il est important de discuter des limitations d'un tel modèle. Plusieurs aut
 \path (Z2) edge (Y);
 \end{tikzpicture}
 \end{figure}
-
+```
 Ainsi, s'il existe des variables $Z_1$ qui affectent à la fois `festival` et `n_tot`, il faut ajouter ces variables dans le modèle pour avoir une estimation plus précises des effets des prédicteurs.
+
+Au niveau de la normalité des résidus, on doit les analyser après la transformation logarithmique.
+
+```{r fest-res1}
+resid <- rstudent(mod_fest_1)
+fitted <- mod_fest_1$fitted.values
+res.dat <- cbind(dat_mod, fitted, resid)
+ggplot(data = res.dat, mapping = aes(x = resid)) + geom_density() +
+geom_histogram(aes(y = ..density..), bins = 10, alpha = 0.5) +
+xlab("Résidus") +
+ylab("Densité")
+```
+
+```{r fest-qq1}
+ggplot(data = res.dat, mapping = aes(sample = resid)) + stat_qq(distribution = qt,
+dparams = mod_fest_1$df.residua) + stat_qq_line(distribution = qt,
+dparams = mod_fest_1$df.residual) + labs(x = "Quantiles théoriques",
+y = "Quantiles empiriques") + ggtitle("QQ-Plot Résidus Student")
+```
+
+En observant les figures @ref(fig:fest-res1) et @ref(fig:fest-qq1), on voit que les résidus semblent ne pas être normales dans le premier tiers des données. Par la suite, les résidus semblent se rapprocher d'un distribution normale. Or, étant donné que les résidus ne sont pas parfaitement normales, cela va poser des limitations dans l'analyse et l'inférence des résultats.
 
 ## Modèle linéaire ajusté
 
 Comme expliqué précédemment, nous devons ajouter des variables dans le modèles pour avoir une estimation plus précise. Il serait utile d'ajouter la variable `holiday`, `mm` et `wkend`. En effet, ces variables agissent à la fois sur `festival` et `n_tot`.
 
 ```{r}
-mod_fest_2 = lm(n_tot ~ festival + mm + holiday + wkend, data = dat_mod)
+mod_fest_2 = lm(n_tot_mod ~ festival + mm + holiday + wkend, data = dat_mod)
 summary(mod_fest_2)
 ```
 
+En controlant pour les variables omises, nous observons maintenant un changement dans l'interprétation des résultats. L'effet des festival semble être négatif et non-significatif. Dans ce modèle, chaque festival diminue le nombre total de déplacement de 1,3% par jour par quartier de façon non-significative. Il semblerait que l'effet passe maintenant par les mois et non par les festivals.
 
+Si nous analysons rapidement les résidus, nous voyons dans les figures \@ref(fig:fest-res2) et \@ref(fig:fest-qq2) qu'ils semblent légèrement plus normales que dans le premier modèle.
+
+```{r fest-res2}
+resid <- rstudent(mod_fest_2)
+fitted <- mod_fest_1$fitted.values
+res.dat <- cbind(dat_mod, fitted, resid)
+ggplot(data = res.dat, mapping = aes(x = resid)) + geom_density() +
+geom_histogram(aes(y = ..density..), bins = 10, alpha = 0.5) +
+xlab("Résidus") +
+ylab("Densité")
+```
+
+```{r fest-qq2}
+ggplot(data = res.dat, mapping = aes(sample = resid)) + stat_qq(distribution = qt,
+dparams = mod_fest_2$df.residua) + stat_qq_line(distribution = qt,
+dparams = mod_fest_2$df.residual) + labs(x = "Quantiles théoriques",
+y = "Quantiles empiriques") + ggtitle("QQ-Plot Résidus Student")
+```
 
 # Conclusion
-
-
