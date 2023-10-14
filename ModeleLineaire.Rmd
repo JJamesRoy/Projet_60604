@@ -128,14 +128,9 @@ dat_mod = dat_mod %>% mutate(n_tot_mod = log(n_tot))
 hist(dat_mod$n_tot_mod)
 ```
 
-# Modèle avec festival
-
 # Parc
 
-Données utilisées:
-https://donnees.montreal.ca/dataset/installations-recreatives-sportives-et-culturelles/resource/1c239e86-8b36-476c-bd51-91a3cd20f687
-https://donnees.montreal.ca/dataset/grands-parcs-parcs-d-arrondissements-et-espaces-publics
-https://donnees.montreal.ca/dataset/lieux-culturels
+Données utilisées: <https://donnees.montreal.ca/dataset/installations-recreatives-sportives-et-culturelles/resource/1c239e86-8b36-476c-bd51-91a3cd20f687> <https://donnees.montreal.ca/dataset/grands-parcs-parcs-d-arrondissements-et-espaces-publics> <https://donnees.montreal.ca/dataset/lieux-culturels>
 
 ```{r}
 #get data
@@ -188,6 +183,7 @@ modele4 = lm(dur~nb_parc + nb_es + nb_lc, data = df_parc_es_lc)
 
 ```
 
+# Modèle avec les festivals
 
 ## Modèle linéaire simple
 
