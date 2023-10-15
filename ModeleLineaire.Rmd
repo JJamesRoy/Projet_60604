@@ -301,4 +301,61 @@ De façon similaire au modèle précédemment, les festivals n'ont pas d'effets 
 
 Étant donné les résultats des modèles que nous avons fait précédemment, les festivals ne semblent pas avoir d'effets significatifs sur l'utilisation des Bixi que cela soit pour les membres ou les non-membres. Ainsi, nous ne pouvons pas nous prononcer sur des politiques et stratégies que l'entreprise pourrait appliquer.
 
+
+# Modèles avec la densité
+
+```{r initialisation des données}
+library(stringr)
+dat_pop <- read.csv("pop_arrondissement.csv")
+
+dat_pop$Superficie <- gsub(",", ".", dat_pop$Superficie)
+dat_pop$Superficie <- as.numeric(dat_pop$Superficie)
+
+dat_pop$Population.2021. <- str_replace_all(dat_pop$Population.2021., "\\s", "")
+dat_pop$Population.2021. <- as.numeric(dat_pop$Population.2021.)
+
+
+dat_pop <- dat_pop %>% 
+  rename(
+    arrond = Nom,
+    superficie = Superficie,
+    population_2021 = Population.2021.
+  )
+dat_pop$density <- dat_pop$population_2021/dat_pop$superficie
+
+dat$arrond <- str_replace_all(dat$arrond, " - ", "-")
+
+arrond = c(
+    "Villeray-Saint-Michel-Parc-Extension",
+    "Ville-Marie",
+    "Verdun",
+    "Saint-Léonard",
+    "Saint-Laurent",
+    "Rosemont-La Petite-Patrie",
+    "Rivière-des-Prairies-Pointe-aux-Trembles",
+    "Pierrefonds-Roxboro",
+    "Outremont",
+    "Montréal-Nord",
+    "Mercier-Hochelaga-Maisonneuve",
+    "L'Île-Bizard–Sainte-Geneviève",
+    "Le Sud-Ouest",
+    "Le Plateau-Mont-Royal",
+    "LaSalle",
+    "Lachine",
+    "Côte-des-Neiges-Notre-Dame-de-Grâce",
+    "Anjou",
+    "Ahuntsic-Cartierville",
+    "Westmount",
+    "Mont-Royal",
+    "Laval",
+    "Longueuil"
+  )
+dat_pop$arrond <- arrond
+
+dat_densi<- dat %>% left_join(dat_pop)
+
+unique(dat_2$arrond[is.na(dat_2$population_2021)])
+
+```
+
 # Conclusion
