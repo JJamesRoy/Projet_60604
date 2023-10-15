@@ -358,4 +358,15 @@ unique(dat_2$arrond[is.na(dat_2$population_2021)])
 
 ```
 
+```{r}
+options(scipen=999)
+model_density <- lm(dur~density ,dat_densi )
+
+summary(model_density)
+
+#verification de la possibilité d'interaction entre la densité et les féstivals
+ggplot(dat_densi, aes(x = density, y = dur, color = as.factor(festival)))+
+  geom_point()
+```
+
 # Conclusion
