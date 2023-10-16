@@ -197,7 +197,7 @@ modele4 = lm(dur~nb_parc + nb_es + nb_lc, data = df_parc_es_lc)
 
 Dans cette section, nous allons analyser si les festivals tenus dans la ville de Montréal ont un impact sur l'utilisation des Bixi. Cette question est intéressante, car elle permet, selon les résultats obtenus, de s'allier avec la ville de Montréal et différente organisations et organismes en lien avec les festivals pour promouvoir un moyen de déplacement moins intensif sur les émission de polluants. Plusieur stratégies d'affaires peuvent être pris selon les résultats. Par exemple : offrir des promotions dans les stations proches des festivals, augmenter la disponibilité des Bixi lors des festivals ou encore promouvoir le service à l'approche des différents festivals.
 
-Pour tester cette question, nous allons produire plusieurs modèles de régression linéaire et faire de l'inférence sur les résultats obtenus. Les données des festivals viennent d'une archive disponible sur ce site web : https://web.archive.org/web/20210928074344/https://www.mtl.org/fr/experience/guide-des-festivals-dete-montreal et elles ont été compilées manuellement.
+Pour tester cette question, nous allons produire plusieurs modèles de régression linéaire et faire de l'inférence sur les résultats obtenus. Les données des festivals viennent d'une archive disponible sur ce site web : <https://web.archive.org/web/20210928074344/https://www.mtl.org/fr/experience/guide-des-festivals-dete-montreal> et elles ont été compilées manuellement.
 
 ## Modèle linéaire simple
 
@@ -208,7 +208,7 @@ summary(mod_fest_1)
 
 Avec un modèle linéaire simple, la tenue de festival semble avoir un effet positif et significatif sur le nombre total de déplacements. En effet, un festival de plus par jour augmente en moyenne le nombre total de déplacement de 3.4% par jour par arrondissement (toutes choses étant égales par ailleurs). De plus, cette augmentation est significatif à un niveau de 95%.
 
-Or, il est important de discuter des limitations d'un tel modèle. Plusieurs autres variables agissent sur le nombre total de déplacements et sur la tenue de festival, il faut ainsi controler pour ces variables. Pour mieux comprendre ce problème, voici un graphe orienté acyclique (GOA) \@ref(fig:firstgroup). 
+Or, il est important de discuter des limitations d'un tel modèle. Plusieurs autres variables agissent sur le nombre total de déplacements et sur la tenue de festival, il faut ainsi controler pour ces variables. Pour mieux comprendre ce problème, voici un graphe orienté acyclique (GOA) \@ref(fig:firstgroup).
 
 ```{=tex}
 \begin{figure}[h!]
@@ -285,6 +285,7 @@ Il peut être intéressant de tester un modèle avec interactions étant donné 
 mod_fest_3 = lm(n_tot_mod ~ festival*holiday +festival*wkend +festival + mm + holiday + wkend, data = dat_mod)
 summary(mod_fest_3)
 ```
+
 Or, il ne semble pas avoir d'effets non plus.
 
 ### Modèle avec seulement les non-membres
@@ -295,12 +296,12 @@ Il serait aussi intéressant de tester si les non-membres (qui ont une utilisati
 mod_fest_4 = lm(n_tot_mod ~ festival + mm + holiday + wkend, data = dat_mod[dat_mod$mem == 0,])
 summary(mod_fest_4)
 ```
+
 De façon similaire au modèle précédemment, les festivals n'ont pas d'effets significatifs même lorsqu'on regarde seulement les non-membres de Bixi.
 
 ## Discussion sur les résultats
 
 Étant donné les résultats des modèles que nous avons fait précédemment, les festivals ne semblent pas avoir d'effets significatifs sur l'utilisation des Bixi que cela soit pour les membres ou les non-membres. Ainsi, nous ne pouvons pas nous prononcer sur des politiques et stratégies que l'entreprise pourrait appliquer.
-
 
 # Modèles avec la densité
 
@@ -358,15 +359,37 @@ unique(dat_2$arrond[is.na(dat_2$population_2021)])
 
 ```
 
-```{r}
-options(scipen=999)
-model_density <- lm(dur~density ,dat_densi )
+## Modèle linéaire simple
+
+```{r SimpleDensity}
+
+model_density <- lm(n_tot~density ,dat )
 
 summary(model_density)
-
-#verification de la possibilité d'interaction entre la densité et les féstivals
-ggplot(dat_densi, aes(x = density, y = dur, color = as.factor(festival)))+
-  geom_point()
 ```
+
+Dans ce modèle de régression linéaire simple, il est possible de constater que la variable de densité est bien significative. Autrement dit, une augmentation d'une personne par kilomètre carré augmenterait en moyenne le nombre total de déplacements de 0.0024. Cependant, la valeur du $R^2$ signifie que le modèle explique 9,4% de la variabilité du nombre total de déplacements. Cela dit, il y a nécessairement un manque de variables explicatives qui permettrait de mieux expliquer la variable réponse.
+
+Dans ce même ordre d'idée, il est possible d'observer si l'hypothèse de normalité des résidus ainsi que l'hypothèse d'homoscédasticité sont respectées dans ce modèle simple, avant d'amorcer un modèle multiple.
+
+```{r QQdensite,out.height = "30%", fig.align='center', fig.cap= Graphique QQ - modèle de densité démogrphaique simple}
+
+
+residuals <- residuals(model_density)
+
+
+ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
+  stat_qq() +
+  stat_qq_line() +
+  xlab("Quantiles Théoriques") +
+  ylab("Quantiles de l'Échantillon") +
+  ggtitle("Graphique Q-Q")
+
+
+
+```
+
+En examinant le comportement des résidus dans la figure \@ref(fig:QQdensite), il est plausible de dire que les résidus ne suivent pas une loi normale. Cela étant dit, dans le cas de ce modèle simple cela veut dire que la densité comme seule variable explicative explique mal le comportement du nombre total de déplacements en Bixi.
+
 
 # Conclusion
