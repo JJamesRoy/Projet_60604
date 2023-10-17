@@ -353,9 +353,9 @@ arrond = c(
   )
 dat_pop$arrond <- arrond
 
-dat_densi<- dat %>% left_join(dat_pop)
+dat<- dat %>% left_join(dat_pop)
 
-unique(dat_2$arrond[is.na(dat_2$population_2021)])
+unique(dat$arrond[is.na(dat$population_2021)])
 
 ```
 
