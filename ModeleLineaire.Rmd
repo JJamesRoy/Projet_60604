@@ -354,7 +354,12 @@ De façon similaire au modèle précédemment, les festivals n'ont pas d'effets 
 
 Étant donné les résultats des modèles que nous avons fait précédemment, les festivals ne semblent pas avoir d'effets significatifs sur l'utilisation des Bixi que cela soit pour les membres ou les non-membres. Ainsi, nous ne pouvons pas nous prononcer sur des politiques et stratégies que l'entreprise pourrait appliquer.
 
-# Modèles avec la densité
+# Modèles avec la densité de population
+
+Dans cette section, il sera question de modéliser l’effet de la densité de la population par $km^2$ par arrondissement sur le nombre total de déplacements par arrondissement en Bixi. Autrement dit, on essaye d’observer qu’est-ce qui arrive au nombre de totaux de déplacement si la densité de population augmente. À première vue, il est cohérent d’affirmer que si la densité de la population augmente, le nombre de déplacement à bicyclette augmentera aussi. Cette prémisse repose sur l'idée qu’une densité de population plus élevée favorise généralement la mise en place d'infrastructures favorables aux déplacements à bicyclette.
+
+Pour Bixi ce type d’information devient alors crucial, surtout lorsqu’il est question de prévisions, puisque certains arrondissements et villes se densifient plus rapidement que d’autres. À cet égard, il est alors important d’allouer les bonnes ressources pour l’augmentation de l’inventaire de bicyclette, selon certains arrondissements.  
+
 
 ```{r initialisation des données, include=FALSE}
 library(stringr)
@@ -378,33 +383,6 @@ dat_pop$density <- dat_pop$population_2021/dat_pop$superficie
 dat_mod$arrond <- str_replace_all(dat_mod$arrond, " - ", "-")
 dat_pop$arrond <- str_replace_all(dat_pop$arrond, "–", "-")
 
-#arrond = c(
-#    "Villeray-Saint-Michel-Parc-Extension",
-#    "Ville-Marie",
-#    "Verdun",
-#    "Saint-Léonard",
-#    "Saint-Laurent",
-#    "Rosemont-La Petite-Patrie",
-#    "Rivière-des-Prairies-Pointe-aux-Trembles",
-#    "Pierrefonds-Roxboro",
-#    "Outremont",
-#    "Montréal-Nord",
-#    "Mercier-Hochelaga-Maisonneuve",
-#    "L'Île-Bizard–Sainte-Geneviève",
-#    "Le Sud-Ouest",
-#    "Le Plateau-Mont-Royal",
-#    "LaSalle",
-#    "Lachine",
-#    "Côte-des-Neiges-Notre-Dame-de-Grâce",
-#    "Anjou",
-#    "Ahuntsic-Cartierville",
-#    "Westmount",
-#    "Mont-Royal",
-#    "Laval",
-#    "Longueuil"
-#  )
-#dat_pop$arrond <- arrond
-#
 df_lieux_mtl <- read.csv("lieux-fr_MTL.csv")
 df_lieux_long <- read.csv("vdq-lieupublic_longeuil.csv")
 df_lieux_la <- read.csv("lieux_laval.csv")
@@ -476,18 +454,40 @@ df_lieux_long <- pivot_wider(df_lieux_long, names_from = Category, values_from =
 df_lieux_long$arrond <- "Longueuil"
 
 df_la_long <- rbind(df_lieux_long,df_lieux_la)
+
+df_Westmont_MR <- data.frame(
+  Parc=c(12,22),
+  Bibliotheque=c(1,1),
+  Centre_communautaire=c(20,19),
+  Centre_sportif=c(1,2),
+  arrond=c("Westmount","Mont-Royal")
+)
+
+df_la_long<- rbind(df_la_long,df_Westmont_MR)
+
 df_rmr <- rbind(df_la_long,df_lieux_mtl)
+
+df_rmr$arrond <- str_replace_all(df_rmr$arrond, " - ", "-")
+df_rmr$arrond <- str_replace_all(df_rmr$arrond, "–", "-") 
 
 
 setdiff(dat_mod$arrond, df_rmr$arrond)
-setdiff(df_rmr$arrond, dat_mod$arrond)
 
-df_rmr <- df_rmr[c(-4,-7,-17), ]
-df_rmr$arrond <- str_replace_all(df_rmr$arrond, " - ", "-")
-df_rmr$arrond <- str_replace_all(df_rmr$arrond, "–", "-") 
 df_rmr<- dat_pop %>% left_join(df_rmr, by="arrond")
 
+# Division des parc, biblio et les centres par la superficie. Permet de standardisé selon la grandeur du territoire
+df_rmr <- df_rmr %>%
+  mutate(
+    ParcKm2 = Parc / superficie,
+    BibliothequeKm2 = Bibliotheque / superficie,
+    Centre_communautaireKm2 = Centre_communautaire / superficie,
+    Centre_sportifKm2 = Centre_sportif / superficie
+  )
+
+
 dat_mod<- dat_mod %>% left_join(df_rmr, by="arrond")
+
+
 
 ```
 
@@ -506,7 +506,7 @@ Dans ce modèle de régression linéaire simple, il est possible de constater qu
 
 Avant d'amorcer un modèle multiple, il est crutial d'observer si l'hypothèse d'homoscédasticité est respectées dans ce modèle simple.
 
-```{r QQdensite,out.height = "30%", fig.align='center', fig.cap= Graphique QQ - modèle de densité démogrphaique simple}
+```{r QQdensite, out.height = "30%", fig.align = 'center', fig.cap = "Graphique QQ - modèle de densité démographique simple"}
 
 
 residuals <- residuals(model_density)
@@ -519,13 +519,12 @@ ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
   ylab("Quantiles de l'Échantillon") +
   ggtitle("Graphique Q-Q")
 
-
-
 ```
 
 En examinant le comportement des résidus dans la figure \@ref(fig:QQdensite), il est plausible de dire que dans le dernier tier de la figure les résidus ne suivent pas une loi normale. Cela étant dit, dans le cas de ce modèle simple ça voudrait dire que la densité comme seule variable explicative explique mal le comportement du nombre total de déplacements en Bixi.
 
 *À VOIR SI JE LAISSE*
+
 ```{r}
 dat_mod$logDensity<- log(dat_mod$density)
 dat_mod$logN_tot <- log(dat_mod$n_tot)
@@ -546,6 +545,26 @@ ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
 
 ## Régression multiple
 
+Avant de débuter le modèle multiple avec la densité de population, il est important de comprendre que plusieurs données ont été ajoutées et même modifier pour pouvoir observer la tendance que prend l'utilisation des Bixis lorsque la densité de population augmente. Cela étant dit, il était important d'ajouter des variables qui affectaient autant la densité de population que le nombre total de Bixi utilisé, comme expliqué dans la figure \@ref(fig:firstgroup). Par conséquent, des variables comme le nombre de parcs par arrondissement, le nombre de bibliothèques par arrondissement, le nombre de centres communautaire par arrondissement et le nombre de centres sportifs par arrondissement ont été ajoutés. De plus, puisque la superficie des arrondissements varie grandement, ces variables ajoutées ont été divisées par la superficie de chaque arrondissement. Ainsi les grandes villes, comme Laval qui a beaucoup d'infrastructure à cause de sa grande superficie, ne viendront pas biaiser nos modèles. Autrement dit, les variables ajoutées(nombre de parcs, le nombre de bibliothèques, le nombre de centres communautaires, le nombre de centres sportifs) sont par $km^2$ de leur arrondissement.
+
+```{r}
+model_desity_M <- lm(formula = n_tot ~ density + ParcKm2 + BibliothequeKm2 + Centre_communautaireKm2 + Centre_sportifKm2, data = dat_mod)
+
+summary(model_desity_M)
+
+```
+
+```{r}
+residuals <- residuals(model_desity_M)
+
+ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
+  stat_qq() +
+  stat_qq_line() +
+  xlab("Quantiles Théoriques") +
+  ylab("Quantiles de l'Échantillon") +
+  ggtitle("Graphique Q-Q")
+
+```
 
 
 
