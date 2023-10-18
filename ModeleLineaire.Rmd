@@ -1,11 +1,12 @@
 ---
 title: "Projet BIXI - Partie 2: Modèle de régression linéaire"
+subtitle: "MATH60604 - Modélisation statistique"
 author: "Abdoul Wassi Badirou, Alfred Assal, James Roy, Samuel Croteau"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
-    toc: yes
-    toc_depth: '3'
+  # pdf_document:
+  #   toc: yes
+  #   toc_depth: '3'
   bookdown::html_document2:
     toc: yes
     number_sections: yes
@@ -15,12 +16,6 @@ output:
     toc: yes
     toc_depth: 3
     extra_dependencies: flafter
-  html_document:
-    toc: yes
-    number_sections: yes
-    toc_float:
-      collapsed: no
-subtitle: "MATH60604 - Modélisation statistique"
 params:
   created_date: "2023-09-12"
 header-includes:
@@ -28,14 +23,28 @@ header-includes:
 - \usepackage{subcaption}
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = FALSE,error = TRUE, fig.pos = "H")
+```
+
+```{r lib}
+library(tidyverse)
+library(readxl)
+library(knitr)
+library(googleway)
+```
+
 # Note
 
 Question : Comment maximiser les déplacements en Bixi pour accélérer la transition vers une économie verte et réduire l'impact sur l'environnement des moyens de transports.
 
-Sous question : 
+Sous question :  
 - Impact de l'événementiel (James)
+
 - Est-ce que la densité de population du quartier a un impact sur l'utilisation des Bixi (Alfred)
+
 - Attraits touristiques (https://donnees.montreal.ca/dataset/installations-recreatives-sportives-et-culturelles/resource/1c239e86-8b36-476c-bd51-91a3cd20f687) (https://donnees.montreal.ca/dataset/lieux-d-interet/resource/edce22aa-f7cc-495e-9c53-b367f68309f6) (Abdoul)
+
 - Parc (https://donnees.montreal.ca/dataset/grands-parcs-parcs-d-arrondissements-et-espaces-publics) (Sam)
 
 Leviers de Bixi : Publicité et marketing sur le service et l'abonnement. Programme incitation Bixi (alléger les stations ou remplir)
@@ -44,15 +53,6 @@ Variables cibles : n_tot et dur
 
 Variables à ajouter : merge avec les autres données par sous-question
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = FALSE,error = FALSE)
-```
-
-
-```{r lib}
-library(tidyverse)
-library(readxl)
-```
 
 ```{r read}
 dat = read.csv("bixifull.csv")
@@ -118,7 +118,49 @@ col = c("holiday", "wkend", "rain_bin")
 dat_mod[col] = lapply(dat_mod[col], factor)
 ```
 
+# Enrichissement des données {.unnumbered}
+```{r importData, results='hide'}
+bixi_raw_data_df = read.csv("bixi1.csv", sep=",", header = T)
+head(bixi_raw_data_df)
+```
+```{r importMergeStationNameAndCoord, results='hide'}
+# Importation des données de stations: Nom, latitude et Longitude
+stations_raw_data_df=read.csv("2021_stations.csv", sep = ",", header = T, encoding='latin_1')
+head(stations_raw_data_df)
+
+#Jointure aux données bixi
+bixi_with_name_df=merge(bixi_raw_data_df,stations_raw_data_df, by.x = "station",by.y = "pk", all.x = T, all.y = F)
+head(bixi_with_name_df)
+str(bixi_with_name_df)
+```
+```{r , results='hide'}
+# Validons qu'il n'y a pas de données manquantes suite à l'ajout des noms des stations et leur coordonnées géographique
+summary(bixi_with_name_df)
+```
+```{r, results='hide'}
+#Importation des données de stations: Nom, arrondissement, latitude, longitude
+bixi_stations_df=read.csv("bixi_stations_full.csv", sep = ",", header = T, encoding='latin_1')
+head(bixi_stations_df)
+
+# merge pour inclure les arrondissements
+bixi_with_arrond_df=merge(bixi_with_name_df,bixi_stations_df, by.x = 'name',by.y = 'STATIONNAME', all.x = T, all.y = F)
+head(bixi_with_arrond_df)
+```
+```{r}
+summary(bixi_with_arrond_df)
+```
+```{r}
+bixiWithArron_clean_df=data.frame(name=bixi_with_arrond_df$name,latitude=bixi_with_arrond_df$latitude,
+      longitude=bixi_with_arrond_df$longitude,arrondissement=bixi_with_arrond_df$STATIONARRONDISSEMENT,
+      bixi_with_arrond_df[,names(bixi_raw_data_df)])
+```
+
+
+
 # Introduction
+- Déterminer les éléments qui influencent l'utilisation des bixi (nombre de déplacement) afin de proposer des stratégies qui permettraient de mieux la démocratiser.
+
+- Déterminer le prix d'imputation des usagers membres qui permettrait de générer un revenu équivalent à celui des non-membres.
 
 # Transformation variables d'intérêts
 # Modèle avec festival
