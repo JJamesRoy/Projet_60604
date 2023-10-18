@@ -356,9 +356,9 @@ De façon similaire au modèle précédemment, les festivals n'ont pas d'effets 
 
 # Modèles avec la densité de population
 
-Dans cette section, il sera question de modéliser l’effet de la densité de la population par $km^2$ par arrondissement sur le nombre total de déplacements par arrondissement en Bixi. Autrement dit, on essaye d’observer qu’est-ce qui arrive au nombre de totaux de déplacement si la densité de population augmente. À première vue, il est cohérent d’affirmer que si la densité de la population augmente, le nombre de déplacement à bicyclette augmentera aussi. Cette prémisse repose sur l'idée qu’une densité de population plus élevée favorise généralement la mise en place d'infrastructures favorables aux déplacements à bicyclette.
+Dans cette section, il sera question de modéliser l’effet de la densité de la population par $km^2$ par arrondissement, sur le nombre total de déplacements en Bixi par arrondissement. Autrement dit, on essaye d’observer qu’est-ce qui arrive au nombre de totaux de déplacement si la densité de population augmente. À première vue, il est cohérent d’affirmer que si la densité de la population augmente, le nombre de déplacement à bicyclette augmentera aussi. Cette prémisse repose sur l'idée qu’une densité de population plus élevée favorise généralement la mise en place d'infrastructures favorables aux déplacements à bicyclette.
 
-Pour Bixi ce type d’information devient alors crucial, surtout lorsqu’il est question de prévisions, puisque certains arrondissements et villes se densifient plus rapidement que d’autres. À cet égard, il est alors important d’allouer les bonnes ressources pour l’augmentation de l’inventaire de bicyclette, selon certains arrondissements.  
+Pour Bixi ce type d’information devient alors crucial, d’une part puisque dans les zones à forte densité de population, les habitants ont souvent plus d'options de transport, ce qui peut réduire leur dépendance à la voiture favorisant ainsi l’utilisation des transports durable comme le vélo. D’autre part, les zones fortement densifiées ont généralement une plus grande concentration de commerce, de services publics et d’emploi à moindre distance. Cette proximité des destinations encourage alors l'utilisation de modes de transport adaptés aux déplacements courts, tels que le vélo. C’est pour ces raisons que nous pensons que la densité de la population est un excellent facteur à observer pour Bixi. 
 
 
 ```{r initialisation des données, include=FALSE}
@@ -455,6 +455,7 @@ df_lieux_long$arrond <- "Longueuil"
 
 df_la_long <- rbind(df_lieux_long,df_lieux_la)
 
+# Ces données ne sont pas disponible sous forme CSV, mais sont dispoible sur le site web des villes 
 df_Westmont_MR <- data.frame(
   Parc=c(12,22),
   Bibliotheque=c(1,1),
