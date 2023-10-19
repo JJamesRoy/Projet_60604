@@ -311,14 +311,7 @@ xlab("Résidus") +
 ylab("Densité")
 ```
 
-```{r fest-qq1, out.height = "30%", fig.align='center', fig.cap="QQ-Plot Résidus Student"}
-ggplot(data = res.dat, mapping = aes(sample = resid)) + stat_qq(distribution = qt,
-dparams = mod_fest_1$df.residua) + stat_qq_line(distribution = qt,
-dparams = mod_fest_1$df.residual) + labs(x = "Quantiles théoriques",
-y = "Quantiles empiriques")
-```
-
-En observant les figures \@ref(fig:fest-res1) et \@ref(fig:fest-qq1), on voit que les résidus semblent ne pas être normales dans le premier tiers des données. Par la suite, les résidus semblent se rapprocher d'un distribution normale. Or, étant donné que les résidus ne sont pas parfaitement normales, cela va poser des limitations dans l'analyse et l'inférence des résultats.
+En observant la figure \@ref(fig:fest-res1), on voit que les résidus semblent ne pas être normales dans le premier tiers des données. Par la suite, les résidus semblent se rapprocher d'un distribution normale. Or, étant donné que les résidus ne sont pas parfaitement normales, cela va poser des limitations dans l'analyse et l'inférence des résultats.
 
 ## Modèle linéaire ajusté
 
