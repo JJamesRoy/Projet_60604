@@ -1,26 +1,27 @@
 ---
 title: "Projet BIXI - Partie 2: Modèle de régression linéaire"
-subtitle: "MATH60604 - Modélisation statistique"
 author: "Abdoul Wassi Badirou, Alfred Assal, James Roy, Samuel Croteau"
 date: "`r Sys.Date()`"
 output:
-  # pdf_document:
-  #   toc: yes
-  #   toc_depth: '3'
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+  bookdown::pdf_document2:
+    toc: yes
+    toc_depth: 3
+    extra_dependencies: flafter
   bookdown::html_document2:
     toc: yes
     number_sections: yes
     toc_float:
       collapsed: no
-  bookdown::pdf_document2:
-    toc: yes
-    toc_depth: 3
-    extra_dependencies: flafter
+subtitle: "MATH60604 - Modélisation statistique"
 params:
   created_date: "2023-09-12"
 header-includes:
 - \usepackage{tikz}
 - \usepackage{subcaption}
+- \usepackage{float}
 ---
 
 ```{r setup, include=FALSE}
