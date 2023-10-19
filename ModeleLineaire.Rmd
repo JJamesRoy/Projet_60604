@@ -4,17 +4,17 @@ subtitle: "MATH60604 - Modélisation statistique"
 author: "Abdoul Wassi Badirou, Alfred Assal, James Roy, Samuel Croteau"
 date: "`r Sys.Date()`"
 output:
-  bookdown::pdf_document2:
-    toc: yes
-    toc_depth: 3
-    extra_dependencies: flafter
-  #   toc: yes
-  #   toc_depth: '3'
   bookdown::html_document2:
     toc: yes
     number_sections: yes
     toc_float:
       collapsed: no
+  #   toc: yes
+  #   toc_depth: '3'
+  bookdown::pdf_document2:
+    toc: yes
+    toc_depth: 3
+    extra_dependencies: flafter
   # pdf_document:
 params:
   created_date: "2023-09-12"
@@ -61,9 +61,9 @@ Variables à ajouter : merge avec les autres données par sous-question
 
 # Introduction
 
-Dans cette deuxième partie du projet, nous devions présenter des modèles de régression linéaire permettant de répondre une question de sorte à conseiller la compagnie BIXI d’un point de vue d’affaires. D’abord, avant de choisir le sujet du questionnement, on s’est penché sur la compagnie elle-même. Sachant que BIXI est une compagnie à but non lucratif, son but n’est pas nécessairement de maximiser ses profits. C’est ainsi qu’on s’est questionné à savoir, qu’est ce qui intéresserait un OBNL comme BIXI. 
-Au premier abord, on a conclu que la question devait être plus d’ordre environnemental. Qu’est-ce que la compagnie peut faire pour accélérer la transition vers une économie verte, en réduisant l’impact environnemental des moyens de transport? Bien sûr, cette question est très large, mais elle nous affecte un nouveau problème où l'on s’intéresse moins à la durée des déplacements et plus au nombre de déplacement. Cette réflexion provient du fait, que le nombre de déplacements est en lien avec le nombre d’utilisateurs. Ce qui veut dire qu’un déplacement en bixi de plus, c’est une personne qui à décider de ne pas prendre sa voiture. À cet égard, on va s’intéresser à plusieurs sous-questions, à savoir comment les évènements affectent le nombre de déplacements. Autrement dit, est-ce que les festivals à Montréal affectent le nombre d’utilisations des bixis? On va aussi s’intéresser aux portraits démographiques de la ville. Quant à savoir, est-ce que la densité de population, les parcs, les lieux culturels et les autres formes d’infrastructures mises en place dans les villes affectent le nombre d’utilisations des bixis? Bien sûr, chaque modèle présenté aura ses limites et elles seront toutes abordées en temps et lieu. Cependant, ces questionnements peuvent être intéressants pour la compagnie, puisqu’ils permettent de pointer les localisations où le transport à vélo est plus abondant dans la région métropolitaine de Montréal et comment la compagnie peut continuer à accroitre son service, en réduisant le nombre de personnes qui utilisent des transports non écologiques.
+Dans cette deuxième partie du projet, nous devions présenter des modèles de régression linéaire permettant de répondre une question de sorte à conseiller la compagnie BIXI d'un point de vue d'affaires. D'abord, avant de choisir le sujet du questionnement, on s'est penché sur la compagnie elle-même. Sachant que BIXI est une compagnie à but non lucratif, son but n'est pas nécessairement de maximiser ses profits. C'est ainsi qu'on s'est questionné à savoir, qu'est ce qui intéresserait un OBNL comme BIXI.
 
+Au premier abord, on a conclu que la question devait être plus d'ordre environnemental. Qu'est-ce que la compagnie peut faire pour accélérer la transition vers une économie verte, en réduisant l'impact environnemental des moyens de transport? Bien sûr, cette question est très large, mais elle nous affecte un nouveau problème où l'on s'intéresse moins à la durée des déplacements et plus au nombre de déplacement. Cette réflexion provient du fait, que le nombre de déplacements est en lien avec le nombre d'utilisateurs. Ce qui veut dire qu'un déplacement en bixi de plus, c'est une personne qui à décider de ne pas prendre sa voiture. À cet égard, on va s'intéresser à plusieurs sous-questions, à savoir comment les évènements affectent le nombre de déplacements. Autrement dit, est-ce que les festivals à Montréal affectent le nombre d'utilisations des bixis? On va aussi s'intéresser aux portraits démographiques de la ville. Quant à savoir, est-ce que la densité de population, les parcs, les lieux culturels et les autres formes d'infrastructures mises en place dans les villes affectent le nombre d'utilisations des bixis? Bien sûr, chaque modèle présenté aura ses limites et elles seront toutes abordées en temps et lieu. Cependant, ces questionnements peuvent être intéressants pour la compagnie, puisqu'ils permettent de pointer les localisations où le transport à vélo est plus abondant dans la région métropolitaine de Montréal et comment la compagnie peut continuer à accroitre son service, en réduisant le nombre de personnes qui utilisent des transports non écologiques.
 
 ```{r read}
 dat = read.csv("bixifull.csv")
@@ -500,7 +500,7 @@ model_desity_M <- lm(formula = n_tot ~ density + ParcKm2 + BibliothequeKm2 + Cen
 summary(model_desity_M)
 ```
 
-Dans la figure ci-dessous \@ref(fig:residualsDensityMult) on peut remarquer que la variance entre des valeurs prédites n'est pas du tout constante. Cela étant dit, l'hypothèse d'homoscédasticité est violée.Aussi, la figure \@ref(fig:QQdensite_multiple) quant a elle mesure la normalité des données. il est possible d'apercevoir dans ce cas que le dernier tiers des données s'éloigne largement de la ligne de normale dans le graphique Q-Q. L'hypothèse de normalité est alors aussi violée. Une solution possible serait de faire une transformation logarithmique des données. Cette transformation permettrait ainsi aux données d'être plus symétrique.
+Dans la figure ci-dessous \@ref(fig:residualsDensityMult) on peut remarquer que la variance entre des valeurs prédites n'est pas du tout constante. Cela étant dit, l'hypothèse d'homoscédasticité est violée.Aussi, la figure \@ref(fig:QQdensiteMultiple) quant a elle mesure la normalité des données. il est possible d'apercevoir dans ce cas que le dernier tiers des données s'éloigne largement de la ligne de normale dans le graphique Q-Q. L'hypothèse de normalité est alors aussi violée. Une solution possible serait de faire une transformation logarithmique des données. Cette transformation permettrait ainsi aux données d'être plus symétrique.
 
 ```{r residualsDensityMult, out.height = "30%", fig.align = 'center', fig.cap = "Graphique des résidus par rapport aux valeurs prédites"}
 plot(model_desity_M$fitted.values, resid(model_desity_M), 
@@ -511,7 +511,7 @@ abline(h = 0, col = "red", lty = 2)
 
 ```
 
-```{r QQdensite_multiple, out.height = "30%", fig.align = 'center', fig.cap = "Graphique QQ - modèle de densité démographique multiple"}
+```{r QQdensiteMultiple, out.height = "30%", fig.align = 'center', fig.cap = "Graphique QQ - modèle de densité démographique multiple"}
 residuals <- residuals(model_desity_M)
 
 ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
@@ -542,7 +542,6 @@ summary(modele2_interactions)
 ```
 
 En examinant ce modèle, on constate que tous les paramètres sont significatifs à au moins 99,9% de confiance sauf pour les paramètres `logParcKm2` et `logDensity:logParcKm2` qui semblent ne pas être statistiquement significatifs. On peut aussi constater que si `logBibliothequeKm2` augmente de 1, alors le log du nombre de déplacement total augmentera de 13.44, puisque que ces variables sont sur l'échelle logarithmique, l'analyse des valeurs numérique perd un peu de son sens, cependant on peut comprendre qu'il y a un effet positif à l'augmentation du nombre de bibliothèque. Puisque les variables sont sur une échelle logarithmique, il faut aussi comprendre que les variables avec des coefficients négatifs ont ainsi très peu d'impact sur le nombre de déplacement total si elles augmentent de un. On remarque aussi que le R2 augmente en comparaison aux autres modèles incluant la densité pour une valeur de 37.34% ce qui veut dire que ce modèle explique un peu plus la variabilité du nombre total de déplacements que les autres ci-dessus avec la densité.
-
 
 Suite aux observations de ce modèle, on peut dire que le nombre de bibliothèques, de centre communautaires et de centres sportifs influencent positivement le nombre de déplacement en Bixi et le nombre de parc n'a pas d'effet significatif.
 
@@ -581,13 +580,12 @@ summary(modele2_interactions_nm)
 
 On obtient des résultats similaires au modèle avec les données des membres aussi. Encore une fois, `logBibliothequeKm2` et `logDensity:logParcKm2` ne semblent pas très significatifs (`logBibliothequeKm2` l'est un peu plus). Cependant, on peut remarquer que le R2 à augmenté à 42.45%, ainsi le modèle avec les non-membres seulement explique un peu mieux la variance du log des déplacements totaux.
 
-*De plus, En supposant que l’indépendance entre le nombre de déplacements n_tot et le terme d’erreur, une variation de 1% de la densité de la population serait associée, dans ce modèle, à une variation moyenne de 1.39 % du nombre de déplacements total en bixi. Cependant, l’hypothèse d’indépendance n’est pas nécessairement respectée dans ce cas, puisqu’on sait qu’il y a des variables qui ne sont pas prises en compte, comme le nombre de pistes cyclables, etc.  Cela étant dit, on peut tout de même affirmer que l’effet de la densité sur le nombre total de déplacements reste positif.* A VOIR SI J'AJOUTE
+*De plus, En supposant que l'indépendance entre le nombre de déplacements n_tot et le terme d'erreur, une variation de 1% de la densité de la population serait associée, dans ce modèle, à une variation moyenne de 1.39 % du nombre de déplacements total en bixi pour les non-membre. Cependant, l'hypothèse d'indépendance n'est pas nécessairement respectée dans ce cas, puisqu'on sait qu'il y a des variables qui ne sont pas prises en compte, comme le nombre de pistes cyclables, etc. Cela étant dit, on peut tout de même affirmer que l'effet de la densité sur le nombre total de déplacements reste positif.* A VOIR SI J'AJOUTE
 
 Nous approfondirons davantage ce sujet dans la conclusion, cependant, il est essentiel de noter que la société doit tenir compte des futurs projets de développement des villes afin d'accroître l'utilisation des Bixi.
 
-## Limitation du modèle de densité 
-
+## Limitation du modèle de densité
 
 # Conclusion
 
-Enfin toutes ces informations sont importantes pour l’OBNL. Elle explique en bref, qu’en moyenne, les arrondissements plus densifiés et l’ajout de certaines infrastructures dans les villes augmentent le nombre d’utilisation des bixi, ce qui est cohérent avec notre hypothèse. À cet effet, il est possible de se demander si ça ne serait pas intéressant pour la compagnie de se coordonner avec les planificateurs urbains des villes pour arrimer l’ajout de station de bixi aux futurs projets de développement urbain des arrondissements. Cela étant dit, ça permettrait d’augmenter le nombre de déplacements en bixi et de diminuer le nombre de véhicules non écologiques sur les routes.
+Enfin toutes ces informations sont importantes pour l'OBNL. Elle explique en bref, qu'en moyenne, les arrondissements plus densifiés et l'ajout de certaines infrastructures dans les villes augmentent le nombre d'utilisation des bixi, ce qui est cohérent avec notre hypothèse. À cet effet, il est possible de se demander si ça ne serait pas intéressant pour la compagnie de se coordonner avec les planificateurs urbains des villes pour arrimer l'ajout de station de bixi aux futurs projets de développement urbain des arrondissements. Cela étant dit, ça permettrait d'augmenter le nombre de déplacements en bixi et de diminuer le nombre de véhicules non écologiques sur les routes.
