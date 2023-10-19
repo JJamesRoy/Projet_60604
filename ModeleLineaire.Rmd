@@ -4,17 +4,17 @@ subtitle: "MATH60604 - Modélisation statistique"
 author: "Abdoul Wassi Badirou, Alfred Assal, James Roy, Samuel Croteau"
 date: "`r Sys.Date()`"
 output:
-  bookdown::pdf_document2:
-    toc: yes
-    toc_depth: 3
-    extra_dependencies: flafter
-  #   toc: yes
-  #   toc_depth: '3'
   bookdown::html_document2:
     toc: yes
     number_sections: yes
     toc_float:
       collapsed: no
+  #   toc: yes
+  #   toc_depth: '3'
+  bookdown::pdf_document2:
+    toc: yes
+    toc_depth: 3
+    extra_dependencies: flafter
   # pdf_document:
 params:
   created_date: "2023-09-12"
