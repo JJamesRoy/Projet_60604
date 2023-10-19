@@ -586,7 +586,6 @@ Nous approfondirons davantage ce sujet dans la conclusion, cependant, il est ess
 
 ## Limitation du modèle de densité
 
-
 # Conclusion
 
 Enfin toutes ces informations sont importantes pour l'OBNL. Elles expliquent en bref, qu'en moyenne, les arrondissements plus densifiés et l'ajout de certaines infrastructures dans les villes augmentent le nombre d'utilisation des bixi, ce qui est cohérent avec notre hypothèse. À cet effet, il est possible de se demander si ça ne serait pas intéressant pour la compagnie de se coordonner avec les planificateurs urbains des villes pour arrimer l'ajout de station de bixi aux futurs projets de développement urbain des arrondissements. Cela étant dit, ça permettrait d'augmenter le nombre de déplacements en bixi et de diminuer le nombre de véhicules non écologiques sur les routes.
