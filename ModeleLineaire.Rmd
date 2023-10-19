@@ -4,17 +4,17 @@ subtitle: "MATH60604 - Modélisation statistique"
 author: "Abdoul Wassi Badirou, Alfred Assal, James Roy, Samuel Croteau"
 date: "`r Sys.Date()`"
 output:
+  bookdown::pdf_document2:
+    toc: yes
+    toc_depth: 3
+    extra_dependencies: flafter
+  #   toc: yes
+  #   toc_depth: '3'
   bookdown::html_document2:
     toc: yes
     number_sections: yes
     toc_float:
       collapsed: no
-  #   toc: yes
-  #   toc_depth: '3'
-  bookdown::pdf_document2:
-    toc: yes
-    toc_depth: 3
-    extra_dependencies: flafter
   # pdf_document:
 params:
   created_date: "2023-09-12"
@@ -27,7 +27,7 @@ header-includes:
 - \usepackage{float}
 - \usepackage{amsmath}
 ---
- 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = FALSE,error = TRUE, fig.pos = "H")
 ```
@@ -517,7 +517,7 @@ ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
 
 ```
 
-# Modèle avec interactions
+## Modèle avec interactions
 
 Compte-tenu que le nombre de parc, de bibliothèques, de centres communautaires et de centres sportifs peuvent être influencés par la densité de population dans une ville, il peut être interessant de générer un modèle qui inclut des interactions avec la densité et le nombre de ces différentes installations.
 
@@ -535,11 +535,11 @@ modele2_interactions <- lm(n_tot_mod ~ logDensity + logParcKm2 + logBibliotheque
 summary(modele2_interactions)
 ```
 
-En examinant ce modèle, on constate que tous les paramètres sont significatifs à au moins 95% de confiance sauf pour le paramètre densité et l'interaction entre Density et BibliothequeKm2. Nous pouvons donc supposer que le paramètre densité a perdu une partie de sa signification et son effet a été capturé par les interactions. Puis, son interaction avec Bibliothèque n'est pas assez significative. On peut aussi constater que si logBibliothequeKm2 augmente de 1, alors le log du nombre de déplacement total augmentera de 13.44, puisque que ces variables sont sur l'échelle logarithmique, les valeurs numériques sont démesurées, cependant on peut comprendre qu'il y a un effet positif à l'augmentation du nombre de bibliothèque. Puisque les variables sont sur une échelle logarithmique, il faut aussi comprendre que les variables avec des coefficient négatifs ont ainsi très peu d'impact sur le nombre de déplacement total si elles augmentent de un. On remarque aussi que le R2 augmente en comparaison aux autres modèles incluant la densité pour une valeur de 37.34% ce qui veut dire que ce modèle explique un peu plus la variabilité du nombre total de déplacements que les autres ci-dessus avec la densité.
+En examinant ce modèle, on constate que tous les paramètres sont significatifs à au moins 99,9% de confiance sauf pour les paramètres logParcKm2 et logDensity:logParcKm2 qui semblent ne pas être statistiquement significatifs. On peut aussi constater que si logBibliothequeKm2 augmente de 1, alors le log du nombre de déplacement total augmentera de 13.44, puisque que ces variables sont sur l'échelle logarithmique, l'analyse des valeurs numérique perd un peu de son sens, cependant on peut comprendre qu'il y a un effet positif à l'augmentation du nombre de bibliothèque. Puisque les variables sont sur une échelle logarithmique, il faut aussi comprendre que les variables avec des coefficients négatifs ont ainsi très peu d'impact sur le nombre de déplacement total si elles augmentent de un. On remarque aussi que le R2 augmente en comparaison aux autres modèles incluant la densité pour une valeur de 37.34% ce qui veut dire que ce modèle explique un peu plus la variabilité du nombre total de déplacements que les autres ci-dessus avec la densité.
 
-Suite aux observations de ce modèle, on peut dire que le nombre de parcs, de bibliothèques et de centre commerciaux influencent positivement le nombre de déplacement en Bixi. Il serait donc judicieux pour la compagnie Bixi de pousser la construction de ces infracstructures.
+Suite aux observations de ce modèle, on peut dire que le nombre de bibliothèques, de centre communautaires et de centres sportifs influencent positivement le nombre de déplacement en Bixi et le nombre de parc n'a pas d'effet significatif.
 
-On peut ensuite examiner les résidus avec les figure \@ref(fig:distResDensiteMultipleInt) et \@ref(fig:qqDensiteMultipleInt)
+Pour s'assurer de l'homoscédasticité et linéarité du modèle, on peut ensuite examiner les résidus avec les figure \@ref(fig:distResDensiteMultipleInt) et \@ref(fig:qqDensiteMultipleInt).
 
 ```{r distResDensiteMultipleInt, out.height = "30%", fig.align = 'center', fig.cap = "Hist résidus - modèle de densité démographique multiple avec interactions"}
 
@@ -561,14 +561,19 @@ ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
   ggtitle("Graphique Q-Q")
 ```
 
-D'après l'analyse des résidus, on constate une allure normale des résidus sur le graphique de la densité et les quantiles semblent suivre raisonnablement la droite sur le graphique QQ. Ainsi, la condition de normalité est sensiblement respectée.
+D'après l'analyse des résidus, on constate une allure normale des résidus sur le graphique de la densité et les quantiles semblent suivre raisonnablement la droite sur le graphique QQ. Ainsi, les conditions semble être respectées.
 
-Ensuite, il peut être intéressant de construire un modèle avec les données des non-membres seulement pour voir si ceux-ci ont l'habitude ou non de prendre un Bixi pour.
+### Modèle pour les non-membres
+
+Ensuite, il peut être intéressant de construire un modèle avec les données des non-membres seulement pour voir si l'utilisation des bixis pour les non-membre est reliée de manière différente aux différentes infrastructures dans un arrondissement. Pour voir si l'entreprise Bixi devrait porter une attention différentes pour les non-membres ou pas.
 
 ```{r}
 modele2_interactions_nm = lm(n_tot_mod ~ logDensity + logParcKm2 + logBibliothequeKm2 + logCentre_communautaireKm2 + logCentre_sportifKm2 + logDensity*logParcKm2 + logDensity*logBibliothequeKm2 + logDensity*logCentre_communautaireKm2 + logDensity*logCentre_sportifKm2, data = dat_mod[dat_mod$mem == 0,])
 summary(modele2_interactions_nm)
 ```
 
+On obtient des résultats similaires au modèle avec les données des membres aussi. Encore une fois, logBibliothequeKm2 et logDensity:logParcKm2 ne semblent pas très significatifs (logBibliothequeKm2 l'est un peu plus). Cependant, on peut remarquer que le R2 à augmenté à 42.45%, ainsi le modèle avec les non-membres seulement explique un peu mieux la variance du log des déplacements totaux.
 
 # Conclusion
+
+-Modèle avec densité: Densité favorise le nb de déplacements. Bibliothèques, centre sportifs et centres communautaires aussi.
