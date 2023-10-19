@@ -35,6 +35,7 @@ library(car)
 library(cleandata)
 library(data.table)
 library(kableExtra)
+library(gridExtra)
 ```
 
 
@@ -380,24 +381,27 @@ Ainsi, s'il existe des variables $Z_1$ qui affectent à la fois `festival` et `n
 
 Au niveau de la normalité des résidus, on doit les analyser après la transformation logarithmique.
 
-```{r fest-res1, out.height = "30%", fig.align='center', fig.cap="Distribution des résidus"}
+```{r fest-res1, out.height = "30%", fig.align='center', fig.cap="Distribution des résidus et QQ-Plot Résidus Student"}
 resid <- rstudent(mod_fest_1)
 fitted <- mod_fest_1$fitted.values
 res.dat <- cbind(dat_mod, fitted, resid)
-ggplot(data = res.dat, mapping = aes(x = resid)) + geom_density() +
+
+plot1 <- ggplot(data = res.dat, mapping = aes(x = resid)) + geom_density() +
 geom_histogram(aes(y = ..density..), bins = 10, alpha = 0.5) +
 xlab("Résidus") +
-ylab("Densité")
-```
+ylab("Densité")+
+  ggtitle("Distribution des résidus")
 
-```{r fest-qq1, out.height = "30%", fig.align='center', fig.cap="QQ-Plot Résidus Student"}
-ggplot(data = res.dat, mapping = aes(sample = resid)) + stat_qq(distribution = qt,
+plot2 <- ggplot(data = res.dat, mapping = aes(sample = resid)) + stat_qq(distribution = qt,
 dparams = mod_fest_1$df.residua) + stat_qq_line(distribution = qt,
 dparams = mod_fest_1$df.residual) + labs(x = "Quantiles théoriques",
-y = "Quantiles empiriques")
+y = "Quantiles empiriques", title = "QQ-Plot Résidus Student")
+
+grid.arrange(plot1, plot2, ncol = 2)
 ```
 
-En observant les figures \@ref(fig:fest-res1) et \@ref(fig:fest-qq1), on voit que les résidus semblent ne pas être normales dans le premier tiers des données. Par la suite, les résidus semblent se rapprocher d'un distribution normale. Or, étant donné que les résidus ne sont pas parfaitement normales, cela va poser des limitations dans l'analyse et l'inférence des résultats.
+
+En observant le figure à gauche \@ref(fig:fest-res1) et celle a droite \@ref(fig:fest-res1), on voit que les résidus semblent ne pas être normales dans le premier tiers des données. Par la suite, les résidus semblent se rapprocher d'un distribution normale. Or, étant donné que les résidus ne sont pas parfaitement normales, cela va poser des limitations dans l'analyse et l'inférence des résultats.
 
 ## Modèle linéaire ajusté
 
@@ -630,46 +634,12 @@ ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
 
 ## Modèle linéaire de régression multiple
 
-Avant de débuter le modèle multiple avec la densité de population, il est important de comprendre que plusieurs données ont été ajoutées et même modifier pour pouvoir observer la tendance que prend l'utilisation des Bixis lorsque la densité de population augmente. Cela étant dit, il était important d'ajouter des variables qui affectaient autant la densité de population que le nombre total de Bixi utilisé, comme expliqué dans la figure \@ref(fig:firstgroup). Par conséquent, des variables comme le nombre de parcs `Parc` par arrondissement, le nombre de bibliothèques par arrondissement `Bibliotheque`, le nombre de centres communautaire par arrondissement `Centre_communautaire` et le nombre de centres sportifs par arrondissement `Centre_sportif` ont été ajoutés. De plus, puisque la superficie des arrondissements varie grandement, ces variables ajoutées ont été divisées par la superficie de chaque arrondissement. Ainsi les grandes villes, comme Laval qui a beaucoup d'infrastructure à cause de sa grande superficie, ne viendront pas biaiser nos modèles. Autrement dit, les variables ajoutées(nombre de parcs, le nombre de bibliothèques, le nombre de centres communautaires, le nombre de centres sportifs) sont par $km^2$ de leur arrondissement.
+Avant de débuter le modèle multiple avec la densité de population, il est important de comprendre que plusieurs données ont été ajoutées et même modifier pour pouvoir observer la tendance que prend l'utilisation des Bixis lorsque la densité de population augmente. Cela étant dit, il était important d'ajouter des variables qui affectaient autant la densité de population que le nombre total de Bixi utilisé, comme expliqué dans la figure \@ref(fig:firstgroup). Par conséquent, des variables comme le nombre de parcs `Parc` par arrondissement, le nombre de bibliothèques par arrondissement `Bibliotheque`, le nombre de centres communautaire par arrondissement `Centre_communautaire` et le nombre de centres sportifs par arrondissement `Centre_sportif` ont été ajoutés. De plus, puisque la superficie des arrondissements varie grandement, ces variables ajoutées ont été divisées par la superficie de chaque arrondissement. Ainsi les grandes villes, comme Laval qui a beaucoup d'infrastructure à cause de sa grande superficie, ne viendront pas biaiser nos modèles. Autrement dit, les variables ajoutées(nombre de parcs, le nombre de bibliothèques, le nombre de centres communautaires, le nombre de centres sportifs) sont par $km^2$ de leur arrondissement. Enfin, pour expliquer le nombre total de déplacement nous utiliseront aussi les variables `mem` (membre ou non) et `wkend` (variable dichotomique qui informe si les déplacement sont la fin de semaine ou non). 
 
-Dans la régression multiple ci-dessous, il est possible de constater que le coefficient de `BibliothequeKm2`est grandement négatif. En se regardant seulement son coefficient, on aurait l'impression qu'en ajoutant une bibliothèque par $km^2$ il y aurait une diminution d'en moyenne 303 déplacements en bixi. Cependant, ce n'est pas nécessairement vrai, puisqu'en observant les données on peut remarquer que la ville de Longueuil a excessivement beaucoup de bibliothèques contrairement aux autres arrondissements, ce qui vient biaiser nos données. Aussi, `Centre_communautaireKm2`n'est pas significatif dans le modèle. C'est-à-dire que la probabilité de faire une erreur en rejetant l'hypothèse nulle où le coefficient de `Centre_communautaireKm2` est nul est élevée.
+Dans la régression multiple ci-dessous, il est possible de constater que le coefficient de `logBibliothequeKm2`est négatif affecte négativement le nombre de déplacement. Cependant, ce n'est pas nécessairement vrai, puisqu'en observant les données on peut remarquer que la ville de Longueuil a excessivement beaucoup de bibliothèques contrairement aux autres arrondissements, ce qui vient biaiser nos données, puisqu’en plus c’est une ville ou le déplacement en voiture est plus courant. Aussi, `logCentre_communautaireKm2`n'est pas significatif dans le modèle. C'est-à-dire que la probabilité de faire une erreur en rejetant l'hypothèse nulle où le coefficient de `logCentre_communautaireKm2` est nul est élevée.
 
-En ce qui concerne la variable d'intérêt :densité de la population `density`, on peut constater que son coefficient signifie qu'en moyenne s'il y a une augmentation d'une personne par $km^2$ qu'il y aurait une augmentation minime du nombre total de déplacements, mais l'information reste toutefois intéressante à connaitre pour la compagnie. De plus, les infrastructures comme les parcs influent grandement sur le nombre total de déplacements en Bixi. Une augmentation d'un parc par $km^2$ augmenterait d'en moyenne 15 déplacements de bixi.Cependant, la mesure des parcs par $km^2$ est démesuré, mais elle donne tout de même un repère important pour compagnie, soit que la construction de parc est favorable à l'utilisation de bixi.
+De plus, en supposant que l'indépendance entre le nombre de déplacements `n_tot` et le terme d'erreur, une variation de 1% de la densité de la population serait associée, dans ce modèle, à une variation moyenne de 0.98% du nombre de déplacements total en bixi. Cependant, l'hypothèse d'indépendance n'est pas nécessairement respectée dans ce cas. Pour cette raison, cette interprétation n'est pas totalement véridique et ne sera pas utilisée dans les modèles à venir, puisqu'on sait qu'il y a des variables qui ne sont pas prises en compte, comme le nombre de pistes cyclables, etc. Cela étant dit, on peut tout de même affirmer que l'effet de la densité sur le nombre total de déplacements est positif.
 
-```{r, results='hide'}
-model_desity_M <- lm(formula = n_tot ~ density + ParcKm2 + BibliothequeKm2 + Centre_communautaireKm2 + Centre_sportifKm2, data = dat_mod)
-
-summary(model_desity_M)
-```
-
-Dans la figure ci-dessous \@ref(fig:residualsDensityMult) on peut remarquer que la variance entre des valeurs prédites n'est pas du tout constante. Cela étant dit, l'hypothèse d'homoscédasticité est violée.Aussi, la figure \@ref(fig:QQdensiteMultiple) quant a elle mesure la normalité des données. il est possible d'apercevoir dans ce cas que le dernier tiers des données s'éloigne largement de la ligne de normale dans le graphique Q-Q. L'hypothèse de normalité est alors aussi violée. Une solution possible serait de faire une transformation logarithmique des données. Cette transformation permettrait ainsi aux données d'être plus symétrique.
-
-```{r residualsDensityMult, out.height = "30%", fig.align = 'center', fig.cap = "Graphique des résidus par rapport aux valeurs prédites"}
-plot(model_desity_M$fitted.values, resid(model_desity_M), 
-     xlab = "Valeurs prédites", 
-     ylab = "Résidus",
-     main = "")
-abline(h = 0, col = "red", lty = 2)
-
-```
-
-```{r QQdensiteMultiple, out.height = "30%", fig.align = 'center', fig.cap = "Graphique QQ - modèle de densité démographique multiple"}
-residuals <- residuals(model_desity_M)
-
-ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
-  stat_qq() +
-  stat_qq_line() +
-  xlab("Quantiles Théoriques") +
-  ylab("Quantiles de l'Échantillon") +
-  ggtitle("Graphique Q-Q")
-
-```
-
-## Modèle avec interactions
-
-Compte-tenu que le nombre de parc, de bibliothèques, de centres communautaires et de centres sportifs peuvent être influencés par la densité de population dans une ville, il peut être interessant de générer un modèle qui inclut des interactions avec la densité et le nombre de ces différentes installations.
-
-Encore une fois, nous allons utiliser le log de nos paramètres compte-tenu que leur distribution est asymétrique et ne suit pas une loi normale.
 
 ```{r}
 dat_mod$logDensity <- log(dat_mod$density)
@@ -678,6 +648,45 @@ dat_mod$logBibliothequeKm2 <- log(dat_mod$BibliothequeKm2)
 dat_mod$logCentre_communautaireKm2 <- log(dat_mod$Centre_communautaireKm2 + 0.01)
 dat_mod$logCentre_sportifKm2 <- log(dat_mod$Centre_sportifKm2 + 0.01)
 
+modele_densite <- lm(n_tot_mod ~ logDensity + logParcKm2 + logBibliothequeKm2 + logCentre_communautaireKm2 + logCentre_sportifKm2 + n_AM +wkend + mem, data = dat_mod)
+
+summary(modele_densite)
+```
+
+Dans la figure à gauche ci-dessous \@ref(fig:residualsDensityMult) on peut remarquer que la variance entre des valeurs prédites n'est pas constante. Cela étant dit, l'hypothèse d'homoscédasticité est violée.Aussi, la figure à droite \@ref(fig:residualsDensityMult) quant a elle mesure la normalité des données. Puisque la transformation logarithmique des données a permis de contourner l'asymétrie des données, il est possible d'apercevoir que même si les queues du graphique QQ s'éloignent de la ligne, qu'il y a une certaine normalité dans les données.
+
+
+```{r residualsDensityMult, out.height = "30%", fig.align = 'center', fig.cap = "Graphique des résidus"}
+
+residuals_data <- data.frame(Fitted_Values = modele_densite$fitted.values, Residuals = resid(modele_densite))
+
+
+plot1 <- ggplot(residuals_data, aes(x = Fitted_Values, y = Residuals)) +
+  geom_point() +
+  xlab("Valeurs prédites") +
+  ylab("Résidus") +
+  ggtitle("Graphique des résidus par rapport aux valeurs prédites") +
+  geom_hline(yintercept = 0, color = "red", linetype = "dashed")
+
+residuals <- residuals(modele_densite)
+plot2 <- ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
+  stat_qq() +
+  stat_qq_line() +
+  xlab("Quantiles Théoriques") +
+  ylab("Quantiles de l'Échantillon") +
+  ggtitle("Graphique Q-Q")
+
+grid.arrange(plot1, plot2, ncol = 2)
+
+```
+## Modèle avec interactions
+
+Compte-tenu que le nombre de parc, de bibliothèques, de centres communautaires et de centres sportifs peuvent être influencés par la densité de population dans une ville, il peut être interessant de générer un modèle qui inclut des interactions avec la densité et le nombre de ces différentes installations.
+
+Encore une fois, nous allons utiliser le log de nos paramètres compte-tenu que leur distribution est asymétrique et ne suit pas une loi normale.
+
+```{r}
+
 modele2_interactions <- lm(n_tot_mod ~ logDensity + logParcKm2 + logBibliothequeKm2 + logCentre_communautaireKm2 + logCentre_sportifKm2 + logDensity*logParcKm2 + logDensity*logBibliothequeKm2 + logDensity*logCentre_communautaireKm2 + logDensity*logCentre_sportifKm2, data = dat_mod)
 
 summary(modele2_interactions)
@@ -685,30 +694,33 @@ summary(modele2_interactions)
 
 En examinant ce modèle, on constate que tous les paramètres sont significatifs à au moins 99,9% de confiance sauf pour les paramètres `logParcKm2` et `logDensity:logParcKm2` qui semblent ne pas être statistiquement significatifs. On peut aussi constater que si `logBibliothequeKm2` augmente de 1, alors le log du nombre de déplacement total augmentera de 13.44, puisque que ces variables sont sur l'échelle logarithmique, l'analyse des valeurs numérique perd un peu de son sens, cependant on peut comprendre qu'il y a un effet positif à l'augmentation du nombre de bibliothèque. Puisque les variables sont sur une échelle logarithmique, il faut aussi comprendre que les variables avec des coefficients négatifs ont ainsi très peu d'impact sur le nombre de déplacement total si elles augmentent de un. On remarque aussi que le R2 augmente en comparaison aux autres modèles incluant la densité pour une valeur de 37.34% ce qui veut dire que ce modèle explique un peu plus la variabilité du nombre total de déplacements que les autres ci-dessus avec la densité.
 
-*De plus, en supposant que l'indépendance entre le nombre de déplacements `n_tot` et le terme d'erreur, une variation de 1% de la densité de la population serait associée, dans ce modèle, à une variation moyenne de 1.12% du nombre de déplacements total en bixi. Cependant, l'hypothèse d'indépendance n'est pas nécessairement respectée dans ce cas. Pour cette raison, cette interprétation n'est pas totalement véridique et ne sera pas utilisée dans les modèles à venir, puisqu'on sait qu'il y a des variables qui ne sont pas prises en compte, comme le nombre de pistes cyclables, etc. Cela étant dit, on peut tout de même affirmer que l'effet de la densité sur le nombre total de déplacements reste positif.* A VOIR SI J'AJOUTE
 
 Suite aux observations de ce modèle, on peut dire que le nombre de bibliothèques, de centre communautaires et de centres sportifs influencent positivement le nombre de déplacement en Bixi et le nombre de parc n'a pas d'effet significatif.
 
-Pour s'assurer de l'homoscédasticité et linéarité du modèle, on peut ensuite examiner les résidus avec les figure \@ref(fig:distResDensiteMultipleInt) et \@ref(fig:qqDensiteMultipleInt).
+Pour s'assurer de l'homoscédasticité et linéarité du modèle, on peut ensuite examiner les résidus avec les figure a droite \@ref(fig:distResDensiteMultipleInt) et celle a gauche \@ref(fig:distResDensiteMultipleInt).
 
-```{r distResDensiteMultipleInt, out.height = "30%", fig.align = 'center', fig.cap = "Hist résidus - modèle de densité démographique multiple avec interactions"}
+```{r distResDensiteMultipleInt, out.height = "30%", fig.align = 'center', fig.cap = "Histograme des résidus - Graphique Q-Q "}
 
 residuals <- residuals(modele2_interactions)
 
-ggplot(data.frame(Résidus = residuals), aes(x = rstudent(modele2_interactions))) + geom_density() + geom_histogram(aes(y = ..density..),
+plot1 <- ggplot(data.frame(Résidus = residuals), aes(x = rstudent(modele2_interactions))) + geom_density() + geom_histogram(aes(y = ..density..),
 bins = 20, alpha = 0.5)+
 xlab("Résidus") +
-ylab("Densité")
-```
+ylab("Densité")+
+  ggtitle("Histogramme des résidus")
 
-```{r qqDensiteMultipleInt, out.height = "30%", fig.align = 'center', fig.cap = "Graphique QQ - modèle de densité démographique multiple avec interactions"}
-
-ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
+plot2 <- ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
   stat_qq() +
   stat_qq_line() +
   xlab("Quantiles Théoriques") +
   ylab("Quantiles de l'Échantillon") +
   ggtitle("Graphique Q-Q")
+grid.arrange(plot1, plot2, ncol = 2)
+
+```
+
+```{r qqDensiteMultipleInt, out.height = "30%", fig.align = 'center', fig.cap = "Graphique QQ - modèle de densité démographique multiple avec interactions"}
+
 ```
 
 D'après l'analyse des résidus, on constate une allure normale des résidus sur le graphique de la densité et les quantiles semblent suivre raisonnablement la droite sur le graphique QQ. Ainsi, les conditions semble être respectées.
@@ -725,8 +737,6 @@ summary(modele2_interactions_nm)
 On obtient des résultats similaires au modèle avec les données des membres aussi. Encore une fois, `logBibliothequeKm2` et `logDensity:logParcKm2` ne semblent pas très significatifs (`logBibliothequeKm2` l'est un peu plus). Cependant, on peut remarquer que le R2 à augmenté à 42.45%, ainsi le modèle avec les non-membres seulement explique un peu mieux la variance du log des déplacements totaux.
 
 Nous approfondirons davantage ce sujet dans la conclusion, cependant, il est essentiel de noter que la société doit tenir compte des futurs projets de développement des villes afin d'accroître l'utilisation des Bixi.
-
-## Limitation du modèle de densité
 
 
 # Conclusion
