@@ -191,7 +191,7 @@ Maintenant, dans la \@ref(fig:histn2), on voit qu'avec une transformation logari
 
 # Parc
 
-Dans cette seciton, nous allons analyser si des attraits comme des parcs et/ou des espaces sportives ont un impact sur l'utilisation des Bixis.
+Dans cette section, nous allons analyser si des attraits comme des parcs et/ou des espaces sportives ont un impact sur l'utilisation des Bixis.
 
 Pour tester cette question, nous allons produire plusieurs modèles de régression linéaire et faire de l'inférence sur les résultats obtenus.Les données ont été recueillis sur le site de donnes.montreal.ca.
 
@@ -405,6 +405,7 @@ dat_mod$arrond <- str_replace_all(dat_mod$arrond, " - ", "-")
 dat_pop$arrond <- str_replace_all(dat_pop$arrond, "–", "-")
 
 df_lieux_mtl <- read.csv("lieux-fr_MTL.csv")
+df_lieux_mtl_1 <- read.csv("lieux-fr_MTL.csv")
 df_lieux_long <- read.csv("vdq-lieupublic_longeuil.csv")
 df_lieux_la <- read.csv("lieux_laval.csv")
 
@@ -588,6 +589,17 @@ ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
 
 ```
 
+
+# Modèle avec interactions
+Compte-tenu que le nombre de parc, de bibliothèques, de centres communautaires et de centres sportifs peuvent être influencés par la densité de population, il peut être interessant de générer un modèle qui inclut ces interactions.
+
+```{r}
+
+modele2_interactions <- lm(logN_tot ~ logDensity + ParcKm2 + BibliothequeKm2 + Centre_communautaireKm2 + Centre_sportifKm2 + density*ParcKm2 + density*BibliothequeKm2 + density*Centre_communautaireKm2 + density*Centre_sportifKm2, data = dat_mod)
+
+summary(modele2_interactions)
+```
+En examinant ce modèle, on constate que tous les paramètres sont significatifs sauf pour le paramètre densité. Ce qui est logique, car celui-ci interragi maintenant avec les autres paramètres. D'après ces informations, nous pouvons interpréter qu'un augmentation de un de BibliothqueKm2 augmenterais le nombre total de déplacement d'environ 8.3. On remarque aussi que le R2 augmente en comparaison aux autres modèles incluant la densité pour une valeur de 39.02%.
 
 
 # Conclusion
