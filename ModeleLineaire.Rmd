@@ -37,7 +37,10 @@ library(tidyverse)
 library(readxl)
 library(knitr)
 library(googleway)
+library(ggplot2)
 library(car)
+library(cleandata)
+library(data.table)
 ```
 
 # Note
@@ -60,11 +63,16 @@ Variables cibles : n_tot et dur
 Variables à ajouter : merge avec les autres données par sous-question
 
 # Introduction
+- Déterminer les éléments qui influencent l'utilisation des bixi (nombre de déplacement) afin de proposer des stratégies qui permettraient de mieux la démocratiser.
+
+- Déterminer le prix d'imputation des usagers membres qui permettrait de générer un revenu équivalent à celui des non-membres.
 
 Dans cette deuxième partie du projet, nous devions présenter des modèles de régression linéaire permettant de répondre une question de sorte à conseiller la compagnie BIXI d'un point de vue d'affaires. D'abord, avant de choisir le sujet du questionnement, on s'est penché sur la compagnie elle-même. Sachant que BIXI est une compagnie à but non lucratif, son but n'est pas nécessairement de maximiser ses profits. C'est ainsi qu'on s'est questionné à savoir, qu'est ce qui intéresserait un OBNL comme BIXI.
 
 Au premier abord, on a conclu que la question devait être plus d'ordre environnemental. Qu'est-ce que la compagnie peut faire pour accélérer la transition vers une économie verte, en réduisant l'impact environnemental des moyens de transport? Bien sûr, cette question est très large, mais elle nous affecte un nouveau problème où l'on s'intéresse moins à la durée des déplacements et plus au nombre de déplacement. Cette réflexion provient du fait, que le nombre de déplacements est en lien avec le nombre d'utilisateurs. Ce qui veut dire qu'un déplacement en bixi de plus, c'est une personne qui à décider de ne pas prendre sa voiture. À cet égard, on va s'intéresser à plusieurs sous-questions, à savoir comment les évènements affectent le nombre de déplacements. Autrement dit, est-ce que les festivals à Montréal affectent le nombre d'utilisations des bixis? On va aussi s'intéresser aux portraits démographiques de la ville. Quant à savoir, est-ce que la densité de population, les parcs, les lieux culturels et les autres formes d'infrastructures mises en place dans les villes affectent le nombre d'utilisations des bixis? Bien sûr, chaque modèle présenté aura ses limites et elles seront toutes abordées en temps et lieu. Cependant, ces questionnements peuvent être intéressants pour la compagnie, puisqu'ils permettent de pointer les localisations où le transport à vélo est plus abondant dans la région métropolitaine de Montréal et comment la compagnie peut continuer à accroitre son service, en réduisant le nombre de personnes qui utilisent des transports non écologiques.
 
+
+# Enrichissement des données
 ```{r read}
 dat = read.csv("bixifull.csv")
 ```
@@ -128,8 +136,11 @@ dat_mod = as.data.frame(dat_mod)
 col = c("holiday", "wkend", "rain_bin")
 dat_mod[col] = lapply(dat_mod[col], factor)
 ```
+```{r, results='hide'}
+dat_mod
+```
 
-# Enrichissement des données {.unnumbered}
+## Enrichissement avec les arrondissements des stations {.unnumbered}
 
 ```{r importData, results='hide'}
 bixi_raw_data_df = read.csv("bixi1.csv", sep=",", header = T)
@@ -155,6 +166,12 @@ summary(bixi_with_name_df)
 ```{r, results='hide'}
 #Importation des données de stations: Nom, arrondissement, latitude, longitude
 bixi_stations_df=read.csv("bixi_stations_full.csv", sep = ",", header = T, encoding='latin_1')
+bixi_stations_df$STATIONARRONDISSEMENT[bixi_stations_df$STATIONARRONDISSEMENT=="Mont-Royal"]="Le Plateau-Mont-Royal"
+# bixi_stations_df$STATIONARRONDISSEMENT[bixi_stations_df$STATIONARRONDISSEMENT=="Côte-des-Neiges - Notre-Dame-de-Grâce"]="Côte-des-Neiges-Notre-Dame-de-Grâce"
+# bixi_stations_df$STATIONARRONDISSEMENT[bixi_stations_df$STATIONARRONDISSEMENT=="Mercier - Hochelaga-Maisonneuve"]="Mercier-Hochelaga-Maisonneuve"
+# bixi_stations_df$STATIONARRONDISSEMENT[bixi_stations_df$STATIONARRONDISSEMENT=="Rosemont - La Petite-Patrie"]="Rosemont-La Petite-Patrie"
+# bixi_stations_df$STATIONARRONDISSEMENT[bixi_stations_df$STATIONARRONDISSEMENT=="Rivière-des-Prairies - Pointe-aux-Trembles"]="Rivière-des-Prairies–Pointe-aux-Trembles"
+# bixi_stations_df$STATIONARRONDISSEMENT[bixi_stations_df$STATIONARRONDISSEMENT=="Villeray - Saint-Michel - Parc-Extension"]="Villeray–Saint-Michel–Parc-Extension"
 head(bixi_stations_df)
 
 # merge pour inclure les arrondissements
@@ -162,21 +179,19 @@ bixi_with_arrond_df=merge(bixi_with_name_df,bixi_stations_df, by.x = 'name',by.y
 head(bixi_with_arrond_df)
 ```
 
-```{r}
-summary(bixi_with_arrond_df)
+```{r, include=FALSE}
+#write.csv(bixi_stations_df,file="bixi_stations_full2.csv",sep = ",", row.names = F) 
 ```
 
-```{r}
+```{r, results='hide'}
+summary(bixi_with_arrond_df)
+```
+```{r, results='hide'}
 bixiWithArron_clean_df=data.frame(name=bixi_with_arrond_df$name,latitude=bixi_with_arrond_df$latitude,
       longitude=bixi_with_arrond_df$longitude,arrondissement=bixi_with_arrond_df$STATIONARRONDISSEMENT,
       bixi_with_arrond_df[,names(bixi_raw_data_df)])
+bixiWithArron_clean_df
 ```
-
-# Introduction
-
--   Déterminer les éléments qui influencent l'utilisation des bixi (nombre de déplacement) afin de proposer des stratégies qui permettraient de mieux la démocratiser.
-
--   Déterminer le prix d'imputation des usagers membres qui permettrait de générer un revenu équivalent à celui des non-membres.
 
 # Transformation variables d'intérêts
 
@@ -204,6 +219,159 @@ Maintenant, dans la \@ref(fig:histn2), on voit qu'avec une transformation logari
 # Analyse de multicolinéarité
 
 À faire si on a le temps.
+Les variables que nous savons qui ont une colinéarité parfaite:
+
+- `avg` et `dur` puisque avg=dur/n_tot
+- `rev` et `dur` puisque rev=alpha*dur
+- valider pour `mm`, `dd` et `wday`. Si ce n'est pas lié vérifier si ce n'est pas à cause du fait que nous avons un sous-ensemble aléatoire
+
+# Impact des lieux touristiques
+Dans cette section, nous voulons analyser l'impact de la présence des lieux touristiques sur l'utilisation des Bixi. Pour cela, nous utilisons le jeu de données sur les lieux d'intérêt disponible dans les données ouvertes de la ville de montréal à l'adresse url https://donnees.montreal.ca/dataset/lieux-d-interet. Nous calculons le nombre de sites touristiques par arrondissement que nous fusionnons à nos données `bixi`. 
+<!-- Nous agrégeons ces données par arrondissement pour les fusionner à nos données bixi. À partir de ces données, nous créons deux variables:  
+- `lieuxTouristiques` (1 ou 0): indique s'il y a un lieu touristique dans l'arrondissement (1) ou non (0)
+- `n_touristiques`: nombre de lieux touristiques dans l'arrondissement. -->
+Nous considérons comme lieux touristiques, les sites qui sont dans les catégories `Établissement culturel`, `Bâtiment et lieu d'intérêt`, `Art public`, `Circuit et parcours`, `Attrait touristique`, `Lieu de diffusion` et `Centre de congrès / d'exposition`. Les données pour les arrondissements de `longueuil` et `laval` sont tirés respectivement de https://www.donneesquebec.ca/recherche/dataset/installations et https://www.donneesquebec.ca/recherche/dataset/sites-de-loisirs
+```{r, results='hide'}
+#Import lieux intérêts montréal
+mtl_lieuxInterets_raw_data_df=read.csv("lieux_d_interet.csv", sep = ",", header = T)
+mtl_lieuxInterets_raw_data_df
+
+#Import lieux intérêts longueuil
+longueuil_lieuxInterets_raw_data_df=read.csv("installations_longueuil_riche.csv", sep=",", header = T, encoding = 'latin_1')
+longueuil_lieuxInterets_raw_data_df
+
+#Import lieux intérêts laval
+laval_lieuxInterets_raw_data_df=read.csv("sites-de-loisirs_laval.csv", sep=",", header = T)
+laval_lieuxInterets_raw_data_df
+```
+```{r, results='hide'}
+#Montréal: Nombre de site par arrondissement
+cat_lieux_touristique=c("Établissement culturel","Bâtiment et lieu d'intérêt","Art public","Circuit et parcours","Attrait touristique","Lieu de diffusion","Centre de congrès / d'exposition")
+mtl_lieuxInterets_df=mtl_lieuxInterets_raw_data_df[mtl_lieuxInterets_raw_data_df$Catégorie %in% cat_lieux_touristique,]
+nb_sitesTouristiques_by_arrondissement <- mtl_lieuxInterets_df %>% 
+  group_by(Arrondissement) %>%
+  summarise(nb_tour=n())
+
+#On ajuste le nom des arrondissements pour s'aligner avec ceux dans nos données bixi
+nb_sitesTouristiques_by_arrondissement$Arrondissement[nb_sitesTouristiques_by_arrondissement$Arrondissement=="Côte-des-Neiges–Notre-Dame-de-Grâce"]="Côte-des-Neiges - Notre-Dame-de-Grâce"
+nb_sitesTouristiques_by_arrondissement$Arrondissement[nb_sitesTouristiques_by_arrondissement$Arrondissement=="Mercier–Hochelaga-Maisonneuve"]="Mercier - Hochelaga-Maisonneuve"
+#nb_sitesTouristiques_by_arrondissement$Arrondissement[nb_sitesTouristiques_by_arrondissement$Arrondissement=="Le Plateau-Mont-Royal"]="Mont-Royal"
+nb_sitesTouristiques_by_arrondissement$Arrondissement[nb_sitesTouristiques_by_arrondissement$Arrondissement=="Rivière-des-Prairies–Pointe-aux-Trembles"]="Rivière-des-Prairies - Pointe-aux-Trembles"
+nb_sitesTouristiques_by_arrondissement$Arrondissement[nb_sitesTouristiques_by_arrondissement$Arrondissement=="Rosemont–La Petite-Patrie"]="Rosemont - La Petite-Patrie"
+nb_sitesTouristiques_by_arrondissement$Arrondissement[nb_sitesTouristiques_by_arrondissement$Arrondissement=="Villeray–Saint-Michel–Parc-Extension"]="Villeray - Saint-Michel - Parc-Extension"
+nb_sitesTouristiques_by_arrondissement$Arrondissement[nb_sitesTouristiques_by_arrondissement$Arrondissement=="Ville de Westmount"]="Westmount"
+
+#Longueuil: Nombre de site par arrondissement
+longueuil_lieuxInterets_df=longueuil_lieuxInterets_raw_data_df[longueuil_lieuxInterets_raw_data_df$ARRONDISSEMENT=="Arrondissement du Vieux-Longueuil" & longueuil_lieuxInterets_raw_data_df$Catégorie=="Tourisme",]
+longueuil_nb_tour=nrow(longueuil_lieuxInterets_df)
+nb_sitesTouristiques_by_arrondissement=rbind(nb_sitesTouristiques_by_arrondissement,
+          data.frame(Arrondissement='Longueuil',nb_tour=longueuil_nb_tour))
+
+#Laval: Nombre de site par arrondissement
+cat_lieux_touristique_laval=c("Aréna","Salle de spectacle","Centre de création / Espace de diffusion","Centre sportif")
+laval_lieuxInterets_df=laval_lieuxInterets_raw_data_df[laval_lieuxInterets_raw_data_df$descr_type_site %in% cat_lieux_touristique_laval,]
+laval_nb_tour=nrow(laval_lieuxInterets_df)
+nb_sitesTouristiques_by_arrondissement=rbind(nb_sitesTouristiques_by_arrondissement,
+          data.frame(Arrondissement='Laval',nb_tour=laval_nb_tour))
+
+nb_sitesTouristiques_by_arrondissement
+
+#Merge avec les données bixi
+bixi_df=merge(bixiWithArron_clean_df,nb_sitesTouristiques_by_arrondissement,by.x = 'arrondissement',by.y = 'Arrondissement', all.x = T, all.y = F)
+bixi_df$wday <- as.factor(bixi_df$wday)
+bixi_df$mem <- as.factor(bixi_df$mem)
+bixi_df
+```
+```{r, results='hide'}
+bixi_df[is.na(bixi_df$nb_tour),]
+```
+
+Étant donné que plusieurs satitions bixi se retrouvent dans un arrondissement, pour évaluer l'impact du nombre de sites touristiques par arrondissement sur l'utilisation des bixi, nous agrégeons nos données par arrondissement, par jour et par type de membre, en prenant la moyenne des différentes variables bixi par arrondissement. Ainsi, nous analysons l'impact des sites touristiques par arrondissement, sur l'utilisation moyenne dans l'arrondissement. Cette dernière est le rapport entre le nombre total de déplacement dans l'arrondissement et le nombre de station qui s'y retrouve. 
+Rapellons que notre variable cible est le logarithme du nombre total de déplacement (`n_tot_log)
+
+```{r, results='hide', fig.keep='none'}
+#Scatter plot pour voir à quoi ressemble la relation entre le nombre de sites par arrondissement et log(n_tot) si on n'agrège pas les données par arrondissement
+ggplot(bixi_df, aes(x=nb_tour, y=log(n_tot))) + geom_point() + geom_smooth(method='lm')
+```
+```{r, results='hide'}
+# Agrégation des données par arrondissement
+var_agg=c("dur","rev","n_AM","n_PM","n_tot","temp","rain","nb_tour")
+var_agg_rename=var_agg[var_agg != "nb_tour"]
+bixi_agg_arrond_df <- bixi_df %>% 
+  group_by(arrondissement, mm,dd,wday,mem,holiday) %>%
+  summarise(across(var_agg, mean))
+bixi_agg_arrond_df=as.data.frame(bixi_agg_arrond_df)
+setnames(bixi_agg_arrond_df,old = var_agg_rename, new = paste0('avg_',var_agg_rename))
+bixi_agg_arrond_df$arrondissement <- as.factor(bixi_agg_arrond_df$arrondissement)
+bixi_agg_arrond_df
+```
+
+```{r, results='hide'}
+#tapply(bixi_agg_arrond_df$arrondissement,as.factor(bixi_agg_arrond_df$nb_tour), n_distinct)
+```
+
+```{r}
+#ggplot(bixi_agg_arrond_df, aes(x=nb_tour, y=log(n_tot))) + geom_point() + geom_smooth(method='lm')
+mod1 <- lm(log(avg_n_tot) ~ nb_tour, data=bixi_agg_arrond_df)
+summary(mod1)
+```
+
+Lorsqu'on tient compte uniquement du nombre de site touristique par arrondissement, on constate que pour chaque augmentation d'une unité de cette dernière, en moyenne, le nombre total de déplacement par station, par jour et par type de membre augmente de `r round((exp(mod1$coefficients['nb_tour'])-1)*100,2)`%. Et cette augmentation est significative. Qu'en-est-il lorsqu'on tient compte des autres variables.
+
+Tout d'abord, il est important de décrire notre modèle complet. Il est composé de toutes les variables sauf `station`, `arrondissement`, `rev`, `dur`, `avg` et `n_PM`. 
+La variable `station` qui est l'identification unique des stations, est exclue car elle ne comporte aucune codification. Donc elle n'apporte aucune information. De plus, comme nous avons agrégé les données à l'arrondissement, la variable n'est plus du tout pertinente. 
+
+La variable `arrondissement` est exclue car elle a une corrélation très forte avec `nb_tour` (nombre de sites touristiques dans la station). L'ajustement d'un modèle qui inclus ces deux variables retourne `NA` pour l'un deux. Elle s'explique par le fait que quasiment tous les arrondissements ont des nombres de sites différents. Donc quasiment, chaque nombre de site correspond à un arrondissement différent. 
+
+Les variables `rev` et `dur` (durée totale de tous les déplacements partant de la station au jour spécifié) sont exclues car ceux sont des variables cibles dans le cadre du projet. Or dans cette section on s'intéresse à l'impact sur la variable `n_tot`. 
+
+La variable `avg` (la durée moyenne (en minutes) de tous les déplacement partant d'une station au jour spécifié) est exclue car elle perd son sens suite à l'agrégat `moyenne` utilisée sur les variables pour agréger les données par arrondissement. Rappelons que pour agréger les données, nous calculons pour les variables leur moyenne sur l'ensemble des stations dans l'arrondissement. Soit $S$ l'ensemble des stations, indexé par $i$. Soit $A$ l'ensemble des arrondissements, indexé par $j$. Soit: 
+
+- $\overline{N}_j$: la moyenne du nombre total de déplacements par station dans l'arrondissement $j$
+
+- $\overline{D}_j$: la moyenne de la durée totale des déplacements par station dans l'arrondissement $j$
+
+- $\overline{A}_j$: la moyenne de la durée moyenne des déplacement par station dans l'arrondissement $j$
+
+\begin{equation} 
+ \overline{N}_j = \sum_{i=1}^{S} \frac{N_{i,j}}{S}=\sum_{i=1}^{S} \frac{D_{i,j}A_{i,j}}{S} \ne \sum_{i=1}^{S} \frac{D_{i,j}}{S}\sum\frac{A_{i,j}}{S} (\#eq:relationDurAvg)
+\end{equation}
+
+La relation décrite par l'équation \@ref(eq:relationDurAvg) décrit mathématiquement la raison pour laquelle nous excluons la variable `avg` dans les données agrégées. 
+
+La variable `n_PM` est exclue car elle a une forte corrélation avec `n_AM`.
+
+```{r ModLieuTouristiqueAjustementModComplet}
+mod2 <- lm(log(avg_n_tot) ~ mm + dd + wday+ mem + holiday + avg_n_AM + avg_temp + avg_rain + nb_tour, data=bixi_agg_arrond_df)
+summary(mod2)
+```
+
+Même après avoir ajusté pour les autres variables, on constate que le nombre de site touristique a un effet significatif sur le nombre total de déplacement par station par arrondissement pour n'importe quel niveau de significance aceptable. En fait, pour chaque augmentation d'un site touristique dans un arrondissement, en moyenne, le nombre total de déplacement par station, par jour et par type de membre augmente de `r round((exp(mod2$coefficients['nb_tour'])-1)*100,2)`% lorsque les autres variables restent inchangés.  
+
+De plus, l'impact des membres bixi sur le nombre total de trajet par station par arrondissement est `r round(exp(mod2$coefficients['mem1']),2)` fois plus important que celui des non membres toujours lorsque les autres variables restent inchangés. Et cet impact est aussi significatif. 
+
+Une entente avec les villes pour construire d'avantage de lieux touristiques pourrait permettre d'accroitre l'utilisation des bixi. De plus, puisque les membres semblent avoir un impact plus important sur l'utilisation des bixi que les non-membres, une stratégie visant à accroitre le portefeuille de client membre serait avantageux.
+
+Quel genre d'interaction on peut regarder?????
+```{r}
+#bixi_agg_arrond_df
+```
+
+
+```{r, results='hide'}
+bixi_df2=bixi_df
+bixi_df2$wday=as.integer(encode_ordinal(bixi_df["wday"], order= c('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'))$wday)
+bixi_df2
+#ord_wday=encode_ordinal(bixi_df["wday"], order= c('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'))
+#ord_wday
+fiv_mod = lm(mm ~ dd + wday, data=bixi_df2)
+summary(fiv_mod)
+
+```
+```{r, results='hide'}
+vif(fiv_mod)
+```
+
 
 # Modèle avec les festivals
 
@@ -468,6 +636,8 @@ model_density <- lm(n_tot~density ,dat_mod )
 summary(model_density)
 
 ```
+
+Dans ce même ordre d'idée, il est possible d'observer si l'hypothèse de normalité des résidus ainsi que l'hypothèse d'homoscédasticité sont respectées dans ce modèle simple, avant d'amorcer un modèle multiple.
 
 En examinant le comportement des résidus dans la figure \@ref(fig:QQdensite), il est plausible de dire que dans le dernier tiers de la figure les résidus ne suivent pas une loi normale. Cela étant dit, dans le cas de ce modèle simple, ça voudrait dire que la densité comme seule variable explicative explique mal le comportement du nombre total de déplacements en Bixi. Il est possible dans ce cas de faire une transformation logarithmique pour rendre les données extrêmes plus symétriques. Cependant, puiqu'on sait que le modèle linéaire simple n'est pas approprié, on préfère passer au modèle multiple et appliquer, dans le besoin, ces changements dans un modèle plus approprié.
 
