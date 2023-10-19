@@ -613,9 +613,7 @@ summary(model_density)
 
 ```
 
-Dans ce même ordre d'idée, il est possible d'observer si l'hypothèse de normalité des résidus ainsi que l'hypothèse d'homoscédasticité sont respectées dans ce modèle simple, avant d'amorcer un modèle multiple.
-
-En examinant le comportement des résidus dans la figure \@ref(fig:QQdensite), il est plausible de dire que dans le dernier tiers de la figure les résidus ne suivent pas une loi normale. Cela étant dit, dans le cas de ce modèle simple, ça voudrait dire que la densité comme seule variable explicative explique mal le comportement du nombre total de déplacements en Bixi. Il est possible dans ce cas de faire une transformation logarithmique pour rendre les données extrêmes plus symétriques. Cependant, puiqu'on sait que le modèle linéaire simple n'est pas approprié, on préfère passer au modèle multiple et appliquer, dans le besoin, ces changements dans un modèle plus approprié.
+Dans ce même ordre d'idée, il est possible d'observer si l'hypothèse de normalité des résidus ainsi que l'hypothèse d'homoscédasticité sont respectées dans ce modèle simple, avant d'amorcer un modèle multiple. En examinant le comportement des résidus dans la figure \@ref(fig:QQdensite), il est plausible de dire que dans le dernier tiers de la figure les résidus ne suivent pas une loi normale. Cela étant dit, dans le cas de ce modèle simple, ça voudrait dire que la densité comme seule variable explicative explique mal le comportement du nombre total de déplacements en Bixi. Il est possible dans ce cas de faire une transformation logarithmique pour rendre les données extrêmes plus symétriques. Cependant, puiqu'on sait que le modèle linéaire simple n'est pas approprié, on préfère passer au modèle multiple et appliquer, dans le besoin, ces changements dans un modèle plus approprié.
 
 ```{r QQdensite, out.height = "30%", fig.align = 'center', fig.cap = "Graphique QQ - modèle de densité démographique simple"}
 
