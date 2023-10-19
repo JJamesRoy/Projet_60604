@@ -4,17 +4,17 @@ subtitle: "MATH60604 - Modélisation statistique"
 author: "Abdoul Wassi Badirou, Alfred Assal, James Roy, Samuel Croteau"
 date: "`r Sys.Date()`"
 output:
-  bookdown::pdf_document2:
-    toc: yes
-    toc_depth: 3
-    extra_dependencies: flafter
-  #   toc: yes
-  #   toc_depth: '3'
   bookdown::html_document2:
     toc: yes
     number_sections: yes
     toc_float:
       collapsed: no
+  #   toc: yes
+  #   toc_depth: '3'
+  bookdown::pdf_document2:
+    toc: yes
+    toc_depth: 3
+    extra_dependencies: flafter
   # pdf_document:
 params:
   created_date: "2023-09-12"
@@ -37,6 +37,7 @@ library(tidyverse)
 library(readxl)
 library(knitr)
 library(googleway)
+library(car)
 ```
 
 # Note
@@ -198,67 +199,6 @@ Maintenant, dans la \@ref(fig:histn2), on voit qu'avec une transformation logari
 
 À faire si on a le temps.
 
-# Parc
-
-
-Dans cette section, nous allons analyser si des attraits comme des parcs et/ou des espaces sportives ont un impact sur l'utilisation des Bixis.
-
-Pour tester cette question, nous allons produire plusieurs modèles de régression linéaire et faire de l'inférence sur les résultats obtenus.Les données ont été recueillis sur le site de donnes.montreal.ca.
-
-Données utilisées: <https://donnees.montreal.ca/dataset/installations-recreatives-sportives-et-culturelles/resource/1c239e86-8b36-476c-bd51-91a3cd20f687> <https://donnees.montreal.ca/dataset/grands-parcs-parcs-d-arrondissements-et-espaces-publics> <https://donnees.montreal.ca/dataset/lieux-culturels>
-
-
-```{r}
-#get data
-data_parc <- read.csv("espace_vert.csv")
-data_es <- read.csv("terrain_sport_ext.csv")
-data_lc <- read_excel("lieuxculturels.xls")
-
-
-#Parcs
-nb_arrond_parc <- (table(data_parc$GESTION))
-dat_nb_parc <- data.frame(arrond = names(nb_arrond_parc), nb_parc = as.numeric(nb_arrond_parc))
-dat_parc <- dat %>%
-  select(dur, n_tot, rev, arrond) %>% 
-  group_by(arrond) %>%
-  summarise(dur = (sum(dur)))
-dat_nb_parc$arrond <- tolower(gsub("\\s+", "", dat_nb_parc$arrond))
-dat_nb_parc$arrond<-gsub("-", "", dat_nb_parc$arrond)
-dat_parc$arrond <- tolower(gsub("\\s+", "", dat_parc$arrond))
-dat_parc$arrond<-gsub("-", "", dat_parc$arrond)
-
-df_parc <- merge(dat_parc, dat_nb_parc, by = "arrond", all.x = TRUE)
-df_parc$nb_parc <- ifelse(is.na(df_parc$nb_parc), 0, df_parc$nb_parc)
-
-#Espaces sportifs
-nb_arrond_es <- table(data_es$ARROND)
-dat_nb_es <- data.frame(arrond = names(nb_arrond_es), nb_es = as.numeric(nb_arrond_es))
-dat_nb_es$arrond <- tolower(gsub("\\s+", "", dat_nb_es$arrond))
-dat_nb_es$arrond<-gsub("-", "", dat_nb_es$arrond)
-
-dat_es <- dat_parc
-df_es <- merge(dat_es, dat_nb_es, by = "arrond", all.x = TRUE)
-
-#Lieux culturels
-nb_arrond_lc <- table(data_lc$Arrondissement)
-dat_nb_lc <- data.frame(arrond = names(nb_arrond_lc), nb_lc = as.numeric(nb_arrond_lc))
-dat_nb_lc$arrond <- tolower(gsub("\\s+", "", dat_nb_lc$arrond))
-dat_nb_lc$arrond<-gsub("-", "", dat_nb_lc$arrond)
-dat_nb_lc$arrond <- gsub("[-–]", "", dat_nb_lc$arrond)
-
-dat_lc <- dat_parc
-df_lc <- merge(dat_lc, dat_nb_lc, by = "arrond", all.x = TRUE)
-
-
-#Modèles vs rev
-df_parc_es <- merge(df_parc, dat_nb_es, by = "arrond", all.x = TRUE)
-df_parc_es_lc <- merge(df_parc_es, dat_nb_lc, by = "arrond", all.x = TRUE)
-df_parc_es_lc <- replace(df_parc_es_lc, is.na(df_parc_es_lc), 0)
-
-modele4 = lm(dur~nb_parc + nb_es + nb_lc, data = df_parc_es_lc)
-
-```
-
 # Modèle avec les festivals
 
 Dans cette section, nous allons analyser si les festivals tenus dans la ville de Montréal ont un impact sur l'utilisation des Bixi. Cette question est intéressante, car elle permet, selon les résultats obtenus, de s'allier avec la ville de Montréal et différente organisations et organismes en lien avec les festivals pour promouvoir un moyen de déplacement moins intensif sur les émission de polluants. Plusieur stratégies d'affaires peuvent être pris selon les résultats. Par exemple : offrir des promotions dans les stations proches des festivals, augmenter la disponibilité des Bixi lors des festivals ou encore promouvoir le service à l'approche des différents festivals.
@@ -375,7 +315,7 @@ Dans cette section, il sera question de modéliser l'effet de la densité de la 
 
 Pour Bixi ce type d'information devient alors crucial, d'une part puisque dans les zones à forte densité de population, les habitants ont souvent plus d'options de transport, ce qui peut réduire leur dépendance à la voiture favorisant ainsi l'utilisation des transports durable comme le vélo. D'autre part, les zones fortement densifiées ont généralement une plus grande concentration de commerce, de services publics et d'emploi à moindre distance. Cette proximité des destinations encourage alors l'utilisation de modes de transport adaptés aux déplacements courts, tels que le vélo. C'est pour ces raisons que nous pensons que la densité de la population est un excellent facteur à observer pour Bixi.
 
-Enfin, les données ajoutées on été receuillis sur les site web de statistiques canada, données montréal et l'institus de la statistiques du quebec. Cette section sera principalement divisé en trois partie. Tout d'aboed, il sera question d'un modèle de régression simple, ensuite d'un mudèle multivariée et pour conclure avec une disscussion sur les limitation des modèles présenté. 
+Enfin, les données ajoutées on été receuillis sur les site web de statistiques canada, données montréal et l'institus de la statistiques du quebec. Cette section sera principalement divisé en trois partie. Tout d'abord, il sera question d'un modèle de régression simple, ensuite d'un mudèle multivariée et pour conclure avec une disscussion sur les limitation des modèles présenté.
 
 ```{r initialisation des données, results='hide'}
 library(stringr)
@@ -508,6 +448,7 @@ dat_mod<- dat_mod %>% left_join(df_rmr, by="arrond")
 ```
 
 ## Modèle linéaire simple
+
 Dans ce modèle de régression linéaire simple, il est possible de constater que la variable de densité est bien significative. Autrement dit, une augmentation d'une personne par kilomètre carré augmenterait en moyenne le nombre total de déplacements de 0.012. Cependant, la valeur du $R^2$ signifie que le modèle explique 19,17% de la variabilité du nombre total de déplacements. Cela dit, il y a nécessairement un manque de variables explicatives qui permettrait de mieux expliquer la variable réponse.
 
 Avant d'amorcer un modèle multiple, il est crutial d'observer si l'hypothèse d'homoscédasticité est respectées dans ce modèle simple.
@@ -522,7 +463,7 @@ summary(model_density)
 
 ```
 
-En examinant le comportement des résidus dans la figure \@ref(fig:QQdensite), il est plausible de dire que dans le dernier tiers de la figure les résidus ne suivent pas une loi normale. Cela étant dit, dans le cas de ce modèle simple, ça voudrait dire que la densité comme seule variable explicative explique mal le comportement du nombre total de déplacements en Bixi. Il est possible dans ce cas de faire une transformation logarithmique pour rendre les données extrêmes plus symétriques. Cependant, puiqu'on sait que le modèle linéaire simple n'est pas approprié, on préfère passer au modèle multiple et appliquer, dans le besoin,  ces changements dans un modèle plus approprié.
+En examinant le comportement des résidus dans la figure \@ref(fig:QQdensite), il est plausible de dire que dans le dernier tiers de la figure les résidus ne suivent pas une loi normale. Cela étant dit, dans le cas de ce modèle simple, ça voudrait dire que la densité comme seule variable explicative explique mal le comportement du nombre total de déplacements en Bixi. Il est possible dans ce cas de faire une transformation logarithmique pour rendre les données extrêmes plus symétriques. Cependant, puiqu'on sait que le modèle linéaire simple n'est pas approprié, on préfère passer au modèle multiple et appliquer, dans le besoin, ces changements dans un modèle plus approprié.
 
 ```{r QQdensite, out.height = "30%", fig.align = 'center', fig.cap = "Graphique QQ - modèle de densité démographique simple"}
 
@@ -539,22 +480,20 @@ ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
 
 ```
 
-
-
 ## Modèle linéaire de régression multiple
 
 Avant de débuter le modèle multiple avec la densité de population, il est important de comprendre que plusieurs données ont été ajoutées et même modifier pour pouvoir observer la tendance que prend l'utilisation des Bixis lorsque la densité de population augmente. Cela étant dit, il était important d'ajouter des variables qui affectaient autant la densité de population que le nombre total de Bixi utilisé, comme expliqué dans la figure \@ref(fig:firstgroup). Par conséquent, des variables comme le nombre de parcs par arrondissement, le nombre de bibliothèques par arrondissement, le nombre de centres communautaire par arrondissement et le nombre de centres sportifs par arrondissement ont été ajoutés. De plus, puisque la superficie des arrondissements varie grandement, ces variables ajoutées ont été divisées par la superficie de chaque arrondissement. Ainsi les grandes villes, comme Laval qui a beaucoup d'infrastructure à cause de sa grande superficie, ne viendront pas biaiser nos modèles. Autrement dit, les variables ajoutées(nombre de parcs, le nombre de bibliothèques, le nombre de centres communautaires, le nombre de centres sportifs) sont par $km^2$ de leur arrondissement.
 
-Dans la régression multiple ci-dessous, il est possible de constater que le coefficient de `BibliothequeKm2`est grandement négatif. En se regardant seulement son coefficient, on aurait l'impression qu'en ajoutant une bibliothèque par $km^2$ il y  aurait une diminution d'en moyenne 303 déplacements en bixi. Cependant, ce n'est pas nécessairement vrai, puisqu’en observant les données on peut remarquer que la ville de Longueuil a excessivement beaucoup de bibliothèques contrairement aux autres arrondissements, ce qui vient biaiser nos données. Aussi, `Centre_communautaireKm2`n'est pas significatif dans le modèle.  C'est-à-dire que la probabilité de faire une erreur en rejetant l'hypothèse nulle où le coefficient de `BibliothequeKm2` est nul est élevée. 
+Dans la régression multiple ci-dessous, il est possible de constater que le coefficient de `BibliothequeKm2`est grandement négatif. En se regardant seulement son coefficient, on aurait l'impression qu'en ajoutant une bibliothèque par $km^2$ il y aurait une diminution d'en moyenne 303 déplacements en bixi. Cependant, ce n'est pas nécessairement vrai, puisqu'en observant les données on peut remarquer que la ville de Longueuil a excessivement beaucoup de bibliothèques contrairement aux autres arrondissements, ce qui vient biaiser nos données. Aussi, `Centre_communautaireKm2`n'est pas significatif dans le modèle. C'est-à-dire que la probabilité de faire une erreur en rejetant l'hypothèse nulle où le coefficient de `BibliothequeKm2` est nul est élevée. **(Centre_communautiareKm2 tu veux dire?)**
 
-En ce qui concerne la variable d'intérêt :densité de la population `density`, on peut constater que son coefficient signifie qu'en moyenne s'il y a une augmentation d'une personne par $km^2$ qu'il y aurait une augmentation minime du nombre total de déplacements, mais l'information reste toutefois intéressante à connaitre pour la compagnie. De plus, les infrastructures comme les parcs influent grandement sur le nombre total de déplacements en Bixi. Une augmentation d'un parc par $km^2$ augmenterait d'en moyenne 15 déplacements de bixi.Cependant, la mesure des parcs par $km^2$ est démesuré, mais elle donne tout de même un repère important pour compagnie, soit que la construction de parc est favorable à l'utilisation de bixi.  
+En ce qui concerne la variable d'intérêt :densité de la population `density`, on peut constater que son coefficient signifie qu'en moyenne s'il y a une augmentation d'une personne par $km^2$ qu'il y aurait une augmentation minime du nombre total de déplacements, mais l'information reste toutefois intéressante à connaitre pour la compagnie. De plus, les infrastructures comme les parcs influent grandement sur le nombre total de déplacements en Bixi. Une augmentation d'un parc par $km^2$ augmenterait d'en moyenne 15 déplacements de bixi.Cependant, la mesure des parcs par $km^2$ est démesuré, mais elle donne tout de même un repère important pour compagnie, soit que la construction de parc est favorable à l'utilisation de bixi.
 
 ```{r}
 model_desity_M <- lm(formula = n_tot ~ density + ParcKm2 + BibliothequeKm2 + Centre_communautaireKm2 + Centre_sportifKm2, data = dat_mod)
 
 summary(model_desity_M)
 ```
- 
+
 Dans la figure ci-dessous \@ref(fig:residualsDensityMult) on peut remarquer que la variance entre des valeurs prédites n'est pas du tout constante. Cela étant dit, l'hypothèse d'homoscédasticité est violée.Aussi, la figure \@ref(fig:QQdensite_multiple) quant a elle mesure la normalité des données. il est possible d'apercevoir dans ce cas que le dernier tiers des données s'éloigne largement de la ligne de normale dans le graphique Q-Q. L'hypothèse de normalité est alors aussi violée. Une solution possible serait de faire une transformation logarithmique des données. Cette transformation permettrait ainsi aux données d'être plus symétrique.
 
 ```{r residualsDensityMult, out.height = "30%", fig.align = 'center', fig.cap = "Graphique des résidus par rapport aux valeurs prédites"}
@@ -565,8 +504,6 @@ plot(model_desity_M$fitted.values, resid(model_desity_M),
 abline(h = 0, col = "red", lty = 2)
 
 ```
-
-
 
 ```{r QQdensite_multiple, out.height = "30%", fig.align = 'center', fig.cap = "Graphique QQ - modèle de densité démographique multiple"}
 residuals <- residuals(model_desity_M)
@@ -581,15 +518,57 @@ ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
 ```
 
 # Modèle avec interactions
-Compte-tenu que le nombre de parc, de bibliothèques, de centres communautaires et de centres sportifs peuvent être influencés par la densité de population, il peut être interessant de générer un modèle qui inclut ces interactions.
+
+Compte-tenu que le nombre de parc, de bibliothèques, de centres communautaires et de centres sportifs peuvent être influencés par la densité de population dans une ville, il peut être interessant de générer un modèle qui inclut des interactions avec la densité et le nombre de ces différentes installations.
+
+Encore une fois, nous allons utiliser le log de nos paramètres compte-tenu que leur distribution est asymétrique et ne suit pas une loi normale.
 
 ```{r}
+dat_mod$logDensity <- log(dat_mod$density)
+dat_mod$logParcKm2 <- log(dat_mod$ParcKm2)
+dat_mod$logBibliothequeKm2 <- log(dat_mod$BibliothequeKm2)
+dat_mod$logCentre_communautaireKm2 <- log(dat_mod$Centre_communautaireKm2 + 0.01)
+dat_mod$logCentre_sportifKm2 <- log(dat_mod$Centre_sportifKm2 + 0.01)
 
-modele2_interactions <- lm(logN_tot ~ logDensity + ParcKm2 + BibliothequeKm2 + Centre_communautaireKm2 + Centre_sportifKm2 + density*ParcKm2 + density*BibliothequeKm2 + density*Centre_communautaireKm2 + density*Centre_sportifKm2, data = dat_mod)
+modele2_interactions <- lm(n_tot_mod ~ logDensity + logParcKm2 + logBibliothequeKm2 + logCentre_communautaireKm2 + logCentre_sportifKm2 + logDensity*logParcKm2 + logDensity*logBibliothequeKm2 + logDensity*logCentre_communautaireKm2 + logDensity*logCentre_sportifKm2, data = dat_mod)
 
 summary(modele2_interactions)
 ```
-En examinant ce modèle, on constate que tous les paramètres sont significatifs sauf pour le paramètre densité. Ce qui est logique, car celui-ci interragi maintenant avec les autres paramètres. D'après ces informations, nous pouvons interpréter qu'un augmentation de un de BibliothqueKm2 augmenterais le nombre total de déplacement d'environ 8.3. On remarque aussi que le R2 augmente en comparaison aux autres modèles incluant la densité pour une valeur de 39.02%.
+
+En examinant ce modèle, on constate que tous les paramètres sont significatifs à au moins 95% de confiance sauf pour le paramètre densité et l'interaction entre Density et BibliothequeKm2. Nous pouvons donc supposer que le paramètre densité a perdu une partie de sa signification et son effet a été capturé par les interactions. Puis, son interaction avec Bibliothèque n'est pas assez significative. On peut aussi constater que si logBibliothequeKm2 augmente de 1, alors le log du nombre de déplacement total augmentera de 13.44, puisque que ces variables sont sur l'échelle logarithmique, les valeurs numériques sont démesurées, cependant on peut comprendre qu'il y a un effet positif à l'augmentation du nombre de bibliothèque. Puisque les variables sont sur une échelle logarithmique, il faut aussi comprendre que les variables avec des coefficient négatifs ont ainsi très peu d'impact sur le nombre de déplacement total si elles augmentent de un. On remarque aussi que le R2 augmente en comparaison aux autres modèles incluant la densité pour une valeur de 37.34% ce qui veut dire que ce modèle explique un peu plus la variabilité du nombre total de déplacements que les autres ci-dessus avec la densité.
+
+Suite aux observations de ce modèle, on peut dire que le nombre de parcs, de bibliothèques et de centre commerciaux influencent positivement le nombre de déplacement en Bixi. Il serait donc judicieux pour la compagnie Bixi de pousser la construction de ces infracstructures.
+
+On peut ensuite examiner les résidus avec les figure \@ref(fig:distResDensiteMultipleInt) et \@ref(fig:qqDensiteMultipleInt)
+
+```{r distResDensiteMultipleInt, out.height = "30%", fig.align = 'center', fig.cap = "Hist résidus - modèle de densité démographique multiple avec interactions"}
+
+residuals <- residuals(modele2_interactions)
+
+ggplot(data.frame(Résidus = residuals), aes(x = rstudent(modele2_interactions))) + geom_density() + geom_histogram(aes(y = ..density..),
+bins = 20, alpha = 0.5)+
+xlab("Résidus") +
+ylab("Densité")
+```
+
+```{r qqDensiteMultipleInt, out.height = "30%", fig.align = 'center', fig.cap = "Graphique QQ - modèle de densité démographique multiple avec interactions"}
+
+ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
+  stat_qq() +
+  stat_qq_line() +
+  xlab("Quantiles Théoriques") +
+  ylab("Quantiles de l'Échantillon") +
+  ggtitle("Graphique Q-Q")
+```
+
+D'après l'analyse des résidus, on constate une allure normale des résidus sur le graphique de la densité et les quantiles semblent suivre raisonnablement la droite sur le graphique QQ. Ainsi, la condition de normalité est sensiblement respectée.
+
+Ensuite, il peut être intéressant de construire un modèle avec les données des non-membres seulement pour voir si ceux-ci ont l'habitude ou non de prendre un Bixi pour.
+
+```{r}
+modele2_interactions_nm = lm(n_tot_mod ~ logDensity + logParcKm2 + logBibliothequeKm2 + logCentre_communautaireKm2 + logCentre_sportifKm2 + logDensity*logParcKm2 + logDensity*logBibliothequeKm2 + logDensity*logCentre_communautaireKm2 + logDensity*logCentre_sportifKm2, data = dat_mod[dat_mod$mem == 0,])
+summary(modele2_interactions_nm)
+```
 
 
 # Conclusion
