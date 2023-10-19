@@ -4,10 +4,7 @@ subtitle: "MATH60604 - Modélisation statistique"
 author: "Abdoul Wassi Badirou, Alfred Assal, James Roy, Samuel Croteau"
 date: "`r Sys.Date()`"
 output:
-  bookdown::pdf_document2:
-    toc: yes
-    toc_depth: 3
-    extra_dependencies: flafter
+  # pdf_document:
   #   toc: yes
   #   toc_depth: '3'
   bookdown::html_document2:
@@ -15,17 +12,15 @@ output:
     number_sections: yes
     toc_float:
       collapsed: no
-  # pdf_document:
+  bookdown::pdf_document2:
+    toc: yes
+    toc_depth: 3
+    extra_dependencies: flafter
 params:
   created_date: "2023-09-12"
 header-includes:
 - \usepackage{tikz}
 - \usepackage{subcaption}
-- \usepackage{subfig}
-- \usepackage{graphicx}
-- \usepackage{sidecap}
-- \usepackage{float}
-- \usepackage{amsmath}
 ---
 
 ```{r setup, include=FALSE}
@@ -200,13 +195,9 @@ Maintenant, dans la \@ref(fig:histn2), on voit qu'avec une transformation logari
 
 # Parc
 
-
 Dans cette section, nous allons analyser si des attraits comme des parcs et/ou des espaces sportives ont un impact sur l'utilisation des Bixis.
 
 Pour tester cette question, nous allons produire plusieurs modèles de régression linéaire et faire de l'inférence sur les résultats obtenus.Les données ont été recueillis sur le site de donnes.montreal.ca.
-
-Données utilisées: <https://donnees.montreal.ca/dataset/installations-recreatives-sportives-et-culturelles/resource/1c239e86-8b36-476c-bd51-91a3cd20f687> <https://donnees.montreal.ca/dataset/grands-parcs-parcs-d-arrondissements-et-espaces-publics> <https://donnees.montreal.ca/dataset/lieux-culturels>
-
 
 ```{r}
 #get data
@@ -215,49 +206,67 @@ data_es <- read.csv("terrain_sport_ext.csv")
 data_lc <- read_excel("lieuxculturels.xls")
 
 
+
+
 #Parcs
+#Westmount = 35 parcs
+new_data_parc <- data.frame(arrond = c("Longueuil", "Laval"), nb_parc = c(200, 200))
+
 nb_arrond_parc <- (table(data_parc$GESTION))
 dat_nb_parc <- data.frame(arrond = names(nb_arrond_parc), nb_parc = as.numeric(nb_arrond_parc))
-dat_parc <- dat %>%
-  select(dur, n_tot, rev, arrond) %>% 
+dat_nb_parc <- dat_nb_parc %>% filter(arrond != "") %>%
+  filter(arrond != "" & arrond != "L'Île-Bizard-Sainte-Geneviève" & arrond != "Pierrefonds-Roxboro")%>%
+  mutate(arrond = sub("Service des grands parcs, du Mont-Royal et des sports", "Mont-Royal", arrond)) %>%
+  mutate(arrond = ifelse(arrond %in% c("Commission scolaire", "Autre", "Montréal-Ouest"), "autres", arrond)) %>%
+  mutate(nb_parc = ifelse(arrond == "Westmount", 35, nb_parc)) %>%
   group_by(arrond) %>%
-  summarise(dur = (sum(dur)))
-dat_nb_parc$arrond <- tolower(gsub("\\s+", "", dat_nb_parc$arrond))
-dat_nb_parc$arrond<-gsub("-", "", dat_nb_parc$arrond)
-dat_parc$arrond <- tolower(gsub("\\s+", "", dat_parc$arrond))
-dat_parc$arrond<-gsub("-", "", dat_parc$arrond)
+  summarise(nb_parc = sum(nb_parc))%>%
+  bind_rows(new_data_parc)%>%
+  mutate(arrond = gsub(" ", "", arrond))%>%
+  mutate(arrond = gsub("-", "", arrond))%>%
+  mutate(arrond = gsub("[-–]", "", arrond))%>%
+  mutate(arrond = gsub("\\s+", "", arrond))%>%
+  mutate(arrond = tolower(arrond))
 
-df_parc <- merge(dat_parc, dat_nb_parc, by = "arrond", all.x = TRUE)
-df_parc$nb_parc <- ifelse(is.na(df_parc$nb_parc), 0, df_parc$nb_parc)
+data <- dat%>%
+  mutate(arrond = gsub(" ", "", arrond))%>%
+  mutate(arrond = gsub("-", "", arrond))%>%
+  mutate(arrond = gsub("[-–]", "", arrond))%>%
+  mutate(arrond = gsub("\\s+", "", arrond))%>%
+  mutate(arrond = tolower(arrond))
+
+data <- left_join(data,dat_nb_parc, by = "arrond")
+#combinaisons_uniques <- unique(data[, c("arrond", "nb_parc")])
 
 #Espaces sportifs
+#Westmount = 
+#Laval = 
+#Longueuil = 100
+#Mont-Royal =
+new_data_es <- data.frame(arrond = c("Longueuil", "Laval", "Mont-Royal","Westmount","autres"), nb_es = c(100, 100, 100, 100, 100))
+
 nb_arrond_es <- table(data_es$ARROND)
-dat_nb_es <- data.frame(arrond = names(nb_arrond_es), nb_es = as.numeric(nb_arrond_es))
-dat_nb_es$arrond <- tolower(gsub("\\s+", "", dat_nb_es$arrond))
-dat_nb_es$arrond<-gsub("-", "", dat_nb_es$arrond)
+dat_nb_es <- data.frame(arrond = names(nb_arrond_es), nb_es = as.numeric(nb_arrond_es))%>%
+  mutate(arrond = ifelse(arrond == "Verdum", "Verdun", arrond)) %>%
+  group_by(arrond) %>%
+  summarise(nb_es = sum(nb_es))%>%
+  filter(arrond != "" & arrond != "L'Île-Bizard-Sainte-Geneviève" & arrond != "Pierrefonds-Roxboro")%>%
+  bind_rows(new_data_es)%>%
+  mutate(arrond = gsub(" ", "", arrond))%>%
+  mutate(arrond = gsub("-", "", arrond))%>%
+  mutate(arrond = gsub("[-–]", "", arrond))%>%
+  mutate(arrond = gsub("\\s+", "", arrond))%>%
+  mutate(arrond = tolower(arrond))
 
-dat_es <- dat_parc
-df_es <- merge(dat_es, dat_nb_es, by = "arrond", all.x = TRUE)
+data <- left_join(data,dat_nb_es, by = "arrond")
+#combinaisons_uniques <- unique(data[, c("arrond", "nb_es")])
 
-#Lieux culturels
-nb_arrond_lc <- table(data_lc$Arrondissement)
-dat_nb_lc <- data.frame(arrond = names(nb_arrond_lc), nb_lc = as.numeric(nb_arrond_lc))
-dat_nb_lc$arrond <- tolower(gsub("\\s+", "", dat_nb_lc$arrond))
-dat_nb_lc$arrond<-gsub("-", "", dat_nb_lc$arrond)
-dat_nb_lc$arrond <- gsub("[-–]", "", dat_nb_lc$arrond)
-
-dat_lc <- dat_parc
-df_lc <- merge(dat_lc, dat_nb_lc, by = "arrond", all.x = TRUE)
-
-
-#Modèles vs rev
-df_parc_es <- merge(df_parc, dat_nb_es, by = "arrond", all.x = TRUE)
-df_parc_es_lc <- merge(df_parc_es, dat_nb_lc, by = "arrond", all.x = TRUE)
-df_parc_es_lc <- replace(df_parc_es_lc, is.na(df_parc_es_lc), 0)
-
-modele4 = lm(dur~nb_parc + nb_es + nb_lc, data = df_parc_es_lc)
+#Création du modèle
+modele4 = lm(n_tot~nb_parc + nb_es , data = data)
 
 ```
+
+# Modèle linéaire simple
 
 # Modèle avec les festivals
 
@@ -371,6 +380,7 @@ De façon similaire au modèle précédemment, les festivals n'ont pas d'effets 
 
 # Modèles avec la densité de population
 
+
 Dans cette section, il sera question de modéliser l'effet de la densité de la population par $km^2$ par arrondissement, sur le nombre total de déplacements en Bixi par arrondissement. Autrement dit, on essaye d'observer qu'est-ce qui arrive au nombre de totaux de déplacement si la densité de population augmente. À première vue, il est cohérent d'affirmer que si la densité de la population augmente, le nombre de déplacement à bicyclette augmentera aussi. Cette prémisse repose sur l'idée qu'une densité de population plus élevée favorise généralement la mise en place d'infrastructures favorables aux déplacements à bicyclette.
 
 Pour Bixi ce type d'information devient alors crucial, d'une part puisque dans les zones à forte densité de population, les habitants ont souvent plus d'options de transport, ce qui peut réduire leur dépendance à la voiture favorisant ainsi l'utilisation des transports durable comme le vélo. D'autre part, les zones fortement densifiées ont généralement une plus grande concentration de commerce, de services publics et d'emploi à moindre distance. Cette proximité des destinations encourage alors l'utilisation de modes de transport adaptés aux déplacements courts, tels que le vélo. C'est pour ces raisons que nous pensons que la densité de la population est un excellent facteur à observer pour Bixi.
@@ -400,7 +410,6 @@ dat_mod$arrond <- str_replace_all(dat_mod$arrond, " - ", "-")
 dat_pop$arrond <- str_replace_all(dat_pop$arrond, "–", "-")
 
 df_lieux_mtl <- read.csv("lieux-fr_MTL.csv")
-df_lieux_mtl_1 <- read.csv("lieux-fr_MTL.csv")
 df_lieux_long <- read.csv("vdq-lieupublic_longeuil.csv")
 df_lieux_la <- read.csv("lieux_laval.csv")
 
@@ -581,6 +590,7 @@ ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
 ```
 
 # Modèle avec interactions
+
 Compte-tenu que le nombre de parc, de bibliothèques, de centres communautaires et de centres sportifs peuvent être influencés par la densité de population, il peut être interessant de générer un modèle qui inclut ces interactions.
 
 ```{r}
@@ -589,7 +599,7 @@ modele2_interactions <- lm(logN_tot ~ logDensity + ParcKm2 + BibliothequeKm2 + C
 
 summary(modele2_interactions)
 ```
-En examinant ce modèle, on constate que tous les paramètres sont significatifs sauf pour le paramètre densité. Ce qui est logique, car celui-ci interragi maintenant avec les autres paramètres. D'après ces informations, nous pouvons interpréter qu'un augmentation de un de BibliothqueKm2 augmenterais le nombre total de déplacement d'environ 8.3. On remarque aussi que le R2 augmente en comparaison aux autres modèles incluant la densité pour une valeur de 39.02%.
 
+En examinant ce modèle, on constate que tous les paramètres sont significatifs sauf pour le paramètre densité. Ce qui est logique, car celui-ci interragi maintenant avec les autres paramètres. D'après ces informations, nous pouvons interpréter qu'un augmentation de un de BibliothqueKm2 augmenterais le nombre total de déplacement d'environ 8.3. On remarque aussi que le R2 augmente en comparaison aux autres modèles incluant la densité pour une valeur de 39.02%.
 
 # Conclusion
