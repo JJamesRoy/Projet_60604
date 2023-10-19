@@ -59,6 +59,12 @@ Variables cibles : n_tot et dur
 
 Variables à ajouter : merge avec les autres données par sous-question
 
+# Introduction
+
+Dans cette deuxième partie du projet, nous devions présenter des modèles de régression linéaire permettant de répondre une question de sorte à conseiller la compagnie BIXI d’un point de vue d’affaires. D’abord, avant de choisir le sujet du questionnement, on s’est penché sur la compagnie elle-même. Sachant que BIXI est une compagnie à but non lucratif, son but n’est pas nécessairement de maximiser ses profits. C’est ainsi qu’on s’est questionné à savoir, qu’est ce qui intéresserait un OBNL comme BIXI. 
+Au premier abord, on a conclu que la question devait être plus d’ordre environnemental. Qu’est-ce que la compagnie peut faire pour accélérer la transition vers une économie verte, en réduisant l’impact environnemental des moyens de transport? Bien sûr, cette question est très large, mais elle nous affecte un nouveau problème où l'on s’intéresse moins à la durée des déplacements et plus au nombre de déplacement. Cette réflexion provient du fait, que le nombre de déplacements est en lien avec le nombre d’utilisateurs. Ce qui veut dire qu’un déplacement en bixi de plus, c’est une personne qui à décider de ne pas prendre sa voiture. À cet égard, on va s’intéresser à plusieurs sous-questions, à savoir comment les évènements affectent le nombre de déplacements. Autrement dit, est-ce que les festivals à Montréal affectent le nombre d’utilisations des bixis? On va aussi s’intéresser aux portraits démographiques de la ville. Quant à savoir, est-ce que la densité de population, les parcs, les lieux culturels et les autres formes d’infrastructures mises en place dans les villes affectent le nombre d’utilisations des bixis? Bien sûr, chaque modèle présenté aura ses limites et elles seront toutes abordées en temps et lieu. Cependant, ces questionnements peuvent être intéressants pour la compagnie, puisqu’ils permettent de pointer les localisations où le transport à vélo est plus abondant dans la région métropolitaine de Montréal et comment la compagnie peut continuer à accroitre son service, en réduisant le nombre de personnes qui utilisent des transports non écologiques.
+
+
 ```{r read}
 dat = read.csv("bixifull.csv")
 ```
