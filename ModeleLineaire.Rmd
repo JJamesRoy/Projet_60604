@@ -27,7 +27,7 @@ header-includes:
 - \usepackage{float}
 - \usepackage{amsmath}
 ---
-
+ 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = FALSE,error = TRUE, fig.pos = "H")
 ```
