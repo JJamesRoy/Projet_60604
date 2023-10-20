@@ -346,7 +346,7 @@ vif(fiv_mod)
 ```
 
 
-# Modèle avec les festivals
+# Impact des festivals
 
 Dans cette section, nous allons analyser si les festivals tenus dans la ville de Montréal ont un impact sur l'utilisation des Bixi. Cette question est intéressante, car elle permet, selon les résultats obtenus, de s'allier avec la ville de Montréal et différente organisations et organismes en lien avec les festivals pour promouvoir un moyen de déplacement moins intensif sur les émission de polluants. Plusieur stratégies d'affaires peuvent être pris selon les résultats. Par exemple : offrir des promotions dans les stations proches des festivals, augmenter la disponibilité des Bixi lors des festivals ou encore promouvoir le service à l'approche des différents festivals.
 
@@ -418,7 +418,7 @@ Si nous analysons rapidement les résidus, nous voyons dans les figures \@ref(fi
 
 ```{r fest-res2, out.height = "30%", fig.align='center', fig.cap="Distribution des résidus"}
 resid <- rstudent(mod_fest_2)
-fitted <- mod_fest_1$fitted.values
+fitted <- mod_fest_2$fitted.values
 res.dat <- cbind(dat_mod, fitted, resid)
 ggplot(data = res.dat, mapping = aes(x = resid)) + geom_density() +
 geom_histogram(aes(y = ..density..), bins = 10, alpha = 0.5) +
