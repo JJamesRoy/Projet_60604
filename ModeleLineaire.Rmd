@@ -629,7 +629,7 @@ ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
 
 ```
 
-## Modèle linéaire de régression multiple
+## Modèle ajusté
 
 Avant de débuter le modèle multiple avec la densité de population, il est important de comprendre que plusieurs données ont été ajoutées et même modifier pour pouvoir observer la tendance que prend l'utilisation des Bixis lorsque la densité de population augmente. Cela étant dit, il était important d'ajouter des variables qui affectaient autant la densité de population que le nombre total de déplacement en Bixi, si l'on veut capter l'effet de la densité, comme expliqué dans la figure \@ref(fig:firstgroup). Par conséquent, des variables comme le nombre de parcs `Parc` par arrondissement, le nombre de bibliothèques par arrondissement `Bibliotheque`, le nombre de centres communautaire par arrondissement `Centre_communautaire` et le nombre de centres sportifs par arrondissement `Centre_sportif` ont été ajoutés. De plus, puisque la superficie des arrondissements varie grandement, ces variables ajoutées ont été divisées par la superficie de chaque arrondissement. Ainsi les grandes villes, comme Laval qui a beaucoup d'infrastructure à cause de sa grande superficie, ne viendront pas biaiser nos modèles. Autrement dit, les variables ajoutées(nombre de parcs, le nombre de bibliothèques, le nombre de centres communautaires, le nombre de centres sportifs) sont par $km^2$ de leur arrondissement.
 
