@@ -729,10 +729,6 @@ plot2 <- ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
 grid.arrange(plot1, plot2, ncol = 2)
 
 ```
-
-```{r qqDensiteMultipleInt, out.height = "30%", fig.align = 'center', fig.cap = "Graphique QQ - modèle de densité démographique multiple avec interactions"}
-
-```
 On remarque dans la figure de gauche que la variance ne semble pas constante, ainsi nous ne pourrions pas dire que l'hypothèse d'homoscésasticité est respectée. D'après le QQ-plot à droite, on constate une allure normale des résidus, les quantiles semblent suivre raisonnablement la droite sur le graphique QQ.
 
 ### Modèle pour les non-membres
