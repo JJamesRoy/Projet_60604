@@ -698,7 +698,7 @@ En examinant ce modèle, on constate que tous les paramètres sont significatifs
 
 Suite aux observations de ce modèle, on peut dire que le nombre de bibliothèques, de centre communautaires et de centres sportifs influencent positivement le nombre de déplacement en Bixi et le nombre de parc n'a pas d'effet significatif.
 
-En procédant à l'analyse des résidus nous obtenons les deux graphes suivant: Figure \@ref(fig:distResDensiteMultipleInt), à gauche: un graphique de la dispersion des résidus et à droite un graphe QQ.
+En procédant à l'analyse des résidus nous obtenons les deux graphes suivant: Figure \@ref(fig:distResDensiteMultipleInt), à gauche: un graphique des résidus par rapport aux valeurs prédites et à droite un graphe QQ.
 ```{r distResDensiteMultipleInt, out.height = "30%", fig.align = 'center', fig.cap = "Graphiques des résidus"}
 
 residuals <- residuals(modele2_interactions)
