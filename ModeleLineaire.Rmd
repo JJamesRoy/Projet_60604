@@ -43,7 +43,7 @@ library(gridExtra)
 
 Dans cette deuxième partie du projet, nous devions présenter des modèles de régression linéaire permettant de répondre à une question de sorte à conseiller la compagnie BIXI d'un point de vue d'affaires. D'abord, avant de choisir le sujet du questionnement, on s'est penché sur la compagnie elle-même. Sachant que BIXI est une compagnie à but non lucratif, son but n'est pas nécessairement de maximiser ses profits. C'est ainsi qu'on s'est questionné à savoir, qu'est ce qui intéresserait un OBNL comme BIXI.
 
-Au premier abord, on a conclu que la question devait être plus d'ordre environnemental. Qu'est-ce que la compagnie peut faire pour accélérer la transition vers une économie verte, en réduisant l'impact environnemental des moyens de transport? Bien sûr, cette question est très large, mais elle nous affecte un nouveau problème où l'on s'intéresse moins à la durée des déplacements et plus au nombre de déplacement. Cette réflexion provient du fait, que le nombre de déplacements est en lien avec le nombre d'utilisateurs. Ce qui veut dire qu'un déplacement en bixi de plus, c'est une personne qui à décider de ne pas prendre sa voiture. À cet égard, on va s'intéresser à plusieurs sous-questions, à savoir comment les évènements affectent le nombre de déplacements. Autrement dit, est-ce que les festivals à Montréal affectent le nombre d'utilisations des bixis? On va aussi s'intéresser aux portraits démographiques de la ville. Quant à savoir, est-ce que la densité de population, les parcs, les lieux culturels et les autres formes d'infrastructures mises en place dans les villes affectent le nombre d'utilisations des bixis? Bien sûr, chaque modèle présenté aura ses limites et elles seront toutes abordées en temps et lieu. Cependant, ces questionnements peuvent être intéressants pour la compagnie, puisqu'ils permettent de pointer les localisations où le transport à vélo est plus abondant dans la région métropolitaine de Montréal et comment la compagnie peut continuer à accroitre son service, en réduisant le nombre de personnes qui utilisent des transports non écologiques.
+Au premier abord, on a conclu que la question devait être plus d'ordre environnemental. Qu'est-ce que la compagnie peut faire pour accélérer la transition vers une économie verte, en réduisant l'impact environnemental des moyens de transport? Bien sûr, cette question est très large, mais elle nous affecte un nouveau problème où l'on s'intéresse moins à la durée des déplacements et plus au nombre de déplacement. Cette réflexion provient du fait, que le nombre de déplacements est en lien avec le nombre d'utilisateurs. Ce qui veut dire qu'un déplacement en bixi de plus, c'est une personne qui à décider de ne pas prendre sa voiture. À cet égard, on va s'intéresser à plusieurs sous-questions, à savoir comment les évènements affectent le nombre de déplacements. Autrement dit, est-ce que les festivals à Montréal affectent le nombre d'utilisations des bixis? On va aussi s'intéresser aux portraits démographiques de la ville. A savoir, est-ce que la densité de population, les parcs, les lieux culturels et les autres formes d'infrastructures mises en place dans les villes affectent le nombre d'utilisations des bixis? Bien sûr, chaque modèle présenté aura ses limites et elles seront toutes abordées en temps et lieu. Toutefois, ces questions peuvent revêtir un intérêt significatif pour la compagnie, car elles offrent la possibilité de cibler les zones où l'utilisation du vélo est plus répandue dans la région métropolitaine de Montréal, tout en explorant les opportunités pour étendre ses services en contribuant à la réduction de l'usage des modes de transport non écologiques.
 
 
 <!-- # Enrichissement des données -->
@@ -414,23 +414,27 @@ summary(mod_fest_2)
 
 En controlant pour les variables omises, nous observons maintenant un changement dans l'interprétation des résultats. L'effet des festival semble être négatif et non-significatif. Dans ce modèle, chaque festival diminue le nombre total de déplacement de 2,4% par jour par quartier de façon non-significative. Il semblerait que l'effet passe maintenant par les mois et non par les festivals.
 
-Si nous analysons rapidement les résidus, nous voyons dans les figures \@ref(fig:fest-res2) et \@ref(fig:fest-qq2) qu'ils semblent légèrement plus normales que dans le premier modèle.
+Si nous analysons rapidement les résidus, nous voyons dans le figure à droite et à gauche \@ref(fig:fest-res2) qu'ils semblent légèrement plus normales que dans le premier modèle.
 
 ```{r fest-res2, out.height = "30%", fig.align='center', fig.cap="Distribution des résidus"}
 resid <- rstudent(mod_fest_2)
 fitted <- mod_fest_2$fitted.values
 res.dat <- cbind(dat_mod, fitted, resid)
-ggplot(data = res.dat, mapping = aes(x = resid)) + geom_density() +
+
+plot1 <- ggplot(data = res.dat, mapping = aes(x = resid)) + geom_density() +
 geom_histogram(aes(y = ..density..), bins = 10, alpha = 0.5) +
 xlab("Résidus") +
-ylab("Densité")
-```
+ylab("Densité")+
+  ggtitle("Distribution des résidus")
 
-```{r fest-qq2, out.height = "30%", fig.align='center', fig.cap="QQ-Plot Résidus Student"}
-ggplot(data = res.dat, mapping = aes(sample = resid)) + stat_qq(distribution = qt,
+plot2 <- ggplot(data = res.dat, mapping = aes(sample = resid)) + stat_qq(distribution = qt,
 dparams = mod_fest_2$df.residua) + stat_qq_line(distribution = qt,
 dparams = mod_fest_2$df.residual) + labs(x = "Quantiles théoriques",
-y = "Quantiles empiriques")
+y = "Quantiles empiriques")+
+  ggtitle("QQ-Plot Résidus Student")
+
+grid.arrange(plot1, plot2, ncol = 2)
+  
 ```
 
 ### Modèle avec interaction
@@ -632,7 +636,7 @@ ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
 
 ## Modèle linéaire de régression multiple
 
-Avant de débuter le modèle multiple avec la densité de population, il est important de comprendre que plusieurs données ont été ajoutées et même modifier pour pouvoir observer la tendance que prend l'utilisation des Bixis lorsque la densité de population augmente. Cela étant dit, il était important d'ajouter des variables qui affectaient autant la densité de population que le nombre total de Bixi utilisé, comme expliqué dans la figure \@ref(fig:firstgroup). Par conséquent, des variables comme le nombre de parcs `Parc` par arrondissement, le nombre de bibliothèques par arrondissement `Bibliotheque`, le nombre de centres communautaire par arrondissement `Centre_communautaire` et le nombre de centres sportifs par arrondissement `Centre_sportif` ont été ajoutés. De plus, puisque la superficie des arrondissements varie grandement, ces variables ajoutées ont été divisées par la superficie de chaque arrondissement. Ainsi les grandes villes, comme Laval qui a beaucoup d'infrastructure à cause de sa grande superficie, ne viendront pas biaiser nos modèles. Autrement dit, les variables ajoutées(nombre de parcs, le nombre de bibliothèques, le nombre de centres communautaires, le nombre de centres sportifs) sont par $km^2$ de leur arrondissement. Enfin, les autres variables ne sont pas utilisées puisqu'on essaye de capter l'effet de la densité. En d'autres mots, comme expliqué dans la figure \@ref(fig:firstgroup), pour que l'ajout d'une variable soit cohérent, il faudrait que la variable affecte la densité et le nombre total de déplacements, ce qui n'est pas le cas.
+Avant de débuter le modèle multiple avec la densité de population, il est important de comprendre que plusieurs données ont été ajoutées et même modifier pour pouvoir observer la tendance que prend l'utilisation des Bixis lorsque la densité de population augmente. Cela étant dit, il était important d'ajouter des variables qui affectaient autant la densité de population que le nombre total de déplacement en Bixi, si l'on veut capter l'effet de la densité, comme expliqué dans la figure \@ref(fig:firstgroup). Par conséquent, des variables comme le nombre de parcs `Parc` par arrondissement, le nombre de bibliothèques par arrondissement `Bibliotheque`, le nombre de centres communautaire par arrondissement `Centre_communautaire` et le nombre de centres sportifs par arrondissement `Centre_sportif` ont été ajoutés. De plus, puisque la superficie des arrondissements varie grandement, ces variables ajoutées ont été divisées par la superficie de chaque arrondissement. Ainsi les grandes villes, comme Laval qui a beaucoup d'infrastructure à cause de sa grande superficie, ne viendront pas biaiser nos modèles. Autrement dit, les variables ajoutées(nombre de parcs, le nombre de bibliothèques, le nombre de centres communautaires, le nombre de centres sportifs) sont par $km^2$ de leur arrondissement.
 
 Dans la régression multiple ci-dessous, il est possible de constater que le coefficient de `logBibliothequeKm2`est négatif affecte négativement le nombre de déplacement. Cependant, ce n'est pas nécessairement vrai, puisqu'en observant les données on peut remarquer que la ville de Longueuil a excessivement beaucoup de bibliothèques contrairement aux autres arrondissements, ce qui vient biaiser nos données, puisqu’en plus c’est une ville ou le déplacement en voiture est plus courant. Aussi, `logCentre_sportifKm2`n'est pas significatif dans le modèle. C'est-à-dire que la probabilité de faire une erreur en rejetant l'hypothèse nulle où le coefficient de `logCentre_sportifKm2` est nul est élevée.
 
@@ -663,7 +667,7 @@ plot1 <- ggplot(residuals_data, aes(x = Fitted_Values, y = Residuals)) +
   geom_point() +
   xlab("Valeurs prédites") +
   ylab("Résidus") +
-  ggtitle("Graphique des résidus par rapport aux valeurs prédites") +
+  ggtitle("Graphique des résidus par rapport\naux valeurs prédites") +
   geom_hline(yintercept = 0, color = "red", linetype = "dashed")
 
 residuals <- residuals(modele_densite)
@@ -736,8 +740,9 @@ On obtient des résultats similaires au modèle avec les données des membres au
 
 Nous approfondirons davantage ce sujet dans la conclusion, cependant, il est essentiel de noter que la société doit tenir compte des futurs projets de développement des villes afin d'accroître l'utilisation des Bixi.
 
-## Limitation
+## Limitations
 Les limites des modèles ont été abordées tout au long de cette section, mais il est important de les rappeler. Ces modèles ne sont d'aucun cas des modèles causaux, ont seulement réussi à capter les tendances que peuvent prendre les variables explicatives face au nombre total de déplacements. De plus, comme expliqué précédemment, il reste des variables qui affectent autant la variable cible que les variables explicatives dans le terme d'erreur. Par exemple, le nombre de kilométrages de piste cyclable est dans le terme d'erreur, mais affecte également le `n_tot` et `density`. Cela dit, il manque plusieurs variables de contrôles à nos modèles, mais nous pensons avoir bien capté la tendance que les variables explicatives peuvent prendre.
 
 # Conclusion
-Enfin toutes ces informations sont importantes pour l'OBNL. Elles expliquent en bref, qu'en moyenne, les arrondissements plus densifiés et l'ajout de certaines infrastructures dans les villes augmentent le nombre d'utilisation des bixi, ce qui est cohérent avec notre hypothèse. À cet effet, il est possible de se demander si ça ne serait pas intéressant pour la compagnie de se coordonner avec les planificateurs urbains des villes pour arrimer l'ajout de station de bixi aux futurs projets de développement urbain des arrondissements. Cela étant dit, ça permettrait d'augmenter le nombre de déplacements en bixi et de diminuer le nombre de véhicules non écologiques sur les routes.
+Pour conclure, toutes ces informations sont importantes pour l'OBNL. Elles expliquent en bref, qu'en moyenne, les arrondissements plus densifiés et l'ajout de certaines infrastructures dans les villes augmentent le nombre d'utilisations des bixi, ce qui est cohérent avec notre hypothèse, contrairement aux festivals qui n’ont quant à eux aucun effet sur le nombre total de déplacements.À cet effet, il est possible de se demander si ça ne serait pas intéressant pour la compagnie de se coordonner avec les planificateurs urbains des villes pour arrimer l'ajout de station de bixi aux futurs projets de développement urbain des arrondissements. Cela étant dit, ça permettrait d'augmenter le nombre de déplacements en bixi et de diminuer le nombre de véhicules non écologiques sur les routes.
+
