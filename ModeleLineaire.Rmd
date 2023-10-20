@@ -43,7 +43,7 @@ library(gridExtra)
 
 Dans cette deuxième partie du projet, nous devions présenter des modèles de régression linéaire permettant de répondre à une question de sorte à conseiller la compagnie BIXI d'un point de vue d'affaires. D'abord, avant de choisir le sujet du questionnement, on s'est penché sur la compagnie elle-même. Sachant que BIXI est une compagnie à but non lucratif, son but n'est pas nécessairement de maximiser ses profits. C'est ainsi qu'on s'est questionné à savoir, qu'est ce qui intéresserait un OBNL comme BIXI.
 
-Au premier abord, on a conclu que la question devait être plus d'ordre environnemental. Qu'est-ce que la compagnie peut faire pour accélérer la transition vers une économie verte, en réduisant l'impact environnemental des moyens de transport? Bien sûr, cette question est très large, mais elle nous affecte un nouveau problème où l'on s'intéresse moins à la durée des déplacements et plus au nombre de déplacement. Cette réflexion provient du fait, que le nombre de déplacements est en lien avec le nombre d'utilisateurs. Ce qui veut dire qu'un déplacement en bixi de plus, c'est une personne qui à décider de ne pas prendre sa voiture. À cet égard, on va s'intéresser à plusieurs sous-questions, à savoir comment les évènements affectent le nombre de déplacements. Autrement dit, est-ce que les festivals à Montréal affectent le nombre d'utilisations des bixis? On va aussi s'intéresser aux portraits démographiques de la ville. A savoir, est-ce que la densité de population, les parcs, les lieux culturels et les autres formes d'infrastructures mises en place dans les villes affectent le nombre d'utilisations des bixis? Bien sûr, chaque modèle présenté aura ses limites et elles seront toutes abordées en temps et lieu. Toutefois, ces questions peuvent revêtir un intérêt significatif pour la compagnie, car elles offrent la possibilité de cibler les zones où l'utilisation du vélo est plus répandue dans la région métropolitaine de Montréal, tout en explorant les opportunités pour étendre ses services en contribuant à la réduction de l'usage des modes de transport non écologiques.
+Au premier abord, on a conclu que la question devait être plus d'ordre environnemental. Qu'est-ce que la compagnie peut faire pour accélérer la transition vers une économie verte, en réduisant l'impact environnemental des moyens de transport? Bien sûr, cette question est très large, mais elle nous affecte un nouveau problème où l'on s'intéresse moins à la durée des déplacements et plus au nombre de déplacement. Cette réflexion provient du fait, que le nombre de déplacements est en lien avec le nombre d'utilisateurs. Ce qui veut dire qu'un déplacement en Bixi de plus, c'est une personne qui à décider de ne pas prendre sa voiture. À cet égard, on va s'intéresser à plusieurs sous-questions, à savoir comment les évènements affectent le nombre de déplacements. Autrement dit, est-ce que les festivals à Montréal affectent le nombre d'utilisations des Bixi? On va aussi s'intéresser aux portraits démographiques de la ville. À savoir, est-ce que la densité de population, les parcs, les lieux culturels et les autres formes d'infrastructures mises en place dans les villes affectent le nombre d'utilisations des Bixi? Bien sûr, chaque modèle présenté aura ses limites et elles seront toutes abordées en temps et lieu. Toutefois, ces questions peuvent revêtir un intérêt significatif pour la compagnie, car elles offrent la possibilité de cibler les zones où l'utilisation du vélo est plus répandue dans la région métropolitaine de Montréal, tout en explorant les opportunités pour étendre ses services en contribuant à la réduction de l'usage des modes de transport non-écologiques.
 
 
 <!-- # Enrichissement des données -->
@@ -259,7 +259,7 @@ bixi_df
 bixi_df[is.na(bixi_df$nb_tour),]
 ```
 
-Étant donné que plusieurs satitions bixi se retrouvent dans un arrondissement, pour évaluer l'impact du nombre de sites touristiques par arrondissement sur l'utilisation des bixi, nous agrégeons nos données par arrondissement, par jour et par type de membre, en prenant la moyenne des différentes variables bixi par arrondissement. Ainsi, nous analysons l'impact des sites touristiques par arrondissement, sur l'utilisation moyenne dans l'arrondissement. Cette dernière est le rapport entre le nombre total de déplacement dans l'arrondissement et le nombre de station qui s'y retrouve. 
+Étant donné que plusieurs stations Bixi se retrouvent dans un arrondissement, pour évaluer l'impact du nombre de sites touristiques par arrondissement sur l'utilisation des Bixi, nous agrégeons nos données par arrondissement, par jour et par type de membre, en prenant la moyenne des différentes variables Bixi par arrondissement. Ainsi, nous analysons l'impact des sites touristiques par arrondissement, sur l'utilisation moyenne dans l'arrondissement. Cette dernière est le rapport entre le nombre total de déplacement dans l'arrondissement et le nombre de station qui s'y retrouve. 
 Rapellons que notre variable cible est le logarithme du nombre total de déplacement (`n_tot_log)
 
 ```{r, results='hide', fig.keep='none'}
@@ -381,7 +381,7 @@ Ainsi, s'il existe des variables $Z_1$ qui affectent à la fois `festival` et `n
 
 Au niveau de la normalité des résidus, on doit les analyser après la transformation logarithmique.
 
-```{r fest-res1, out.height = "30%", fig.align='center', fig.cap="Distribution des résidus et QQ-Plot Résidus Student"}
+```{r fest-res1, out.height = "30%", fig.align='center', fig.cap="Variance des résidus"}
 resid <- rstudent(mod_fest_1)
 fitted <- mod_fest_1$fitted.values
 res.dat <- cbind(dat_mod, fitted, resid)
@@ -392,16 +392,14 @@ xlab("Résidus") +
 ylab("Densité")+
   ggtitle("Distribution des résidus")
 
-plot2 <- ggplot(data = res.dat, mapping = aes(sample = resid)) + stat_qq(distribution = qt,
-dparams = mod_fest_1$df.residua) + stat_qq_line(distribution = qt,
-dparams = mod_fest_1$df.residual) + labs(x = "Quantiles théoriques",
-y = "Quantiles empiriques", title = "QQ-Plot Résidus Student")
+plot2 <- ggplot(data = res.dat, aes(x = as.factor(festival), y = resid)) + geom_boxplot() + ylab("Résidus") +
+xlab("Festival")
 
 grid.arrange(plot1, plot2, ncol = 2)
 ```
 
 
-En observant le figure à gauche \@ref(fig:fest-res1) et celle a droite \@ref(fig:fest-res1), on voit que les résidus semblent ne pas être normales dans le premier tiers des données. Par la suite, les résidus semblent se rapprocher d'un distribution normale. Or, étant donné que les résidus ne sont pas parfaitement normales, cela va poser des limitations dans l'analyse et l'inférence des résultats.
+En observant le figure à gauche \@ref(fig:fest-res1) et celle a droite \@ref(fig:fest-res1), on voit que les résidus semblent ne pas être normales dans le premier tiers des données. Par la suite, les résidus semblent se rapprocher d'un distribution normale. Or, étant donné que les résidus ne sont pas parfaitement normales, cela va poser des limitations dans l'analyse et l'inférence des résultats. Il ne semble pas avoir d'hétéroscédasticité dans les résidus.
 
 ## Modèle linéaire ajusté
 
@@ -412,9 +410,9 @@ mod_fest_2 = lm(n_tot_mod ~ festival + mm + holiday + wkend, data = dat_mod)
 summary(mod_fest_2)
 ```
 
-En controlant pour les variables omises, nous observons maintenant un changement dans l'interprétation des résultats. L'effet des festival semble être négatif et non-significatif. Dans ce modèle, chaque festival diminue le nombre total de déplacement de 2,4% par jour par quartier de façon non-significative. Il semblerait que l'effet passe maintenant par les mois et non par les festivals.
+En contrôlant pour les variables omises, nous observons maintenant un changement dans l'interprétation des résultats. L'effet des festival semble être négatif et non-significatif. Dans ce modèle, chaque festival diminue le nombre total de déplacement de 2,4% par jour par quartier de façon non-significative. Il semblerait que l'effet passe maintenant par les mois et non par les festivals.
 
-Si nous analysons rapidement les résidus, nous voyons dans le figure à droite et à gauche \@ref(fig:fest-res2) qu'ils semblent légèrement plus normales que dans le premier modèle.
+Si nous analysons rapidement les résidus, nous voyons dans le figure à droite et à gauche \@ref(fig:fest-res2) qu'ils semblent légèrement plus normales que dans le premier modèle. Les résidus semblent encore homoscédastiques.
 
 ```{r fest-res2, out.height = "30%", fig.align='center', fig.cap="Distribution des résidus"}
 resid <- rstudent(mod_fest_2)
@@ -427,11 +425,8 @@ xlab("Résidus") +
 ylab("Densité")+
   ggtitle("Distribution des résidus")
 
-plot2 <- ggplot(data = res.dat, mapping = aes(sample = resid)) + stat_qq(distribution = qt,
-dparams = mod_fest_2$df.residua) + stat_qq_line(distribution = qt,
-dparams = mod_fest_2$df.residual) + labs(x = "Quantiles théoriques",
-y = "Quantiles empiriques")+
-  ggtitle("QQ-Plot Résidus Student")
+plot2 <- ggplot(data = res.dat, aes(x = as.factor(festival), y = resid)) + geom_boxplot() + ylab("Résidus") +
+xlab("Festival")
 
 grid.arrange(plot1, plot2, ncol = 2)
   
@@ -463,7 +458,7 @@ De façon similaire au modèle précédemment, les festivals n'ont pas d'effets 
 
 Étant donné les résultats des modèles que nous avons fait précédemment, les festivals ne semblent pas avoir d'effets significatifs sur l'utilisation des Bixi que cela soit pour les membres ou les non-membres. Ainsi, nous ne pouvons pas nous prononcer sur des politiques et stratégies que l'entreprise pourrait appliquer.
 
-# Modèles avec la densité de population
+# Impact de la densité de population
 
 Dans cette section, il sera question de modéliser l'effet de la densité de la population par $km^2$ par arrondissement, sur le nombre total de déplacements en Bixi par arrondissement. Autrement dit, on essaye d'observer qu'est-ce qui arrive au nombre de totaux de déplacement si la densité de population augmente. À première vue, il est cohérent d'affirmer que si la densité de la population augmente, le nombre de déplacement à bicyclette augmentera aussi. Cette prémisse repose sur l'idée qu'une densité de population plus élevée favorise généralement la mise en place d'infrastructures favorables aux déplacements à bicyclette.
 
@@ -698,8 +693,9 @@ En examinant ce modèle, on constate que tous les paramètres sont significatifs
 
 Suite aux observations de ce modèle, on peut dire que le nombre de bibliothèques, de centre communautaires et de centres sportifs influencent positivement le nombre de déplacement en Bixi et le nombre de parc n'a pas d'effet significatif.
 
-En procédant à l'analyse des résidus nous obtenons les deux graphes suivant: Figure \@ref(fig:distResDensiteMultipleInt), à gauche: un graphique des résidus par rapport aux valeurs prédites et à droite un graphe QQ.
-```{r distResDensiteMultipleInt, out.height = "30%", fig.align = 'center', fig.cap = "Graphiques des résidus"}
+Pour s'assurer de l'homoscédasticité et linéarité du modèle, on peut ensuite examiner les résidus avec les figure à droite \@ref(fig:distResDensiteMultipleInt) et celle a gauche \@ref(fig:distResDensiteMultipleInt).
+
+```{r distResDensiteMultipleInt, out.height = "30%", fig.align = 'center', fig.cap = "Histograme des résidus - Graphique Q-Q "}
 
 residuals <- residuals(modele2_interactions)
 
@@ -752,3 +748,4 @@ Les limites des modèles ont été abordées tout au long de cette section, mais
 # Conclusion
 Pour conclure, toutes ces informations sont importantes pour l'OBNL. Elles expliquent en bref, qu'en moyenne, les arrondissements plus densifiés et l'ajout de certaines infrastructures dans les villes augmentent le nombre d'utilisations des bixi, ce qui est cohérent avec notre hypothèse, contrairement aux festivals qui n’ont quant à eux aucun effet sur le nombre total de déplacements. À cet effet, il est possible de se demander si ça ne serait pas intéressant pour la compagnie de se coordonner avec les planificateurs urbains des villes pour arrimer l'ajout de station de bixi aux futurs projets de développement urbain des arrondissements. Cela étant dit, ça permettrait d'augmenter le nombre de déplacements en bixi et de diminuer le nombre de véhicules non écologiques sur les routes.
 
+Au niveau, des festivals, ceux-ci ne semblent pas avoir d'impact selon nos modèles. Mais, il peut être intéressant d'améliorer les modèles pour voir leur effet et ajuster les politiques de Bixi selon les résultats.
