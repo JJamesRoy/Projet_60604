@@ -696,16 +696,25 @@ summary(modele2_interactions)
 
 En examinant ce modèle, on constate que tous les paramètres sont significatifs à au moins 99,9% de confiance sauf pour les paramètres `logParcKm2` et `logDensity:logParcKm2` qui semblent ne pas être statistiquement significatifs. On peut aussi constater que si `logBibliothequeKm2` augmente de 1, alors le log du nombre de déplacement total augmentera de 13.44, puisque que ces variables sont sur l'échelle logarithmique, l'analyse des valeurs numérique perd un peu de son sens, cependant on peut comprendre qu'il y a un effet positif à l'augmentation du nombre de bibliothèque. Puisque les variables sont sur une échelle logarithmique, il faut aussi comprendre que les variables avec des coefficients négatifs ont ainsi très peu d'impact sur le nombre de déplacement total si elles augmentent de un. On remarque aussi que le R2 augmente en comparaison aux autres modèles incluant la densité pour une valeur de 37.34% ce qui veut dire que ce modèle explique un peu plus la variabilité du nombre total de déplacements que les autres ci-dessus avec la densité.
 
-
 Suite aux observations de ce modèle, on peut dire que le nombre de bibliothèques, de centre communautaires et de centres sportifs influencent positivement le nombre de déplacement en Bixi et le nombre de parc n'a pas d'effet significatif.
 
-Pour s'assurer de l'homoscédasticité et linéarité du modèle, on peut ensuite examiner les résidus avec les figure a droite \@ref(fig:distResDensiteMultipleInt) et celle a gauche \@ref(fig:distResDensiteMultipleInt).
-
-```{r distResDensiteMultipleInt, out.height = "30%", fig.align = 'center', fig.cap = "Histograme des résidus - Graphique Q-Q "}
+En procédant à l'analyse des résidus nous obtenons les deux graphes suivant: Figure \@ref(fig:distResDensiteMultipleInt), à gauche: un graphique de la dispersion des résidus et à droite un graphe QQ.
+```{r distResDensiteMultipleInt, out.height = "30%", fig.align = 'center', fig.cap = "Graphiques des résidus"}
 
 residuals <- residuals(modele2_interactions)
 
-plot1 <- ggplot(data.frame(Résidus = residuals), aes(x = rstudent(modele2_interactions))) + geom_density() + geom_histogram(aes(y = ..density..),
+
+residuals_data <- data.frame(Fitted_Values = modele2_interactions$fitted.values, Residuals = resid(modele2_interactions))
+
+
+plot1 <- ggplot(residuals_data, aes(x = Fitted_Values, y = Residuals)) +
+  geom_point() +
+  xlab("Valeurs prédites") +
+  ylab("Résidus") +
+  ggtitle("Graphique des résidus par rapport\naux valeurs prédites") +
+  geom_hline(yintercept = 0, color = "red", linetype = "dashed")
+
+plot3 <- ggplot(data.frame(Résidus = residuals), aes(x = rstudent(modele2_interactions))) + geom_density() + geom_histogram(aes(y = ..density..),
 bins = 20, alpha = 0.5)+
 xlab("Résidus") +
 ylab("Densité")+
@@ -724,8 +733,7 @@ grid.arrange(plot1, plot2, ncol = 2)
 ```{r qqDensiteMultipleInt, out.height = "30%", fig.align = 'center', fig.cap = "Graphique QQ - modèle de densité démographique multiple avec interactions"}
 
 ```
-
-D'après l'analyse des résidus, on constate une allure normale des résidus sur le graphique de la densité et les quantiles semblent suivre raisonnablement la droite sur le graphique QQ. Ainsi, les conditions semble être respectées.
+On remarque dans la figure de gauche que la variance ne semble pas constante, ainsi nous ne pourrions pas dire que l'hypothèse d'homoscésasticité est respectée. D'après le QQ-plot à droite, on constate une allure normale des résidus, les quantiles semblent suivre raisonnablement la droite sur le graphique QQ.
 
 ### Modèle pour les non-membres
 
