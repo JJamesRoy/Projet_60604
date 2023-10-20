@@ -691,16 +691,31 @@ summary(modele2_interactions)
 
 En examinant ce modèle, on constate que tous les paramètres sont significatifs à au moins 99,9% de confiance sauf pour les paramètres `logParcKm2` et `logDensity:logParcKm2` qui semblent ne pas être statistiquement significatifs. On peut aussi constater que si `logBibliothequeKm2` augmente de 1, alors le log du nombre de déplacement total augmentera de 13.44, puisque que ces variables sont sur l'échelle logarithmique, l'analyse des valeurs numérique perd un peu de son sens, cependant on peut comprendre qu'il y a un effet positif à l'augmentation du nombre de bibliothèque. Puisque les variables sont sur une échelle logarithmique, il faut aussi comprendre que les variables avec des coefficients négatifs ont ainsi très peu d'impact sur le nombre de déplacement total si elles augmentent de un. On remarque aussi que le R2 augmente en comparaison aux autres modèles incluant la densité pour une valeur de 37.34% ce qui veut dire que ce modèle explique un peu plus la variabilité du nombre total de déplacements que les autres ci-dessus avec la densité.
 
-
 Suite aux observations de ce modèle, on peut dire que le nombre de bibliothèques, de centre communautaires et de centres sportifs influencent positivement le nombre de déplacement en Bixi et le nombre de parc n'a pas d'effet significatif.
 
+<<<<<<< HEAD
 Pour s'assurer de l'homoscédasticité et linéarité du modèle, on peut ensuite examiner les résidus avec les figure à droite \@ref(fig:distResDensiteMultipleInt) et celle a gauche \@ref(fig:distResDensiteMultipleInt).
 
 ```{r distResDensiteMultipleInt, out.height = "30%", fig.align = 'center', fig.cap = "Histograme des résidus - Graphique Q-Q "}
+=======
+En procédant à l'analyse des résidus nous obtenons les deux graphes suivant: Figure \@ref(fig:distResDensiteMultipleInt), à gauche: un graphique des résidus par rapport aux valeurs prédites et à droite un graphe QQ.
+```{r distResDensiteMultipleInt, out.height = "30%", fig.align = 'center', fig.cap = "Graphiques des résidus"}
+>>>>>>> 53d6d11c33896a78c0b155dc895d18299db8cb75
 
 residuals <- residuals(modele2_interactions)
 
-plot1 <- ggplot(data.frame(Résidus = residuals), aes(x = rstudent(modele2_interactions))) + geom_density() + geom_histogram(aes(y = ..density..),
+
+residuals_data <- data.frame(Fitted_Values = modele2_interactions$fitted.values, Residuals = resid(modele2_interactions))
+
+
+plot1 <- ggplot(residuals_data, aes(x = Fitted_Values, y = Residuals)) +
+  geom_point() + geom_smooth() +
+  xlab("Valeurs prédites") +
+  ylab("Résidus") +
+  ggtitle("Graphique des résidus par rapport\naux valeurs prédites") +
+  geom_hline(yintercept = 0, color = "red", linetype = "dashed")
+
+plot3 <- ggplot(data.frame(Résidus = residuals), aes(x = rstudent(modele2_interactions))) + geom_density() + geom_histogram(aes(y = ..density..),
 bins = 20, alpha = 0.5)+
 xlab("Résidus") +
 ylab("Densité")+
@@ -715,12 +730,7 @@ plot2 <- ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
 grid.arrange(plot1, plot2, ncol = 2)
 
 ```
-
-```{r qqDensiteMultipleInt, out.height = "30%", fig.align = 'center', fig.cap = "Graphique QQ - modèle de densité démographique multiple avec interactions"}
-
-```
-
-D'après l'analyse des résidus, on constate une allure normale des résidus sur le graphique de la densité et les quantiles semblent suivre raisonnablement la droite sur le graphique QQ. Ainsi, les conditions semble être respectées.
+On remarque dans la figure de gauche que la variance ne semble pas constante, ainsi nous ne pourrions pas dire que l'hypothèse d'homoscésasticité est respectée. D'après le QQ-plot à droite, on constate une allure normale des résidus, les quantiles semblent suivre raisonnablement la droite sur le graphique QQ.
 
 ### Modèle pour les non-membres
 
@@ -735,8 +745,10 @@ On obtient des résultats similaires au modèle avec les données des membres au
 
 Nous approfondirons davantage ce sujet dans la conclusion, cependant, il est essentiel de noter que la société doit tenir compte des futurs projets de développement des villes afin d'accroître l'utilisation des Bixi.
 
+
 ## Limitations
 Les limites des modèles ont été abordées tout au long de cette section, mais il est important de les rappeler. Ces modèles ne sont en aucun cas des modèles causaux, ils ont seulement réussi à capter les tendances que peuvent prendre les variables explicatives face au nombre total de déplacements. De plus, comme expliqué précédemment, il reste des variables qui affectent autant la variable cible que les variables explicatives dans le terme d'erreur. Par exemple, le nombre de kilométrages de piste cyclable est dans le terme d'erreur, mais affecte également le `n_tot` et `density`. Cela dit, il manque plusieurs variables de contrôles à nos modèles, mais nous pensons avoir bien capté la tendance que les variables explicatives peuvent prendre.
+
 
 # Conclusion
 Pour conclure, toutes ces informations sont importantes pour l'OBNL. Elles expliquent en bref, qu'en moyenne, les arrondissements plus densifiés et l'ajout de certaines infrastructures dans les villes augmentent le nombre d'utilisations des bixi, ce qui est cohérent avec notre hypothèse, contrairement aux festivals qui n’ont quant à eux aucun effet sur le nombre total de déplacements.À cet effet, il est possible de se demander si ça ne serait pas intéressant pour la compagnie de se coordonner avec les planificateurs urbains des villes pour arrimer l'ajout de station de bixi aux futurs projets de développement urbain des arrondissements. Cela étant dit, ça permettrait d'augmenter le nombre de déplacements en bixi et de diminuer le nombre de véhicules non écologiques sur les routes.
