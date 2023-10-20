@@ -3,17 +3,18 @@ title: "Projet BIXI - Partie 2: Modèle de régression linéaire"
 subtitle: "MATH60604 - Modélisation statistique"
 author: "Abdoul Wassi Badirou, Alfred Assal, James Roy, Samuel Croteau"
 date: "`r Sys.Date()`"
+geometry: margin=1.5cm
 output:
-  bookdown::html_document2:
-    toc: yes
-    number_sections: yes
-    toc_float:
-      collapsed: no
+  # bookdown::html_document2:
   #   toc: yes
-  #   toc_depth: '3'
+  #   number_sections: yes
+  #   toc_float:
+  #     collapsed: no
+  # #   toc: yes
+  # #   toc_depth: '3'
   bookdown::pdf_document2:
     toc: yes
-    toc_depth: 2
+    toc_depth: 1
     extra_dependencies: ["flafter"]
   # pdf_document:
 params:
@@ -48,9 +49,11 @@ library(gridExtra)
 
 # Introduction
 
-Dans cette deuxième partie du projet, nous devions présenter des modèles de régression linéaire permettant de répondre à une question de sorte à conseiller la compagnie BIXI d'un point de vue d'affaires. D'abord, avant de choisir le sujet du questionnement, on s'est penché sur la compagnie elle-même. Sachant que BIXI est une compagnie à but non lucratif, son but n'est pas nécessairement de maximiser ses profits. C'est ainsi qu'on s'est questionné à savoir, qu'est ce qui intéresserait un OBNL comme BIXI.
+Dans cette deuxième partie du projet, nous devons utiliser des modèles de régression linéaire pour répondre à des questions d'un point de vue d'affaires qui permettent d'expliquer la durée des déplacements et les revenus. La compagnie BIXI étant une organisation à but non lucratif, son but n'est pas nécessairement de maximiser ses profits. De plus, dans la partie 1, nous avons remarqué qu'il y a une corrélation presque parfaite entre le nombre total de déplacement, la durée des déplacements et les revenus. Nous avons donc décider de prendre pour cible le nombre total de déplacement. 
 
-Au premier abord, on a conclu que la question devait être plus d'ordre environnemental. Qu'est-ce que la compagnie peut faire pour accélérer la transition vers une économie verte, en réduisant l'impact environnemental des moyens de transport? Bien sûr, cette question est très large, mais elle nous affecte un nouveau problème où l'on s'intéresse moins à la durée des déplacements et plus au nombre de déplacement. Cette réflexion provient du fait, que le nombre de déplacements est en lien avec le nombre d'utilisateurs. Ce qui veut dire qu'un déplacement en Bixi de plus, c'est une personne qui à décider de ne pas prendre sa voiture. À cet égard, on va s'intéresser à plusieurs sous-questions, à savoir comment les évènements affectent le nombre de déplacements. Autrement dit, est-ce que les festivals à Montréal affectent le nombre d'utilisations des Bixi? On va aussi s'intéresser aux portraits démographiques de la ville. À savoir, est-ce que la densité de population, les parcs, les lieux culturels et les autres formes d'infrastructures mises en place dans les villes affectent le nombre d'utilisations des Bixi? Bien sûr, chaque modèle présenté aura ses limites et elles seront toutes abordées en temps et lieu. Toutefois, ces questions peuvent revêtir un intérêt significatif pour la compagnie, car elles offrent la possibilité de cibler les zones où l'utilisation du vélo est plus répandue dans la région métropolitaine de Montréal, tout en explorant les opportunités pour étendre ses services en contribuant à la réduction de l'usage des modes de transport non-écologiques.
+Les enjeux environnementaux sont l'un des enjeux les plus importants de notre époque. Chaque compagnie doit contribuer à réduire l'impact des activités humaines sur l'environnement. Bixi peut y contribuer en mettant en place des conditions qui démocratisent d'avantage l'utilisation de leur vélo. Ainsi elle apporterait son grain de sable dans la transition vers une économie verte dans le secteur des moyens de transport. En plus de contributer à la santé et au bien être de ses usagers. Notre réflexion repose sur l'hypothèse qu'un déplacement Bixi de plus, c'est une personne qui à décider de ne pas prendre sa voiture ou sa moto. Ainsi notre objectif est de formuler des questions de recherche en lien avec l'augmentation du nombre total de déplacement. 
+
+À cet égard, on s'intéresse d'une part à savoir comment les évènements affectent le nombre de déplacements. Autrement dit, est-ce que les festivals à Montréal affectent le nombre d'utilisations des Bixi? D'autre part, on s'intéresse aux portraits démographiques de la ville. À savoir, est-ce que la densité de population, les parcs, les lieux culturels et les autres formes d'infrastructures mises en place dans les villes affectent le nombre d'utilisations des Bixi? Bien sûr, chaque modèle présenté aura ses limites et elles seront toutes abordées en temps et lieu. Toutefois, ces questions peuvent revêtir un intérêt significatif pour la compagnie, car elles offrent la possibilité de cibler les zones où l'utilisation du vélo est plus répandue dans la région métropolitaine de Montréal, tout en explorant les opportunités pour étendre ses services en contribuant à la réduction de l'usage des modes de transport non-écologiques.
 
 
 <!-- # Enrichissement des données -->
@@ -174,9 +177,9 @@ bixiWithArron_clean_df=data.frame(name=bixi_with_arrond_df$name,latitude=bixi_wi
 bixiWithArron_clean_df
 ```
 
-# Transformation variables d'intérêts
+# Transformation de la variable cible
 
-Nous allons observer nos variables d'intérêts pour voir si elles se prêtent à l'analyse statistique.
+La variable à expliquer dans notre analyse est le nombre total de déplacement. Les modèles de régression linéaire reposent entre autre sur l'hypothèse de normalité de la variable cible.
 
 ```{r histn, out.height = "30%", fig.cap="Distribution des déplacements totaux", fig.align='center'}
 par(mfrow=c(1,2))
@@ -191,26 +194,14 @@ hist(dat_mod$n_tot_mo,
      xlab = "Nombre de déplacement totaux",
      main = "")
 ```
-
-Dans la figure de gauche \@ref(fig:histn), on voit que les données de la variable `n_tot` ne sont pas normales, il faudrait les normaliser pour être capable de faire des analyses statistiques à l'aide de régression linéaire.
-
-<!-- # ```{r histn2, out.height = "30%", fig.cap="Distribution du log des déplacements totaux", fig.align='center'} -->
-<!-- # dat_mod = dat_mod %>% mutate(n_tot_mod = log(n_tot)) -->
-<!-- # hist(dat_mod$n_tot_mo,  -->
-<!-- #      ylab = "Fréquence",  -->
-<!-- #      xlab = "Nombre de déplacement totaux", -->
-<!-- #      main = "") -->
-<!-- # ``` -->
-
-Maintenant, dans la figure de droite \@ref(fig:histn), on voit qu'avec une transformation logarithmique, les données se normalisent. Par contre, le côté gauche de la courbe est encore relevé, cela peut impacter l'inférence statistique que nous allons faire prochainement.
-
+Sur la figure de gauche \@ref(fig:histn), on voit que les données de la variable `n_tot` ne sont pas normales. En lui appliquant une transformation logarithmique, nous obtenons la distribution illustrée sur la figure de droite \@ref(fig:histn). Celle ci devient approximativement normale. Par contre, le fait que le côté gauche de la courbe soit encore un peu relevé, peut impacter l'inférence statistique que nous ferons.
 
 # Impact des lieux touristiques
 Dans cette section, nous voulons analyser l'impact du nombre des lieux touristiques sur l'utilisation des Bixi. Pour cela, nous utilisons le jeu de données sur les lieux d'intérêt disponible dans les données ouvertes de la ville de montréal à l'adresse url https://donnees.montreal.ca/dataset/lieux-d-interet. Nous calculons le nombre de sites touristiques (variable `n_tour`) par arrondissement que nous fusionnons à nos données `bixi`. 
 <!-- Nous agrégeons ces données par arrondissement pour les fusionner à nos données bixi. À partir de ces données, nous créons deux variables:  
 - `lieuxTouristiques` (1 ou 0): indique s'il y a un lieu touristique dans l'arrondissement (1) ou non (0)
 - `n_touristiques`: nombre de lieux touristiques dans l'arrondissement. -->
-Nous considérons comme lieux touristiques, les sites qui sont dans les catégories `Établissement culturel`, `Bâtiment et lieu d'intérêt`, `Art public`, `Circuit et parcours`, `Attrait touristique`, `Lieu de diffusion` et `Centre de congrès / d'exposition`. Les données pour les arrondissements de `longueuil` et `laval` sont tirés respectivement de https://www.donneesquebec.ca/recherche/dataset/installations et https://www.donneesquebec.ca/recherche/dataset/sites-de-loisirs
+Nous considérons comme lieux touristiques, les sites qui sont dans les catégories `Établissement culturel`, `Bâtiment et lieu d'intérêt`, `Art public`, `Circuit et parcours`, `Attrait touristique`, `Lieu de diffusion` et `Centre de congrès / d'exposition`. Les données pour les arrondissements de `longueuil` et `laval` sont tirés respectivement de https://www.donneesquebec.ca/recherche/dataset/installations et https://www.donneesquebec.ca/recherche/dataset/sites-de-loisirs.
 ```{r, results='hide'}
 #Import lieux intérêts montréal
 mtl_lieuxInterets_raw_data_df=read.csv("lieux_d_interet.csv", sep = ",", header = T)
@@ -266,7 +257,7 @@ bixi_df
 bixi_df[is.na(bixi_df$nb_tour),]
 ```
 
-Étant donné que plusieurs satitions bixi se retrouvent dans un arrondissement, pour évaluer l'impact du nombre de sites touristiques par arrondissement sur l'utilisation des bixi, nous agrégeons nos données par arrondissement, par jour et par type de membre, en prenant la somme des variables `dur`, `rev`, `n_AM`, `n_PM`, `n_tot` et la moyenne des variables `temp` et `rain` pour toutes les stations dans un arrondissement. Nous introduisons ensuite les variables `nb_tour` et `n_stat` pour respectivement le nombre de sites touristiques et le nombre de station dans chaque arrondissement. Ainsi, nous analysons l'impact du nombre de sites touristiques dans chaque arrondissement, sur le nombre total de déplacement dans l'arrondissement. Ce dernier est la somme du nombre total de déplacements partant des stations qui sont dans l'arrondissement. Notre variable cible est le logarithme du nombre total de déplacement dans les arrondissements (`log(sum_n_tot)`).
+Étant donné que plusieurs stations bixi se retrouvent dans un arrondissement, pour évaluer l'impact du nombre de sites touristiques par arrondissement sur l'utilisation des bixi, nous agrégeons nos données par arrondissement, par jour et par type de membre, en prenant la somme des variables `dur`, `rev`, `n_AM`, `n_PM`, `n_tot` et la moyenne des variables `temp` et `rain` pour toutes les stations dans un arrondissement. Nous introduisons ensuite les variables `nb_tour` et `n_stat` pour respectivement le nombre de sites touristiques et le nombre de station dans chaque arrondissement. Ainsi, nous analysons l'impact du nombre de sites touristiques dans chaque arrondissement, sur le nombre total de déplacement dans l'arrondissement. Ce dernier est la somme du nombre total de déplacements partant des stations qui sont dans l'arrondissement. Notre variable cible est le logarithme du nombre total de déplacement dans les arrondissements (`log(sum_n_tot)`).
 
 ```{r, results='hide', fig.keep='none'}
 #Scatter plot pour voir à quoi ressemble la relation entre le nombre de sites touristique par arrondissement et log(n_tot) si on n'agrège pas les données par arrondissement
@@ -309,7 +300,7 @@ max_station_by_arr=max(bixi_agg_arrond_df2$n_stat)
 arr_with_max_n_stat=bixi_agg_arrond_df2[which.max(bixi_agg_arrond_df2$n_stat),'arrondissement']
 ```
 
-En moyenne, il y a `r round(mean_nb_tour_by_arr,0)` sites touristiques par arrondissement. L'arrondissement de `r arr_with_max_nb_tour` est celui qui en comporte le plus avec `r max_nb_tour` sites touristiques. Il y a en moyenne `r round(mean_station_by_arr,0)` station par arrondissement. L'arrondissement de `r arr_with_max_n_stat` est celui qui en comporte le plus avec `r max_station_by_arr` stations.
+En moyenne, il y a `r round(mean_nb_tour_by_arr,0)` sites touristiques par arrondissement. L'arrondissement de `r arr_with_max_nb_tour` est celui qui en comporte le plus avec `r max_nb_tour` sites touristiques. Il y a en moyenne `r round(mean_station_by_arr,0)` stations par arrondissement. L'arrondissement de `r arr_with_max_n_stat` est celui qui en comporte le plus avec `r max_station_by_arr` stations.
 
 ## Modèle de régression linéaire simple
 
@@ -331,22 +322,21 @@ Lorsqu'on tient compte uniquement du nombre de sites touristique par arrondissem
 Tout d'abord, il est important de décrire notre modèle complet. Il est composé de toutes les variables sauf `station`, `arrondissement`, `rev`, `dur`, `avg`, `n_PM`, `n_AM`. 
 La variable `station` qui est l'identification unique des stations, est exclue car elle ne comporte aucune codification. Donc elle n'apporte aucune information. Puisque nous avons agrégé les données à l'arrondissement, la variable n'est plus du tout pertinente. 
 
-La variable `arrondissement` est exclue car elle a une corrélation très forte avec `nb_tour` (nombre de sites touristiques dans la station) qui notre varible d'intérêt. L'ajustement d'un modèle qui inclus ces deux variables retourne `NA` pour l'un deux. Elle s'explique par le fait que quasiment tous les arrondissements ont des nombres de sites différents. Donc quasiment, chaque nombre de site correspond à un arrondissement différent. 
+La variable `arrondissement` est exclue car elle a une corrélation très forte avec `nb_tour` (nombre de sites touristiques dans la station) qui est notre varible d'intérêt. L'ajustement d'un modèle qui inclus ces deux variables retourne `NA` pour l'un deux. Elle s'explique par le fait que quasiment tous les arrondissements ont des nombres de sites différents. Donc quasiment, chaque nombre de site correspond à un arrondissement différent. 
 
 Les variables `rev` (revenu total généré) et `dur` (durée totale de tous les déplacements partant de la station au jour spécifié) sont exclues car ceux sont des variables cibles dans le cadre du projet et elles ont une corrélation presque parfaite avec la variable cible `n_tot` qui nous intéresse dans cette section. 
 
-La variable `avg` (la durée moyenne (en minutes) de tous les déplacement partant d'une station au jour spécifié) est exclue car elle perd son sens suite à l'agrégat `somme` utilisée sur les variables pour agréger les données par arrondissement. Rappelons que pour agréger les données, nous calculons pour les variables la somme pour toutes les stations dans l'arrondissement. Soit $S$ l'ensemble des stations, indexé par $i$. Soit $A$ l'ensemble des arrondissements, indexé par $j$. Soit $N_j$: la somme du nombre total de déplacements par station dans l'arrondissement $j$.
-
+La variable `avg` (la durée moyenne de tous les déplacements partant d'une station au jour spécifié) est exclue car elle perd son sens suite à l'agrégat `somme` utilisée sur les variables pour agréger les données par arrondissement. Rappelons que pour agréger les données, nous calculons pour les variables la somme pour toutes les stations dans l'arrondissement. Soit $S$ l'ensemble des stations, indexé par $i$. Soit $A$ l'ensemble des arrondissements, indexé par $j$. Soit $N_j$: la somme du nombre total de déplacements par station dans l'arrondissement $j$.
 
 \begin{equation} 
  N_j = \sum_{i=1}^{S} N_{i,j}=\sum_{i=1}^{S} D_{i,j}A_{i,j} \ne \sum_{i=1}^{S} D_{i,j}\sum_{i=1}^{S} A_{i,j} (\#eq:relationDurAvg)
 \end{equation}
 
-$N_{i,j},D_{i,j},A_{i,j}$ sont respectivement le nombre total de déplacement (variable `n_tot`), la durée totale des déplacements (variable `dur`) et la durée moyenne des déplacements (variable `avg`) pour la station $i$ dans l'arrondissement $j$. La relation décrite par l'équation \@ref(eq:relationDurAvg) décrit mathématiquement la raison pour laquelle nous excluons la variable `avg` dans les données agrégées. 
+$N_{i,j},D_{i,j},A_{i,j}$ sont respectivement le nombre total de déplacement (variable `n_tot`), la durée totale des déplacements (variable `dur`) et la durée moyenne des déplacements (variable `avg`) pour la station $i$ dans l'arrondissement $j$. La relation décrite par l'équation \@ref(eq:relationDurAvg) décrit mathématiquement la raison pour laquelle la variable `avg` perd son sens. 
 
-La variable `n_AM` et `n_PM` sont exclues car elles forment une combinaison linéaire avec `n_tot`. C'est à dire si le nombre total de déplacement change, forcément le nombre de déplacement en matinée et/ou en après-midi et/ou en soirée va changer. De plus les sites touristiques peuvent avoir un effet sur le nombre de déplacement en raison de leur heure d'ouverture. Il est donc absurde de controler le nombre de déplacement en journée ou en après-midi et même en soirée pour mesurer l'impact de la création d'un site sur le nombre total de déplacement.
+Les variables `n_AM` et `n_PM` sont exclues car elles forment une combinaison linéaire avec `n_tot`. C'est à dire si le nombre total de déplacement change, forcément le nombre de déplacement en matinée et/ou en après-midi et/ou en soirée va changer. De plus les sites touristiques peuvent avoir un effet sur le nombre de déplacement en raison de leur heure d'ouverture. Il est donc absurde de controler le nombre de déplacement en journée ou en après-midi et même en soirée pour mesurer l'impact de la création d'un site sur le nombre total de déplacement.
 
-À noter que dans le modèle, nous avons inclus le nombre de station dans l'arrondissement car il peut avoir un effet confondant. En effet, l'augmentation du nombre de stations peut rendre les sites touristiques ou d'autres sites non touristiques plus accessibles et générer plus de déplacement bixi et nous laisserait croire à tors que c'est l'augmentation des sites touristiques qui impacte les déplacements. 
+À noter que dans le modèle, nous avons inclus le nombre de stations dans l'arrondissement car il peut avoir un effet confondant. En effet, l'augmentation du nombre de stations peut rendre les sites touristiques ou d'autres sites non touristiques plus accessibles et générer plus de déplacement bixi et nous laisserait croire à tors que c'est l'augmentation des sites touristiques qui impacte les déplacements. 
 
 ```{r ModLieuTouristiqueAjustementModComplet, results='hide'}
 mod2 <- lm(log(avg_n_tot) ~ mm + dd + wday+ mem + holiday + avg_n_AM + avg_temp + avg_rain + nb_tour , data=bixi_agg_arrond_df)
@@ -401,7 +391,7 @@ plot3 <- ggplot(data = mod2_sum_resid_dat, mapping = aes(x=mod2_sum_log_sum_nTot
 #grid.arrange(plot1, plot3, ncol = 2)
 grid.arrange(plot1,plot2, plot3, ncol = 3)
 ```
-Les deux premiers graphes de la figure \@ref(fig:analyseResidusModeLieuxTouristiques2) nous montre que les résidus sont approximativement normale avec une moyenne proche de 0. Sur le dernier graphique on ne voit pas d'effet d'entonoir, la variance nous parait globalement constante, mais pas bien centré autour de 0 pour les premières valeurs.
+Les deux premiers graphes de la figure \@ref(fig:analyseResidusModeLieuxTouristiques2) nous montrent que les résidus sont approximativement normale avec une moyenne proche de 0. Sur le dernier graphique on ne voit pas d'effet d'entonoir, la variance nous parait globalement constante, mais pas bien centré autour de 0 pour les premières valeurs.
 
 ```{r ModLieuTouristiqueAjustementModCompletV2Log, results='hide'}
 mod2_sum_log <- lm(log(sum_n_tot) ~ I(log(mm)) + I(log(dd)) + wday+ mem + holiday + avg_temp + avg_rain + I(log(nb_tour)) + I(log(n_stat)), data=bixi_agg_arrond_df2)
@@ -434,7 +424,7 @@ Il peut être intéressant ici d'analyser l'interaction entre le nombre de stati
 mod3 <- lm(log(sum_n_tot) ~ mm + dd + wday + holiday + avg_temp + avg_rain + nb_tour*mem +  n_stat , data=bixi_agg_arrond_df2)
 summary(mod3)
 ```
-Nous constatons que l'interaction entre le fait d'être membre et le nombre de site touristique sur l'utilisation des bixi est significatif à un niveau de signifiance de 5%. En fait l'impact du nombre de site touristique sur le nombre total de déplacement est plus important pour les membres que les non-membres. Donc, bixi devrait chercher à avoir plus de client qui sont membre, d'avantage dans les arrondissements où il y a plus de sites touristiques. 
+Nous constatons que l'interaction entre le fait d'être membre et le nombre de site touristique sur l'utilisation des bixi est significatif à un niveau de signifiance de 5%. En fait l'impact du nombre de site touristique sur le nombre total de déplacement est plus important pour les membres que les non-membres. Donc, bixi devrait chercher à avoir plus de client qui sont membres, d'avantage dans les arrondissements où il y a plus de sites touristiques. 
 
 ```{r, fig.keep='none'}
 ggplot(bixi_agg_arrond_df2, aes(x=nb_tour, y=sum_n_tot, col=mem)) + geom_point() + geom_line(aes(y=10^(mod3$fitted.values)), size=1)
@@ -461,7 +451,7 @@ grid.arrange(plot1,plot2, plot3, ncol = 3)
 Les graphiques pour l'analyse des résidus du modèle avec interaction sont très similaire à ceux présentés à la figure \@ref(fig:analyseResidusModeLieuxTouristiques2). Les conclusions sont donc les mêmes. 
 
 ## Limitations
-L'agrégation par arrondissement sur lesquel repose l'analyse peut mettre en évidence certaines limitations dans nos interprétations. En effet, nous nous sommes basés sur le nombre de sites touristiques dans l'arrondissement, sans forcément tenir compte de leur proximité vis à vis des stations dans l'arrondissement. Il aurait été plus juste de ne tenir compte des site touristiques qui sont dans un certains rayon des stations. De plus la sélection des sites considérés touristiques dans chaque arrondissement est assez subjectifs. Nous n'avons pas fait une exploration détaillée des données exogènes utilisées pour nous assurer de l'hamonie de la définition de ce que nous considérons comme lieux touristiques entre les données de la ville de montréal, laval et longueuil. Chacun de ses jeux de données ont des catégorisations différentes, et nous n'avions pas un dictionnaire qui explique les caractéristiques de chaque catégories dans les jeux de données respectifs. Nous nous sommes basés sur notre interprétation des segments dans ces données, ce qui peut introduire des biais dans notre analyse.
+L'agrégation par arrondissement sur lesquel repose l'analyse peut mettre en évidence certaines limitations dans nos interprétations. En effet, nous nous sommes basés sur le nombre de sites touristiques dans l'arrondissement, sans forcément tenir compte de leur proximité vis à vis des stations dans l'arrondissement. Il aurait été plus juste de ne tenir compte des sites touristiques qui sont dans un certains rayon des stations. De plus la sélection des sites considérés touristiques dans chaque arrondissement est assez subjectifs. Nous n'avons pas fait une exploration détaillée des données exogènes utilisées pour nous assurer de l'hamonie de la définition de ce que nous considérons comme lieux touristiques entre les données de la ville de montréal, laval et longueuil. Chacun de ses jeux de données ont des catégorisations différentes, et nous n'avions pas un dictionnaire qui explique les caractéristiques de chaque catégories dans les jeux de données respectifs. Nous nous sommes basés sur notre interprétation des segments dans ces données, ce qui peut introduire des biais dans notre analyse.
 
 # Impact des festivals
 
@@ -469,14 +459,14 @@ Dans cette section, nous allons analyser si les festivals tenus dans la ville de
 
 Pour tester cette question, nous allons produire plusieurs modèles de régression linéaire et faire de l'inférence sur les résultats obtenus. Les données des festivals viennent d'une archive disponible sur ce site web : <https://web.archive.org/web/20210928074344/https://www.mtl.org/fr/experience/guide-des-festivals-dete-montreal> et elles ont été compilées manuellement.
 
-## Modèle linéaire simple
+## Modèle de régression linéaire simple
 
 ```{r fest1, out.height = "30%"}
 mod_fest_1 = lm(n_tot_mod ~ festival, data = dat_mod)
 summary(mod_fest_1)
 ```
 
-Avec un modèle linéaire simple, la tenue de festival semble avoir un effet positif et significatif sur le nombre total de déplacements. En effet, un festival de plus par jour augmente en moyenne le nombre total de déplacement de 3.4% par jour par arrondissement (toutes choses étant égales par ailleurs). De plus, cette augmentation est significatif à un niveau de 95%.
+Avec un modèle linéaire simple, la tenue de festival semble avoir un effet positif et significatif sur le nombre total de déplacements. En effet, un festival de plus par jour augmente en moyenne le nombre total de déplacement de 3.4% par jour par arrondissement (toutes choses étant égales par ailleurs). De plus, cette augmentation est significatif à un niveau de 5%.
 
 Or, il est important de discuter des limitations d'un tel modèle. Plusieurs autres variables agissent sur le nombre total de déplacements et sur la tenue de festival, il faut ainsi controler pour ces variables. Pour mieux comprendre ce problème, voici un graphe orienté acyclique (GOA) \@ref(fig:firstgroup).
 
@@ -516,20 +506,20 @@ xlab("Festival")
 grid.arrange(plot1, plot2, ncol = 2)
 ```
 
-En observant le figure à gauche \@ref(fig:festRes1) et celle a droite \@ref(fig:festRes1), on voit que les résidus semblent ne pas être normales dans le premier tiers des données. Par la suite, les résidus semblent se rapprocher d'un distribution normale. Or, étant donné que les résidus ne sont pas parfaitement normales, cela va poser des limitations dans l'analyse et l'inférence des résultats. Il ne semble pas avoir d'hétéroscédasticité dans les résidus.
+En observant le figure \@ref(fig:festRes1) à gauche et celle à droite sur la figure \@ref(fig:festRes1), on voit que les résidus semblent ne pas être normales dans le premier tiers des données. Par la suite, les résidus semblent se rapprocher d'un distribution normale. Or, étant donné que les résidus ne sont pas parfaitement normales, cela peut poser des limitations dans l'analyse et l'inférence des résultats. Il ne semble pas avoir d'hétéroscédasticité dans les résidus.
 
-## Modèle linéaire ajusté
+## Modèle de régression linéaire multiple
 
-Comme expliqué précédemment, nous devons ajouter des variables dans le modèles pour avoir une estimation plus précise. Il serait utile d'ajouter la variable `holiday`, `mm` et `wkend`. En effet, ces variables agissent à la fois sur `festival` et `n_tot`.
+Comme expliqué précédemment, nous devons ajouter des variables dans le modèle pour avoir une estimation plus précise. Il serait utile d'ajouter la variable `holiday`, `mm` et `wkend`. En effet, ces variables agissent à la fois sur `festival` et `n_tot`.
 
 ```{r, out.height = "30%"}
 mod_fest_2 = lm(n_tot_mod ~ festival + mm + holiday + wkend, data = dat_mod)
 summary(mod_fest_2)
 ```
 
-En contrôlant pour les variables omises, nous observons maintenant un changement dans l'interprétation des résultats. L'effet des festival semble être négatif et non-significatif. Dans ce modèle, chaque festival diminue le nombre total de déplacement de 2,4% par jour par quartier de façon non-significative. Il semblerait que l'effet passe maintenant par les mois et non par les festivals.
+En contrôlant pour les variables omises, nous observons maintenant un changement dans l'interprétation des résultats. L'effet des festivals semble être négatif et non-significatif. Dans ce modèle, chaque festival diminue le nombre total de déplacement de 2,4% par jour par quartier de façon non-significative. Il semblerait que l'effet passe maintenant par les mois et non par les festivals.
 
-Si nous analysons rapidement les résidus, nous voyons dans le figure à droite et à gauche \@ref(fig:fest-res2) qu'ils semblent légèrement plus normales que dans le premier modèle. Les résidus semblent encore homoscédastiques.
+Si nous analysons rapidement les résidus, nous voyons dans le figure à droite et à gauche \@ref(fig:fest-res2), qu'ils semblent légèrement plus normales que dans le premier modèle. Les résidus semblent encore homoscédastiques.
 
 ```{r fest-res2, out.height = "30%", fig.align='center', fig.cap="Distribution des résidus"}
 resid <- rstudent(mod_fest_2)
@@ -549,7 +539,7 @@ grid.arrange(plot1, plot2, ncol = 2)
   
 ```
 
-### Modèle avec interaction
+## Modèle avec interaction
 
 Il peut être intéressant de tester un modèle avec interactions étant donné que les utilisations seront peut-être augmenté si un festival est pendant une fin de semaine ou une journée férié.
 
@@ -581,7 +571,7 @@ Dans cette section, il sera question de modéliser l'effet de la densité de la 
 
 Pour Bixi ce type d'information devient alors crucial, d'une part puisque dans les zones à forte densité de population, les habitants ont souvent plus d'options de transport, ce qui peut réduire leur dépendance à la voiture favorisant ainsi l'utilisation des transports durable comme le vélo. D'autre part, les zones fortement densifiées ont généralement une plus grande concentration de commerce, de services publics et d'emploi à moindre distance. Cette proximité des destinations encourage alors l'utilisation de modes de transport adaptés aux déplacements courts, tels que le vélo. C'est pour ces raisons que nous pensons que la densité de la population est un excellent facteur à observer pour Bixi.
 
-Enfin, les données ajoutées on été receuillis sur les site web de statistiques canada, données montréal et l'institus de la statistiques du quebec. Cette section sera principalement divisé en trois partie. Tout d'abord, il sera question d'un modèle de régression simple, ensuite d'un mudèle multivariée et pour conclure avec une disscussion sur les limitation des modèles présenté.
+Enfin, les données ajoutées on été receuillis sur les site web de statistiques canada, données montréal et l'institut de la statistiques du quebec. Cette section sera principalement divisé en trois partie. Tout d'abord, il sera question d'un modèle de régression simple, ensuite d'un modèle multivariée et pour conclure avec une disscussion sur les limitation des modèles présentés.
 
 ```{r initialisation des données, results='hide'}
 library(stringr)
@@ -713,7 +703,7 @@ dat_mod<- dat_mod %>% left_join(df_rmr, by="arrond")
 
 ```
 
-## Modèle linéaire simple
+## Modèle de régression linéaire simple
 
 Dans ce modèle de régression linéaire simple, il est possible de constater que la variable de densité est bien significative. Autrement dit, une augmentation d'une personne par kilomètre carré augmenterait en moyenne le nombre total de déplacements de 0.012. Cependant, la valeur du $R^2$ signifie que le modèle explique 19,17% de la variabilité du nombre total de déplacements. Cela dit, il y a nécessairement un manque de variables explicatives qui permettrait de mieux expliquer la variable réponse.
 
@@ -731,7 +721,7 @@ summary(model_density)
 
 Dans ce même ordre d'idée, il est possible d'observer si l'hypothèse de normalité des résidus ainsi que l'hypothèse d'homoscédasticité sont respectées dans ce modèle simple, avant d'amorcer un modèle multiple. En examinant le comportement des résidus dans la figure \@ref(fig:QQdensite), il est plausible de dire que dans le dernier tiers de la figure les résidus ne suivent pas une loi normale. Cela étant dit, dans le cas de ce modèle simple, ça voudrait dire que la densité comme seule variable explicative explique mal le comportement du nombre total de déplacements en Bixi. Il est possible dans ce cas de faire une transformation logarithmique pour rendre les données extrêmes plus symétriques. Cependant, puiqu'on sait que le modèle linéaire simple n'est pas approprié, on préfère passer au modèle multiple et appliquer, dans le besoin, ces changements dans un modèle plus approprié.
 
-```{r QQdensite, out.height = "30%", fig.align = 'center', fig.cap = "Graphique QQ - modèle de densité démographique simple"}
+```{r QQdensite, out.height = "20%", fig.align = 'center', fig.cap = "Graphique QQ - modèle de densité démographique simple"}
 
 library(lmtest)
 residuals <- residuals(model_density)
@@ -746,7 +736,7 @@ ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
 
 ```
 
-## Modèle ajusté
+## Modèle de régression linéaire multiple
 
 Avant de débuter le modèle multiple avec la densité de population, il est important de comprendre que plusieurs données ont été ajoutées et même modifier pour pouvoir observer la tendance que prend l'utilisation des Bixis lorsque la densité de population augmente. Cela étant dit, il était important d'ajouter des variables qui affectaient autant la densité de population que le nombre total de déplacement en Bixi, si l'on veut capter l'effet de la densité, comme expliqué dans la figure \@ref(fig:firstgroup). Par conséquent, des variables comme le nombre de parcs `Parc` par arrondissement, le nombre de bibliothèques par arrondissement `Bibliotheque`, le nombre de centres communautaire par arrondissement `Centre_communautaire` et le nombre de centres sportifs par arrondissement `Centre_sportif` ont été ajoutés. De plus, puisque la superficie des arrondissements varie grandement, ces variables ajoutées ont été divisées par la superficie de chaque arrondissement. Ainsi les grandes villes, comme Laval qui a beaucoup d'infrastructure à cause de sa grande superficie, ne viendront pas biaiser nos modèles. Autrement dit, les variables ajoutées(nombre de parcs, le nombre de bibliothèques, le nombre de centres communautaires, le nombre de centres sportifs) sont par $km^2$ de leur arrondissement.
 
@@ -853,15 +843,22 @@ modele2_interactions_nm = lm(n_tot_mod ~ logDensity + logParcKm2 + logBibliotheq
 summary(modele2_interactions_nm)
 ```
 
-On obtient des résultats similaires au modèle avec les données des membres aussi. Encore une fois, `logBibliothequeKm2` et `logDensity:logParcKm2` ne semblent pas très significatifs (`logBibliothequeKm2` l'est un peu plus). Cependant, on peut remarquer que le R2 à augmenté à 42.45%, ainsi le modèle avec les non-membres seulement explique un peu mieux la variance du log des déplacements totaux.
+On obtient des résultats similaires au modèle avec les données des membres aussi. Encore une fois, `logBibliothequeKm2` et `logDensity:logParcKm2` ne semblent pas très significatifs (`logBibliothequeKm2` l'est un peu plus). Cependant, on peut remarquer que le R2 à augmenté à 42.45%, ainsi le modèle avec les non-membres seulement expliquer un peu mieux la variance du log des déplacements totaux.
 
 Nous approfondirons davantage ce sujet dans la conclusion, cependant, il est essentiel de noter que la société doit tenir compte des futurs projets de développement des villes afin d'accroître l'utilisation des Bixi.
 
 
 ## Limitations
-Les limites des modèles ont été abordées tout au long de cette section, mais il est important de les rappeler. Puisque l'analyse des résidus a démontré que l'hypothèses d'homoscédasticité n'est pas respectée, les paramètres des modèles sont questionnables et biaisés, ainsi la fiabilité du modèle l'est aussi. Ces modèles ne sont d'aucun cas des modèles causaux, ils ont seulement réussi à capter les tendances que peuvent prendre les variables explicatives face au nombre total de déplacements. De plus, comme expliqué précédemment, il reste des variables qui affectent autant la variable cible que les variables explicatives dans le terme d'erreur. Par exemple, le nombre de kilométrages de piste cyclable est dans le terme d'erreur, mais affecte également le `n_tot` et `density`. Cela dit, il manque plusieurs variables de contrôles à nos modèles, mais nous pensons avoir bien capté la tendance que les variables explicatives peuvent prendre.
+Les limites des modèles ont été abordées tout au long de cette section, mais il est important de les rappeler. Puisque l'analyse des résidus a démontré que l'hypothèse d'homoscédasticité n'est pas respectée, les paramètres des modèles sont questionnables et biaisés, ainsi la fiabilité du modèle l'est aussi. Ces modèles ne sont d'aucun cas des modèles causaux, ils ont seulement réussi à capter les tendances que peuvent prendre les variables explicatives face au nombre total de déplacements. De plus, comme expliqué précédemment, il reste des variables qui affectent autant la variable cible que les variables explicatives dans le terme d'erreur. Par exemple, le nombre de kilométrages de piste cyclable est dans le terme d'erreur, mais affecte également le `n_tot` et `density`. Cela dit, il manque plusieurs variables de contrôles à nos modèles, mais nous pensons avoir bien capté la tendance que les variables explicatives peuvent prendre.
 
 
 # Conclusion
-Pour conclure, toutes ces informations sont importantes pour l'OBNL. Elles expliquent en bref, qu'en moyenne, les arrondissements plus densifiés et l'ajout de certaines infrastructures dans les villes augmentent le nombre d'utilisations des bixi, ce qui est cohérent avec notre hypothèse.En contrepartie, il est à noter que les festivals n'ont aucun impact sur le nombre total de déplacements dans nos modèles. Néanmoins, il pourrait être pertinent d'approfondir l'analyse pour évaluer leur influence et, le cas échéant, d'adapter les politiques de Bixi en conséquence. À cet effet, il est possible de se demander si ça ne serait pas intéressant pour la compagnie de se coordonner avec les planificateurs urbains des villes pour arrimer l'ajout de station de bixi aux futurs projets de développement urbain des arrondissements. Cela étant dit, ça permettrait d'augmenter le nombre de déplacements en bixi et de diminuer le nombre de véhicules non écologiques sur les routes.
+Pour conclure, toutes ces informations sont importantes pour l'OBNL. Elles expliquent en bref, qu'en moyenne, les arrondissements plus densifiés et l'ajout de certaines infrastructures dans les villes ou le nombre de sites touristiques ou culturels augmentent le nombre d'utilisations des bixi, ce qui est cohérent avec notre hypothèse. De plus l'utilisation des bixi est plus important pour les membres que non-membres. En contrepartie, il est à noter que les festivals n'ont aucun impact sur le nombre total de déplacements dans nos modèles. Néanmoins, il pourrait être pertinent d'approfondir l'analyse pour évaluer leur influence et, le cas échéant, d'adapter les politiques de Bixi en conséquence. À cet effet, il est possible de se demander si ça ne serait pas intéressant pour la compagnie de se coordonner avec les planificateurs urbains des villes pour arrimer l'ajout de station de bixi aux futurs projets de développement urbain des arrondissements. Cela étant dit, ça permettrait d'augmenter le nombre de déplacements en bixi et de diminuer le nombre de véhicules non écologiques sur les routes.
+
+# Contribution des membres de l'équipe
+
+-   Abdoul Wassi Badirou: Introduction, impacts des lieux touristiques et conclusion
+-   Alfred Assal: Introduction, impact de la densité de population et conclusion
+-   Samuel Croteau: Impact de la densité de population et conclusion
+-   James Roy: Impact des festivals et conclusion
 
