@@ -4,6 +4,13 @@ subtitle: "MATH60604 - Modélisation statistique"
 author: "Abdoul Wassi Badirou, Alfred Assal, James Roy, Samuel Croteau"
 date: "`r Sys.Date()`"
 output:
+  bookdown::html_document2:
+    toc: yes
+    number_sections: yes
+    toc_float:
+      collapsed: no
+  #   toc: yes
+  #   toc_depth: '3'
   bookdown::pdf_document2:
     toc: yes
     toc_depth: 2
@@ -199,7 +206,7 @@ Maintenant, dans la figure de droite \@ref(fig:histn), on voit qu'avec une trans
 
 
 # Impact des lieux touristiques
-Dans cette section, nous voulons analyser l'impact de la présence des lieux touristiques sur l'utilisation des Bixi. Pour cela, nous utilisons le jeu de données sur les lieux d'intérêt disponible dans les données ouvertes de la ville de montréal à l'adresse url https://donnees.montreal.ca/dataset/lieux-d-interet. Nous calculons le nombre de sites touristiques par arrondissement que nous fusionnons à nos données `bixi`. 
+Dans cette section, nous voulons analyser l'impact du nombre des lieux touristiques sur l'utilisation des Bixi. Pour cela, nous utilisons le jeu de données sur les lieux d'intérêt disponible dans les données ouvertes de la ville de montréal à l'adresse url https://donnees.montreal.ca/dataset/lieux-d-interet. Nous calculons le nombre de sites touristiques (variable `n_tour`) par arrondissement que nous fusionnons à nos données `bixi`. 
 <!-- Nous agrégeons ces données par arrondissement pour les fusionner à nos données bixi. À partir de ces données, nous créons deux variables:  
 - `lieuxTouristiques` (1 ou 0): indique s'il y a un lieu touristique dans l'arrondissement (1) ou non (0)
 - `n_touristiques`: nombre de lieux touristiques dans l'arrondissement. -->
@@ -259,15 +266,14 @@ bixi_df
 bixi_df[is.na(bixi_df$nb_tour),]
 ```
 
-Étant donné que plusieurs satitions bixi se retrouvent dans un arrondissement, pour évaluer l'impact du nombre de sites touristiques par arrondissement sur l'utilisation des bixi, nous agrégeons nos données par arrondissement, par jour et par type de membre, en prenant la moyenne des différentes variables bixi par arrondissement. Ainsi, nous analysons l'impact des sites touristiques par arrondissement, sur l'utilisation moyenne dans l'arrondissement. Cette dernière est le rapport entre le nombre total de déplacement dans l'arrondissement et le nombre de station qui s'y retrouve. 
-Rapellons que notre variable cible est le logarithme du nombre total de déplacement (`n_tot_log)
+Étant donné que plusieurs satitions bixi se retrouvent dans un arrondissement, pour évaluer l'impact du nombre de sites touristiques par arrondissement sur l'utilisation des bixi, nous agrégeons nos données par arrondissement, par jour et par type de membre, en prenant la somme des variables `dur`, `rev`, `n_AM`, `n_PM`, `n_tot` et la moyenne des variables `temp` et `rain` pour toutes les stations dans un arrondissement. Nous introduisons ensuite les variables `nb_tour` et `n_stat` pour respectivement le nombre de sites touristiques et le nombre de station dans chaque arrondissement. Ainsi, nous analysons l'impact du nombre de sites touristiques dans chaque arrondissement, sur le nombre total de déplacement dans l'arrondissement. Ce dernier est la somme du nombre total de déplacements partant des stations qui sont dans l'arrondissement. Notre variable cible est le logarithme du nombre total de déplacement dans les arrondissements (`log(sum_n_tot)`).
 
 ```{r, results='hide', fig.keep='none'}
-#Scatter plot pour voir à quoi ressemble la relation entre le nombre de sites par arrondissement et log(n_tot) si on n'agrège pas les données par arrondissement
+#Scatter plot pour voir à quoi ressemble la relation entre le nombre de sites touristique par arrondissement et log(n_tot) si on n'agrège pas les données par arrondissement
 ggplot(bixi_df, aes(x=nb_tour, y=log(n_tot))) + geom_point() + geom_smooth(method='lm')
 ```
 ```{r, results='hide'}
-# Agrégation des données par arrondissement
+# Agrégation des données par arrondissement en utilisant la moyenne (abandonné. J'utilise la somme)
 var_agg=c("dur","rev","n_AM","n_PM","n_tot","temp","rain","nb_tour")
 var_agg_rename=var_agg[var_agg != "nb_tour"]
 bixi_agg_arrond_df <- bixi_df %>% 
@@ -277,74 +283,185 @@ bixi_agg_arrond_df=as.data.frame(bixi_agg_arrond_df)
 setnames(bixi_agg_arrond_df,old = var_agg_rename, new = paste0('avg_',var_agg_rename))
 bixi_agg_arrond_df$arrondissement <- as.factor(bixi_agg_arrond_df$arrondissement)
 bixi_agg_arrond_df
+
+# Agrégation des données par arrondissement en utilisant la somme
+var_agg_sum=c("dur","rev","n_AM","n_PM","n_tot")
+var_agg_mean=c("temp","rain","nb_tour")
+var_agg_rename_mean=var_agg_mean[var_agg_mean != "nb_tour"]
+bixi_agg_arrond_df2 <- bixi_df %>% 
+  group_by(arrondissement, mm,dd,wday,mem,holiday) %>%
+  summarise(across(var_agg_sum,sum),across(var_agg, mean), n_stat=n_distinct(station))
+bixi_agg_arrond_df2=as.data.frame(bixi_agg_arrond_df2)
+setnames(bixi_agg_arrond_df2,old = var_agg_sum, new = paste0('sum_',var_agg_sum))
+setnames(bixi_agg_arrond_df2,old = var_agg_rename_mean, new = paste0('avg_',var_agg_rename_mean))
+bixi_agg_arrond_df$arrondissement2 <- as.factor(bixi_agg_arrond_df2$arrondissement)
+bixi_agg_arrond_df2
 ```
+```{r, results='hide'}
+summary(bixi_agg_arrond_df2)
+```
+```{r, results='hide'}
+mean_nb_tour_by_arr=mean(bixi_agg_arrond_df2$nb_tour)
+arr_with_max_nb_tour=bixi_agg_arrond_df2[which.max(bixi_agg_arrond_df2$nb_tour),'arrondissement']
+max_nb_tour=max(bixi_agg_arrond_df2$nb_tour)
+mean_station_by_arr=mean(bixi_agg_arrond_df2$n_stat)
+max_station_by_arr=max(bixi_agg_arrond_df2$n_stat)
+arr_with_max_n_stat=bixi_agg_arrond_df2[which.max(bixi_agg_arrond_df2$n_stat),'arrondissement']
+```
+
+En moyenne, il y a `r round(mean_nb_tour_by_arr,0)` sites touristiques par arrondissement. L'arrondissement de `r arr_with_max_nb_tour` est celui qui en comporte le plus avec `r max_nb_tour` sites touristiques. Il y a en moyenne `r round(mean_station_by_arr,0)` station par arrondissement. L'arrondissement de `r arr_with_max_n_stat` est celui qui en comporte le plus avec `r max_station_by_arr` stations.
+
+## Modèle de régression linéaire simple
 
 ```{r, results='hide'}
-#tapply(bixi_agg_arrond_df$arrondissement,as.factor(bixi_agg_arrond_df$nb_tour), n_distinct)
-```
-
-```{r}
 #ggplot(bixi_agg_arrond_df, aes(x=nb_tour, y=log(n_tot))) + geom_point() + geom_smooth(method='lm')
 mod1 <- lm(log(avg_n_tot) ~ nb_tour, data=bixi_agg_arrond_df)
 summary(mod1)
 ```
+```{r}
+#modèle utilisant l'agrégat sum
+mod1_sum <- lm(log(sum_n_tot) ~ nb_tour, data=bixi_agg_arrond_df2)
+summary(mod1_sum)
+```
 
-Lorsqu'on tient compte uniquement du nombre de site touristique par arrondissement, on constate que pour chaque augmentation d'une unité de cette dernière, en moyenne, le nombre total de déplacement par station, par jour et par type de membre augmente de `r round((exp(mod1$coefficients['nb_tour'])-1)*100,2)`%. Et cette augmentation est significative. Qu'en-est-il lorsqu'on tient compte des autres variables.
+Lorsqu'on tient compte uniquement du nombre de sites touristique par arrondissement, on constate que pour chaque augmentation d'une unité de ce dernier, en moyenne, le nombre total de déplacement par arrondissement, par jour et par type de membre augmente de `r round((exp(mod1_sum$coefficients['nb_tour'])-1)*100,2)`%. Et cette augmentation est significative. Qu'en-est-il lorsqu'on tient compte des autres variables? Le modèle de régression linéaire multiple nous permettra d'y répondre.
 
-Tout d'abord, il est important de décrire notre modèle complet. Il est composé de toutes les variables sauf `station`, `arrondissement`, `rev`, `dur`, `avg` et `n_PM`. 
-La variable `station` qui est l'identification unique des stations, est exclue car elle ne comporte aucune codification. Donc elle n'apporte aucune information. De plus, comme nous avons agrégé les données à l'arrondissement, la variable n'est plus du tout pertinente. 
+## Modèle de régression linéaire multiple
 
-La variable `arrondissement` est exclue car elle a une corrélation très forte avec `nb_tour` (nombre de sites touristiques dans la station). L'ajustement d'un modèle qui inclus ces deux variables retourne `NA` pour l'un deux. Elle s'explique par le fait que quasiment tous les arrondissements ont des nombres de sites différents. Donc quasiment, chaque nombre de site correspond à un arrondissement différent. 
+Tout d'abord, il est important de décrire notre modèle complet. Il est composé de toutes les variables sauf `station`, `arrondissement`, `rev`, `dur`, `avg`, `n_PM`, `n_AM`. 
+La variable `station` qui est l'identification unique des stations, est exclue car elle ne comporte aucune codification. Donc elle n'apporte aucune information. Puisque nous avons agrégé les données à l'arrondissement, la variable n'est plus du tout pertinente. 
 
-Les variables `rev` et `dur` (durée totale de tous les déplacements partant de la station au jour spécifié) sont exclues car ceux sont des variables cibles dans le cadre du projet. Or dans cette section on s'intéresse à l'impact sur la variable `n_tot`. 
+La variable `arrondissement` est exclue car elle a une corrélation très forte avec `nb_tour` (nombre de sites touristiques dans la station) qui notre varible d'intérêt. L'ajustement d'un modèle qui inclus ces deux variables retourne `NA` pour l'un deux. Elle s'explique par le fait que quasiment tous les arrondissements ont des nombres de sites différents. Donc quasiment, chaque nombre de site correspond à un arrondissement différent. 
 
-La variable `avg` (la durée moyenne (en minutes) de tous les déplacement partant d'une station au jour spécifié) est exclue car elle perd son sens suite à l'agrégat `moyenne` utilisée sur les variables pour agréger les données par arrondissement. Rappelons que pour agréger les données, nous calculons pour les variables leur moyenne sur l'ensemble des stations dans l'arrondissement. Soit $S$ l'ensemble des stations, indexé par $i$. Soit $A$ l'ensemble des arrondissements, indexé par $j$. Soit: 
+Les variables `rev` (revenu total généré) et `dur` (durée totale de tous les déplacements partant de la station au jour spécifié) sont exclues car ceux sont des variables cibles dans le cadre du projet et elles ont une corrélation presque parfaite avec la variable cible `n_tot` qui nous intéresse dans cette section. 
 
-- $\overline{N}_j$: la moyenne du nombre total de déplacements par station dans l'arrondissement $j$
+La variable `avg` (la durée moyenne (en minutes) de tous les déplacement partant d'une station au jour spécifié) est exclue car elle perd son sens suite à l'agrégat `somme` utilisée sur les variables pour agréger les données par arrondissement. Rappelons que pour agréger les données, nous calculons pour les variables la somme pour toutes les stations dans l'arrondissement. Soit $S$ l'ensemble des stations, indexé par $i$. Soit $A$ l'ensemble des arrondissements, indexé par $j$. Soit $N_j$: la somme du nombre total de déplacements par station dans l'arrondissement $j$.
 
-- $\overline{D}_j$: la moyenne de la durée totale des déplacements par station dans l'arrondissement $j$
-
-- $\overline{A}_j$: la moyenne de la durée moyenne des déplacement par station dans l'arrondissement $j$
 
 \begin{equation} 
- \overline{N}_j = \sum_{i=1}^{S} \frac{N_{i,j}}{S}=\sum_{i=1}^{S} \frac{D_{i,j}A_{i,j}}{S} \ne \sum_{i=1}^{S} \frac{D_{i,j}}{S}\sum\frac{A_{i,j}}{S} (\#eq:relationDurAvg)
+ N_j = \sum_{i=1}^{S} N_{i,j}=\sum_{i=1}^{S} D_{i,j}A_{i,j} \ne \sum_{i=1}^{S} D_{i,j}\sum_{i=1}^{S} A_{i,j} (\#eq:relationDurAvg)
 \end{equation}
 
-La relation décrite par l'équation \@ref(eq:relationDurAvg) décrit mathématiquement la raison pour laquelle nous excluons la variable `avg` dans les données agrégées. 
+$N_{i,j},D_{i,j},A_{i,j}$ sont respectivement le nombre total de déplacement (variable `n_tot`), la durée totale des déplacements (variable `dur`) et la durée moyenne des déplacements (variable `avg`) pour la station $i$ dans l'arrondissement $j$. La relation décrite par l'équation \@ref(eq:relationDurAvg) décrit mathématiquement la raison pour laquelle nous excluons la variable `avg` dans les données agrégées. 
 
-La variable `n_PM` est exclue car elle a une forte corrélation avec `n_AM`.
+La variable `n_AM` et `n_PM` sont exclues car elles forment une combinaison linéaire avec `n_tot`. C'est à dire si le nombre total de déplacement change, forcément le nombre de déplacement en matinée et/ou en après-midi et/ou en soirée va changer. De plus les sites touristiques peuvent avoir un effet sur le nombre de déplacement en raison de leur heure d'ouverture. Il est donc absurde de controler le nombre de déplacement en journée ou en après-midi et même en soirée pour mesurer l'impact de la création d'un site sur le nombre total de déplacement.
 
-```{r ModLieuTouristiqueAjustementModComplet}
-mod2 <- lm(log(avg_n_tot) ~ mm + dd + wday+ mem + holiday + avg_n_AM + avg_temp + avg_rain + nb_tour, data=bixi_agg_arrond_df)
+À noter que dans le modèle, nous avons inclus le nombre de station dans l'arrondissement car il peut avoir un effet confondant. En effet, l'augmentation du nombre de stations peut rendre les sites touristiques ou d'autres sites non touristiques plus accessibles et générer plus de déplacement bixi et nous laisserait croire à tors que c'est l'augmentation des sites touristiques qui impacte les déplacements. 
+
+```{r ModLieuTouristiqueAjustementModComplet, results='hide'}
+mod2 <- lm(log(avg_n_tot) ~ mm + dd + wday+ mem + holiday + avg_n_AM + avg_temp + avg_rain + nb_tour , data=bixi_agg_arrond_df)
 summary(mod2)
 ```
 
-Même après avoir ajusté pour les autres variables, on constate que le nombre de site touristique a un effet significatif sur le nombre total de déplacement par station par arrondissement pour n'importe quel niveau de significance aceptable. En fait, pour chaque augmentation d'un site touristique dans un arrondissement, en moyenne, le nombre total de déplacement par station, par jour et par type de membre augmente de `r round((exp(mod2$coefficients['nb_tour'])-1)*100,2)`% lorsque les autres variables restent inchangés.  
+```{r ModLieuTouristiqueAjustementModCompletV2}
+mod2_sum <- lm(log(sum_n_tot) ~ mm + dd + wday+ mem + holiday + avg_temp + avg_rain + nb_tour + n_stat, data=bixi_agg_arrond_df2)
+summary(mod2_sum)
+```
 
-De plus, l'impact des membres bixi sur le nombre total de trajet par station par arrondissement est `r round(exp(mod2$coefficients['mem1']),2)` fois plus important que celui des non membres toujours lorsque les autres variables restent inchangés. Et cet impact est aussi significatif. 
+Même après avoir ajusté pour les autres variables, on constate que le nombre de site touristique a un effet significatif sur le nombre total de déplacement dans un arrondissement pour n'importe quel niveau de significance acceptable. En fait, pour chaque augmentation d'un site touristique dans un arrondissement, en moyenne, le nombre total de déplacement dans un arrondissement, par jour et par type de membre augmente d'environ `r round((exp(mod2_sum$coefficients['nb_tour'])-1)*100,2)`% lorsque les autres variables restent inchangées.  
 
-Une entente avec les villes pour construire d'avantage de lieux touristiques pourrait permettre d'accroitre l'utilisation des bixi. De plus, puisque les membres semblent avoir un impact plus important sur l'utilisation des bixi que les non-membres, une stratégie visant à accroitre le portefeuille de client membre serait avantageux.
+De plus, l'impact des membres bixi sur le nombre total de trajet dans un arrondissement est `r round(exp(mod2_sum$coefficients['mem1']),0)` fois plus important que celui des non membres toujours lorsque les autres variables restent inchangés. Cet impact est aussi significatif pour n'importe quel niveau de significance acceptable. 
 
-Quel genre d'interaction on peut regarder?????
-```{r}
-#bixi_agg_arrond_df
+Une entente avec les villes pour construire d'avantage de lieux touristiques pourrait permettre d'accroitre l'utilisation des bixi. Puisque les membres semblent avoir un impact plus important sur l'utilisation des bixi que les non-membres, une stratégie visant à accroitre le portefeuille de client membre serait avantageux.
+
+```{r, results='hide'}
+#Analyse des résidus
+mod2_resid <- rstudent(mod2)
+mod2_fitted <-  mod2$fitted.values
+mod2_log_avg_nTot <- log(bixi_agg_arrond_df$avg_n_tot)
+mod2_resid_dat <- as.data.frame(cbind(mod2_log_avg_nTot,mod2_fitted,mod2_resid)) 
+head(mod2_resid_dat)
+```
+```{r analyseResidusModeLieuxTouristiques,out.height = "30%", fig.align='center', fig.cap="Analyse des résidus studentisés du modèle de régression multiple avec les lieux touristiques", results='hide', fig.keep='none'}
+plot1 <- ggplot(data = mod2_resid_dat, mapping = aes(x=mod2_resid)) + geom_density() + geom_histogram(aes(y=..density..), bins=10, alpha=0.5) + xlab("Résidus") + ggtitle("Distribution résidus")
+
+plot2 <- ggplot(data = mod2_resid_dat, mapping = aes(sample=mod2_resid)) + stat_qq(distribution= qt, dparams = mod2$df.residual) + stat_qq_line(distribution = qt, dparams = mod2$df.residual) + labs(x="Quantiles théoriques", y="Quantiles empiriques") + ggtitle("QQ-Plot résidus")
+
+plot3 <- ggplot(data = mod2_resid_dat, mapping = aes(x=mod2_log_avg_nTot, y=mod2_resid)) + geom_point() + geom_smooth() + theme(legend.position = "bottom") + labs(x="Valeurs ajustées", y="Résidus") + ggtitle("Nuage de points")
+
+#grid.arrange(plot1, plot3, ncol = 2)
+grid.arrange(plot1,plot2, plot3, ncol = 3)
+```
+
+```{r, results='hide'}
+#Analyse des résidus pour modèle utilisant sum
+mod2_sum_resid <- rstudent(mod2_sum)
+mod2_sum_fitted <-  mod2_sum$fitted.values
+mod2_sum_log_sum_nTot <- log(bixi_agg_arrond_df2$sum_n_tot)
+mod2_sum_resid_dat <- as.data.frame(cbind(mod2_sum_log_sum_nTot,mod2_sum_fitted,mod2_sum_resid)) 
+head(mod2_sum_resid_dat)
+```
+```{r analyseResidusModeLieuxTouristiques2,out.height = "30%", fig.align='center', fig.cap="Analyse des résidus studentisés du modèle de régression multiple avec les lieux touristiques"}
+plot1 <- ggplot(data = mod2_sum_resid_dat, mapping = aes(x=mod2_sum_resid)) + geom_density() + geom_histogram(aes(y=..density..), bins=10, alpha=0.5) + xlab("Résidus") + ggtitle("Distribution résidus")
+
+plot2 <- ggplot(data = mod2_sum_resid_dat, mapping = aes(sample=mod2_sum_resid)) + stat_qq(distribution= qt, dparams = mod2_sum$df.residual) + stat_qq_line(distribution = qt, dparams = mod2_sum$df.residual) + labs(x="Quantiles théoriques", y="Quantiles empiriques") + ggtitle("QQ-Plot résidus")
+
+plot3 <- ggplot(data = mod2_sum_resid_dat, mapping = aes(x=mod2_sum_log_sum_nTot, y=mod2_sum_resid)) + geom_point()  + theme(legend.position = "bottom") + labs(x="Valeurs ajustées", y="Résidus") + ggtitle("Nuage de points")
+
+#grid.arrange(plot1, plot3, ncol = 2)
+grid.arrange(plot1,plot2, plot3, ncol = 3)
+```
+Les deux premiers graphes de la figure \@ref(fig:analyseResidusModeLieuxTouristiques2) nous montre que les résidus sont approximativement normale avec une moyenne proche de 0. Sur le dernier graphique on ne voit pas d'effet d'entonoir, la variance nous parait globalement constante, mais pas bien centré autour de 0 pour les premières valeurs.
+
+```{r ModLieuTouristiqueAjustementModCompletV2Log, results='hide'}
+mod2_sum_log <- lm(log(sum_n_tot) ~ I(log(mm)) + I(log(dd)) + wday+ mem + holiday + avg_temp + avg_rain + I(log(nb_tour)) + I(log(n_stat)), data=bixi_agg_arrond_df2)
+summary(mod2_sum_log)
 ```
 
 
 ```{r, results='hide'}
-bixi_df2=bixi_df
-bixi_df2$wday=as.integer(encode_ordinal(bixi_df["wday"], order= c('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'))$wday)
-bixi_df2
-#ord_wday=encode_ordinal(bixi_df["wday"], order= c('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'))
-#ord_wday
-fiv_mod = lm(mm ~ dd + wday, data=bixi_df2)
-summary(fiv_mod)
-
+#Analyse des résidus pour modèle utilisant sum et log dans les variables
+mod2_sum_log_resid <- rstudent(mod2_sum_log)
+mod2_sum_log_fitted <-  mod2_sum_log$fitted.values
+mod2_sum_log_sum_nTot2 <- log(bixi_agg_arrond_df2$sum_n_tot)
+mod2_sum_log_resid_dat <- as.data.frame(cbind(mod2_sum_log_sum_nTot2,mod2_sum_log_fitted,mod2_sum_log_resid)) 
+head(mod2_sum_log_resid_dat)
 ```
+
+```{r analyseResidusModeLieuxTouristiques2Log,out.height = "30%", fig.align='center', fig.cap="Analyse des résidus studentisés du modèle de régression multiple avec les lieux touristiques", fig.keep='none'}
+plot1 <- ggplot(data = mod2_sum_log_resid_dat, mapping = aes(x=mod2_sum_log_resid)) + geom_density() + geom_histogram(aes(y=..density..), bins=10, alpha=0.5) + xlab("Résidus") + ggtitle("Distribution résidus")
+
+plot2 <- ggplot(data = mod2_sum_log_resid_dat, mapping = aes(sample=mod2_sum_log_resid)) + stat_qq(distribution= qt, dparams = mod2_sum_log$df.residual) + stat_qq_line(distribution = qt, dparams = mod2_sum_log$df.residual) + labs(x="Quantiles théoriques", y="Quantiles empiriques") + ggtitle("QQ-Plot résidus")
+
+plot3 <- ggplot(data = mod2_sum_log_resid_dat, mapping = aes(x=mod2_sum_log_sum_nTot2, y=mod2_sum_log_resid)) + geom_point() + geom_smooth() + theme(legend.position = "bottom") + labs(x="Valeurs ajustées", y="Résidus") + ggtitle("Nuage de points")
+
+#grid.arrange(plot1, plot3, ncol = 2)
+grid.arrange(plot1,plot2, plot3, ncol = 3)
+```
+## Modèle avec interaction
+Il peut être intéressant ici d'analyser l'interaction entre le nombre de stations par arrondissement et le type de membre 
+```{r ModLieuTouristiqueAjustementModInteraction}
+mod3 <- lm(log(sum_n_tot) ~ mm + dd + wday + holiday + avg_temp + avg_rain + nb_tour*mem +  n_stat , data=bixi_agg_arrond_df2)
+summary(mod3)
+```
+Nous constatons que l'interaction entre le fait d'être membre et le nombre de site touristique sur l'utilisation des bixi est significatif à un niveau de signifiance de 5%. En fait l'impact du nombre de site touristique sur le nombre total de déplacement est plus important pour les membres que les non-membres. Donc, bixi devrait chercher à avoir plus de client qui sont membre, d'avantage dans les arrondissements où il y a plus de sites touristiques. 
+
+```{r, fig.keep='none'}
+ggplot(bixi_agg_arrond_df2, aes(x=nb_tour, y=sum_n_tot, col=mem)) + geom_point() + geom_line(aes(y=10^(mod3$fitted.values)), size=1)
+```
+
 ```{r, results='hide'}
-vif(fiv_mod)
+#Analyse des résidus pour modèle avec interaction
+mod3_resid <- rstudent(mod3)
+mod3_fitted <-  mod3$fitted.values
+mod3_log_sum_nTot <- log(bixi_agg_arrond_df2$sum_n_tot)
+mod3_resid_dat <- as.data.frame(cbind(mod3_log_sum_nTot,mod3_fitted,mod3_resid)) 
+head(mod3_resid_dat)
 ```
+```{r analyseResidusModeLieuxTouristiquesAvecInteraction,out.height = "30%", fig.align='center', fig.cap="Analyse des résidus studentisés du modèle de régression multiple avec interaction", fig.keep='none'}
+plot1 <- ggplot(data = mod3_resid_dat, mapping = aes(x=mod3_resid)) + geom_density() + geom_histogram(aes(y=..density..), bins=10, alpha=0.5) + xlab("Résidus") + ggtitle("Distribution résidus")
 
+plot2 <- ggplot(data = mod3_resid_dat, mapping = aes(sample=mod3_resid)) + stat_qq(distribution= qt, dparams = mod3$df.residual) + stat_qq_line(distribution = qt, dparams = mod3$df.residual) + labs(x="Quantiles théoriques", y="Quantiles empiriques") + ggtitle("QQ-Plot résidus")
+
+plot3 <- ggplot(data = mod3_resid_dat, mapping = aes(x=mod3_log_sum_nTot, y=mod3_resid)) + geom_point()  + theme(legend.position = "bottom") + labs(x="Valeurs ajustées", y="Résidus") + ggtitle("Nuage de points")
+
+#grid.arrange(plot1, plot3, ncol = 2)
+grid.arrange(plot1,plot2, plot3, ncol = 3)
+```
+Les graphiques pour l'analyse des résidus du modèle avec interaction sont très similaire à ceux présentés à la figure \@ref(fig:analyseResidusModeLieuxTouristiques2). Les conclusions sont donc les mêmes. 
+
+## Limitations
+L'agrégation par arrondissement sur lesquel repose l'analyse peut mettre en évidence certaines limitations dans nos interprétations. En effet, nous nous sommes basés sur le nombre de sites touristiques dans l'arrondissement, sans forcément tenir compte de leur proximité vis à vis des stations dans l'arrondissement. Il aurait été plus juste de ne tenir compte des site touristiques qui sont dans un certains rayon des stations. De plus la sélection des sites considérés touristiques dans chaque arrondissement est assez subjectifs. Nous n'avons pas fait une exploration détaillée des données exogènes utilisées pour nous assurer de l'hamonie de la définition de ce que nous considérons comme lieux touristiques entre les données de la ville de montréal, laval et longueuil. Chacun de ses jeux de données ont des catégorisations différentes, et nous n'avions pas un dictionnaire qui explique les caractéristiques de chaque catégories dans les jeux de données respectifs. Nous nous sommes basés sur notre interprétation des segments dans ces données, ce qui peut introduire des biais dans notre analyse.
 
 # Impact des festivals
 
@@ -381,7 +498,7 @@ Ainsi, s'il existe des variables $Z_1$ qui affectent à la fois `festival` et `n
 
 Au niveau de la normalité des résidus, on doit les analyser après la transformation logarithmique.
 
-```{r fest-res1, out.height = "30%", fig.align='center', fig.cap="Distribution des résidus et QQ-Plot Résidus Student"}
+```{r festRes1, out.height = "30%", fig.align='center', fig.cap="Distribution des résidus et QQ-Plot Résidus Student"}
 resid <- rstudent(mod_fest_1)
 fitted <- mod_fest_1$fitted.values
 res.dat <- cbind(dat_mod, fitted, resid)
@@ -401,7 +518,7 @@ grid.arrange(plot1, plot2, ncol = 2)
 ```
 
 
-En observant le figure à gauche \@ref(fig:fest-res1) et celle a droite \@ref(fig:fest-res1), on voit que les résidus semblent ne pas être normales dans le premier tiers des données. Par la suite, les résidus semblent se rapprocher d'un distribution normale. Or, étant donné que les résidus ne sont pas parfaitement normales, cela va poser des limitations dans l'analyse et l'inférence des résultats.
+En observant le figure à gauche \@ref(fig:festRes1) et celle a droite \@ref(fig:festRes1), on voit que les résidus semblent ne pas être normales dans le premier tiers des données. Par la suite, les résidus semblent se rapprocher d'un distribution normale. Or, étant donné que les résidus ne sont pas parfaitement normales, cela va poser des limitations dans l'analyse et l'inférence des résultats.
 
 ## Modèle linéaire ajusté
 
@@ -638,7 +755,7 @@ ggplot(data.frame(Résidus = residuals), aes(sample = Résidus)) +
 
 Avant de débuter le modèle multiple avec la densité de population, il est important de comprendre que plusieurs données ont été ajoutées et même modifier pour pouvoir observer la tendance que prend l'utilisation des Bixis lorsque la densité de population augmente. Cela étant dit, il était important d'ajouter des variables qui affectaient autant la densité de population que le nombre total de déplacement en Bixi, si l'on veut capter l'effet de la densité, comme expliqué dans la figure \@ref(fig:firstgroup). Par conséquent, des variables comme le nombre de parcs `Parc` par arrondissement, le nombre de bibliothèques par arrondissement `Bibliotheque`, le nombre de centres communautaire par arrondissement `Centre_communautaire` et le nombre de centres sportifs par arrondissement `Centre_sportif` ont été ajoutés. De plus, puisque la superficie des arrondissements varie grandement, ces variables ajoutées ont été divisées par la superficie de chaque arrondissement. Ainsi les grandes villes, comme Laval qui a beaucoup d'infrastructure à cause de sa grande superficie, ne viendront pas biaiser nos modèles. Autrement dit, les variables ajoutées(nombre de parcs, le nombre de bibliothèques, le nombre de centres communautaires, le nombre de centres sportifs) sont par $km^2$ de leur arrondissement.
 
-Dans la régression multiple ci-dessous, il est possible de constater que le coefficient de `logBibliothequeKm2`est négatif affecte négativement le nombre de déplacement. Cependant, ce n'est pas nécessairement vrai, puisqu'en observant les données on peut remarquer que la ville de Longueuil a excessivement beaucoup de bibliothèques contrairement aux autres arrondissements, ce qui vient biaiser nos données, puisqu’en plus c’est une ville ou le déplacement en voiture est plus courant. Aussi, `logCentre_sportifKm2`n'est pas significatif dans le modèle. C'est-à-dire que la probabilité de faire une erreur en rejetant l'hypothèse nulle où le coefficient de `logCentre_sportifKm2` est nul est élevée.
+Dans la régression multiple ci-dessous, il est possible de constater que le coefficient de `logBibliothequeKm2` est négatif affecte négativement le nombre de déplacement. Cependant, ce n'est pas nécessairement vrai, puisqu'en observant les données on peut remarquer que la ville de Longueuil a excessivement beaucoup de bibliothèques contrairement aux autres arrondissements, ce qui vient biaiser nos données, puisqu’en plus c’est une ville ou le déplacement en voiture est plus courant. Aussi, `logCentre_sportifKm2` n'est pas significatif dans le modèle. C'est-à-dire que la probabilité de faire une erreur en rejetant l'hypothèse nulle où le coefficient de `logCentre_sportifKm2` est nul est élevée.
 
 De plus, en supposant que l'indépendance entre le nombre de déplacements `n_tot` et le terme d'erreur, une variation de 1% de la densité de la population serait associée, dans ce modèle, à une variation moyenne de 1.66% du nombre de déplacements total en bixi. Cependant, l'hypothèse d'indépendance n'est pas nécessairement respectée dans ce cas. Pour cette raison, cette interprétation n'est pas totalement véridique et ne sera pas utilisée dans les modèles à venir, puisqu'on sait qu'il y a des variables qui ne sont pas prises en compte, comme le nombre de pistes cyclables, etc. Cela étant dit, on peut tout de même affirmer que l'effet de la densité sur le nombre total de déplacements est positif.
 
