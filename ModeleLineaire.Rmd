@@ -708,7 +708,7 @@ residuals_data <- data.frame(Fitted_Values = modele2_interactions$fitted.values,
 
 
 plot1 <- ggplot(residuals_data, aes(x = Fitted_Values, y = Residuals)) +
-  geom_point() +
+  geom_point() + geom_smooth() +
   xlab("Valeurs prédites") +
   ylab("Résidus") +
   ggtitle("Graphique des résidus par rapport\naux valeurs prédites") +
