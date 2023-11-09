@@ -1,0 +1,47 @@
+---
+title: "Projet BIXI - Partie 3: Modèle linéaire généralisés"
+subtitle: "MATH60604 - Modélisation statistique"
+author: "Abdoul Wassi Badirou, Alfred Assal, James Roy, Samuel Croteau"
+date: "`r Sys.Date()`"
+geometry: margin=1.5cm
+output:
+  # bookdown::html_document2:
+  #   toc: yes
+  #   number_sections: yes
+  #   toc_float:
+  #     collapsed: no
+  # #   toc: yes
+  # #   toc_depth: '3'
+  bookdown::pdf_document2:
+    toc: yes
+    toc_depth: 1
+    extra_dependencies: ["flafter"]
+  # pdf_document:
+params:
+  created_date: "2023-09-12"
+header-includes:
+- \usepackage{tikz}
+- \usepackage{subcaption}
+# - \usepackage{subfig}
+- \usepackage{graphicx}
+- \usepackage{sidecap}
+- \usepackage{float}
+- \usepackage{amsmath}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = FALSE,error = TRUE, fig.pos = "H")
+```
+
+```{r lib}
+library(tidyverse)
+library(readxl)
+library(knitr)
+library(googleway)
+library(ggplot2)
+library(car)
+library(cleandata)
+library(data.table)
+library(kableExtra)
+library(gridExtra)
+```
