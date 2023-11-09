@@ -45,3 +45,35 @@ library(data.table)
 library(kableExtra)
 library(gridExtra)
 ```
+
+
+```{r read}
+dat = read.csv("bixifull.csv")
+
+#hist(dat$n_tot)
+#hist(dat$n_PM)
+#hist(dat$n_AM)
+
+```
+
+# Introduction
+Tout le monde ajouter un petit truc...
+
+Question: à suivre...
+
+n_tot = Abdoul
+n_PM = Alfred
+n_AM = Samuel
+Bin_u15_min = James
+
+
+# n_tot
+
+# n_PM
+
+# n_AM
+
+# Bin_u15min
+
+
+
