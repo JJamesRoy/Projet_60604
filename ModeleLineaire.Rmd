@@ -106,11 +106,14 @@ col = c("mm", "dd", "mem", "arrond")
 dat[col] = lapply(dat[col], factor)
 ```
 
+
+
+
 ```{r dat.mod}
 var_mean= c("holiday", "temp", "rain", "festival", "rain_bin", "wkend")
 var_sum = c("dur", "rev", "n_tot", "n_AM", "n_PM", "avg")
 
-dat_mod = dat %>% select(-station, -name, -wday, -Date) %>% 
+dat_mod = dat %>% select(-name, -wday, -Date) %>% 
   group_by(mem, mm, dd, arrond) %>%
   summarise(across(all_of(var_mean), ~mean(., na.rm = TRUE)),
             across(all_of(var_sum), ~sum(., na.rm = TRUE))) # Sert à compiler les données selon les arrondissements par jour. On se débarasse ainsi des variables station. Cela fait qu'on peut analyser les données par arrondissement plutot que par station.
@@ -121,7 +124,7 @@ col = c("holiday", "wkend", "rain_bin")
 dat_mod[col] = lapply(dat_mod[col], factor)
 ```
 ```{r, results='hide'}
-dat_mod
+#write.csv(dat_mod, file = "bixi_modif.csv")
 ```
 
 <!-- ## Enrichissement avec les arrondissements des stations {.unnumbered} -->
@@ -175,7 +178,41 @@ bixiWithArron_clean_df=data.frame(name=bixi_with_arrond_df$name,latitude=bixi_wi
       longitude=bixi_with_arrond_df$longitude,arrondissement=bixi_with_arrond_df$STATIONARRONDISSEMENT,
       bixi_with_arrond_df[,names(bixi_raw_data_df)])
 bixiWithArron_clean_df
+dat_mod2 = bixiWithArron_clean_df
 ```
+```{r modifpart3}
+dat_mod2$arrond = dat_mod2$arrondissement
+dat_mod2 = dat_mod2 %>% mutate(rain_bin = ifelse(rain == 0, 0, 1)) %>% select(-arrondissement)
+dat_mod2 = dat_mod2 %>% mutate(wkend = ifelse(wday == "Saturday" | wday == "Sunday",1,0))
+col = c("mm", "dd", "mem", "arrond")
+dat_mod2[col] = lapply(dat_mod2[col], factor)
+library(stringr)
+dat_pop <- read.csv("pop_arrondissement.csv")
+
+dat_pop$Superficie <- gsub(",", ".", dat_pop$Superficie)
+dat_pop$Superficie <- as.numeric(dat_pop$Superficie)
+
+dat_pop$Population.2021. <- str_replace_all(dat_pop$Population.2021., "\\s", "")
+dat_pop$Population.2021. <- as.numeric(dat_pop$Population.2021.)
+
+
+dat_pop <- dat_pop %>% 
+  rename(
+    arrond = Nom,
+    superficie = Superficie,
+    population_2021 = Population.2021.
+  )
+dat_pop$density <- dat_pop$population_2021/dat_pop$superficie
+
+dat_mod2$arrond <- str_replace_all(dat_mod2$arrond, " - ", "-")
+dat_pop$arrond <- str_replace_all(dat_pop$arrond, "–", "-")
+
+dat_mod2<- dat_mod2 %>% left_join(dat_pop, by="arrond")
+
+write.csv(dat_mod2, file = "bixi_arrond_dens_full.csv")
+```
+
+
 
 # Transformation de la variable cible
 
@@ -702,6 +739,7 @@ df_rmr <- df_rmr %>%
 dat_mod<- dat_mod %>% left_join(df_rmr, by="arrond")
 
 ```
+
 
 ## Modèle de régression linéaire simple
 

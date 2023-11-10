@@ -46,29 +46,67 @@ library(kableExtra)
 library(gridExtra)
 ```
 
-
 ```{r read}
 dat = read.csv("bixifull.csv")
-
+dat_full = read.csv("bixi_arrond_dens_full.csv") # Dataset avec les données sur les arrondissement, densité, etc...
+dat_full$arrond <- factor(dat_full$arrond)
 #hist(dat$n_tot)
 #hist(dat$n_PM)
 #hist(dat$n_AM)
+```
 
+```{r}
+dat_full = dat_full %>% mutate(u15 = ifelse(avg > 15,1,0)) %>% select(-c("name","X"))
+```
+
+```{r}
+dat_full <- dat_full %>%
+  group_by(arrond) %>%
+  mutate(nb_stations = n_distinct(station)) %>% 
+  mutate(station_density = nb_stations/superficie)
 ```
 
 # Introduction
-Tout le monde ajouter un petit truc...
-Question: à suivre...
 
+Tout le monde ajouter un petit truc... Question: à suivre...
 
+# Bin_u15min (James)
+
+L'entreprise Bixi cherche à savoir qu'est-ce qui affecte la disponibilité dans ses stations. En effet, dans certaines stations ils ne restent plus de Bixi pour les autres usagers. Elle croit que cela peut être du à des utilisateurs qui font des voyagent trop long (plus de 15 minutes) et donc monopolisent les Bixi pour eux. En l'absence de variables sur la disponibilités, nous proposons d'utiliser une variable binaire `u15` qui prend la valeur de 1 si la durée moyenne à partir d'une certaine station à une certaine journée de l'année est supérieure à 15 minutes, 0 sinon. Bien que cette variable est imparfaite, il sera possible de cibler certaines conditions spécifiques (comme les arrondissements, les mois de l'année, etc.) qui agissent sur la disponibilité des Bixi.
+
+```{r}
+barplot(table(dat_full$u15), col = c("red", "blue"), main = "", xlab = "Valeurs", ylab = "Fréquence")
+```
+
+## Effets des arrondissements sur la variable `u15`
+
+Étant donné que les stations sont installées au début de la saison, l'entreprise doit trouver les arrondissements problématiques. Il est donc possible d'ajuster un modèle simple pour voir les effets des différents arrondissements.
+
+```{r}
+pop <- dat_full %>%
+  group_by(arrond) %>%
+  summarise(dens = mean(density, na.rm = TRUE))
+```
+
+```{r}
+ggplot(pop, aes(x = reorder(arrond, -dens), y = dens)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Densité de pop. par arrondissement en ordre décroissant", x = "Arrondissements", y = "Population") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+```{r}
+dat_full$arrond <- relevel(dat_full$arrond, ref = "Le Plateau-Mont-Royal")
+mod_u15_1 = glm(u15 ~ arrond, data = dat_full, family = binomial(link = "logit"))
+summary(mod_u15_1)
+```
+
+Étant donné que les stations sont installées au début de la saison, l'entreprise doit trouver les arrondissements problématiques. Il est donc possible d'ajuster un modèle simple pour voir les effets des différents arrondissements.
+
+Selon ce premier modèle,
 
 # n_tot (Abdoul)
 
 # n_PM (Alfred)
 
 # n_AM (Samuel)
-
-# Bin_u15min (James)
-
-
-
