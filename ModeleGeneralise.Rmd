@@ -85,15 +85,29 @@ barplot(table(dat_full$u15), col = c("red", "blue"), main = "", xlab = "Valeurs"
 ```{r}
 pop <- dat_full %>%
   group_by(arrond) %>%
-  summarise(dens = mean(density, na.rm = TRUE))
+  summarise(dens = mean(density, na.rm = TRUE),
+            dens_stat = mean(station_density))
 ```
 
 ```{r}
-ggplot(pop, aes(x = reorder(arrond, -dens), y = dens)) +
-  geom_bar(stat = "identity", fill = "skyblue") +
+ylim.prim <- c(0, 20000)
+ylim.sec <- c(0, 19.38271605)
+
+b <- diff(ylim.prim)/diff(ylim.sec)
+a <- ylim.prim[1] - b*ylim.sec[1]
+
+
+ggplot(pop, aes(x = reorder(arrond, -dens))) +
+  geom_bar(aes(y = dens), stat = "identity", fill = "skyblue") +
+  geom_bar(aes(y = dens_stat * adjustment_factor), stat = "identity", fill = "orange", alpha = 0.3) +
+  scale_y_continuous("Densité", sec.axis = sec_axis(~ (. - a)/b, name = "Densité de station")) +
   labs(title = "Densité de pop. par arrondissement en ordre décroissant", x = "Arrondissements", y = "Population") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
+
+### Modèle 1
+
+Étant donné que les stations sont installées au début de la saison, l'entreprise doit trouver les arrondissements problématiques. Il est donc possible d'ajuster un modèle simple pour voir les effets des différents arrondissements.
 
 ```{r}
 dat_full$arrond <- relevel(dat_full$arrond, ref = "Le Plateau-Mont-Royal")
@@ -101,9 +115,87 @@ mod_u15_1 = glm(u15 ~ arrond, data = dat_full, family = binomial(link = "logit")
 summary(mod_u15_1)
 ```
 
-Étant donné que les stations sont installées au début de la saison, l'entreprise doit trouver les arrondissements problématiques. Il est donc possible d'ajuster un modèle simple pour voir les effets des différents arrondissements.
+#### Interprétations
 
-Selon ce premier modèle,
+Selon ce premier modèle, on voit que comparé à l'arrondissement du Plateau-Mont-Royal, les déplacements faits dans tous les autres arrondissements et villes ont plus de chances d'être plus long que 15 minutes en moyennes. Cette observations est significative à au moins 99% pour tout les facteurs.
+
+### Modèle 2
+
+Maintenant, nous pouvons ajuster un modèle plus complexe pour voir s'il est possible de raffiner l'analyse.
+
+```{r}
+mod_u15_2 = glm(u15 ~ arrond + mem + as.factor(mm), wkend + rain_bin, data = dat_full, family = binomial(link = "logit"))
+summary(mod_u15_2)
+```
+
+Nous allons d'abord comparer le modèle avec le précédent avant de l'interpréter, car il se peut que le premier modèle soit une simplifcation correcte du deuxième modèle. C'est-à-dire que les deux modèles ne sont pas significativement différent en terme de qualité d'ajustement.
+
+Nous allons donc faire le test suivant :
+
+$H_0$ : Les modèles sont équivalents
+
+$H_1$ : Les modèles ne sont pas équivalents, donc l'ajout des nouvelles variables améliorent significativement l'ajustement du modèle.
+
+```{r}
+anova(mod_u15_1, mod_u15_2, test = "Chisq")
+```
+
+Ainsi, nous voyons que la valeur-P associée au test ci-dessus est inférieure à 0.1%, donc nous pouvons rejeter l'hypothèse nulle. En conclusion, le deuxième modèle s'ajuste mieux au données.
+
+Dans ce cas, nous allons interpréter les résultats pour pouvoir dégager des informations pertinentes et stratégiques pour l'entreprise Bixi. 
+
+```{r}
+top_arrondissements <- dat_full %>%
+  group_by(arrond) %>%
+  summarise(nb_stations = mean(nb_stations, na.rm = TRUE)) %>%
+  arrange(desc(nb_stations)) %>%
+  head(5)
+
+# Afficher le top 5 des arrondissements avec le plus grand nombre de stations
+print(top_arrondissements)
+```
+
+Nous allons donc interpréter le top 5 des arrondissements avec le plus de stations uniques (dans notre échantillon de données).
+
+```{r}
+top_arrondissements$logodd = NA
+
+intercept <- coef(mod_u15_2)[1]  # Intercept
+
+# Liste des arrondissements
+arrondissements <- c("Le Plateau-Mont-Royal", "Ville-Marie", "Rosemont-La Petite-Patrie", "Villeray-Saint-Michel-Parc-Extension", "Le Sud-Ouest")
+
+# Initialiser le tableau
+data <- data.frame(
+  arrond = arrondissements,
+  nb_stations = c(157, 154, 99, 62, 56),
+  logodd = NA
+)
+
+# Calculer les log-odds pour chaque arrondissement
+for (i in 1:nrow(data)) {
+  arrond_name <- data$arrond[i]
+  if (arrond_name == "Le Plateau-Mont-Royal") {
+    # Utiliser uniquement l'intercepte
+    data$logodd[i] <- exp(intercept)
+  } else {
+    # Utiliser le coefficient approprié pour les autres arrondissements
+    coef_arrond <- coef(mod_u15_2)[paste0("arrond", arrond_name)]
+    log_odds <- intercept + coef_arrond
+    data$logodd[i] <- exp(log_odds)
+  }
+}
+
+# Afficher le tableau mis à jour
+print(data)
+```
+
+Arrondissement | Log-odds | Probabilité que u15 = 1
+Le Plateau-Mont-Royal |		
+Ville-Marie	|
+Rosemont-La Petite-Patrie	|	
+Villeray-Saint-Michel-Parc-Extension	|
+Le Sud-Ouest |
 
 # n_tot (Abdoul)
 
