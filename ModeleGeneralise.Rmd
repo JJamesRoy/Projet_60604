@@ -74,13 +74,15 @@ Tout le monde ajouter un petit truc... Question: à suivre...
 
 L'entreprise Bixi cherche à savoir qu'est-ce qui affecte la disponibilité dans ses stations. En effet, dans certaines stations ils ne restent plus de Bixi pour les autres usagers. Elle croit que cela peut être du à des utilisateurs qui font des voyagent trop long (plus de 15 minutes) et donc monopolisent les Bixi pour eux. En l'absence de variables sur la disponibilités, nous proposons d'utiliser une variable binaire `u15` qui prend la valeur de 1 si la durée moyenne à partir d'une certaine station à une certaine journée de l'année est supérieure à 15 minutes, 0 sinon. Bien que cette variable est imparfaite, il sera possible de cibler certaines conditions spécifiques (comme les arrondissements, les mois de l'année, etc.) qui agissent sur la disponibilité des Bixi.
 
-```{r}
+```{r plot-u15}
 barplot(table(dat_full$u15), col = c("red", "blue"), main = "", xlab = "Valeurs", ylab = "Fréquence")
 ```
 
+Comme il est possible de le voir dans le graphique \@ref(fig:plot-u15), la variable cible est binaire, il faut ainsi faire une régression généralisée *logit.*
+
 ## Effets des arrondissements sur la variable `u15`
 
-Étant donné que les stations sont installées au début de la saison, l'entreprise doit trouver les arrondissements problématiques. Il est donc possible d'ajuster un modèle simple pour voir les effets des différents arrondissements.
+Étant donné que les stations sont installées au début de la saison, l'entreprise doit trouver les arrondissements problématiques. Il est donc possible d'ajuster un modèle simple pour voir les effets des différents arrondissements sur si la probabilité d'avoir des stations où le déplacement moyen est supérieur à 15 minutes.
 
 ```{r}
 pop <- dat_full %>%
@@ -89,20 +91,23 @@ pop <- dat_full %>%
             dens_stat = mean(station_density))
 ```
 
-```{r}
+```{r fig-densite}
 ylim.prim <- c(0, 20000)
 ylim.sec <- c(0, 19.38271605)
 
 b <- diff(ylim.prim)/diff(ylim.sec)
 a <- ylim.prim[1] - b*ylim.sec[1]
 
+adjustment_factor <- max(pop$dens) / max(pop$dens_stat)
 
-ggplot(pop, aes(x = reorder(arrond, -dens))) +
-  geom_bar(aes(y = dens), stat = "identity", fill = "skyblue") +
-  geom_bar(aes(y = dens_stat * adjustment_factor), stat = "identity", fill = "orange", alpha = 0.3) +
-  scale_y_continuous("Densité", sec.axis = sec_axis(~ (. - a)/b, name = "Densité de station")) +
-  labs(title = "Densité de pop. par arrondissement en ordre décroissant", x = "Arrondissements", y = "Population") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+ggplot(pop, aes(y = reorder(arrond, dens))) +
+  geom_bar(aes(x = dens, fill = "Densité de population"), stat = "identity", color = "black") +
+  geom_bar(aes(x = dens_stat * adjustment_factor, fill = "Densité de station"), stat = "identity", alpha = 0.7, color = "black") +
+  scale_x_continuous("Densité", sec.axis = sec_axis(~ (. - a)/b, name = "Densité de station")) +
+  labs(title = "Densité de pop. par arrondissement en ordre décroissant", y = "Arrondissements", x = "Population") +
+  theme(axis.text.y = element_text(angle = 0, hjust = 0)) +
+  scale_fill_manual(values = c("Densité de population" = "skyblue", "Densité de station" = "#ff0000"),
+                    name = "")
 ```
 
 ### Modèle 1
@@ -117,7 +122,14 @@ summary(mod_u15_1)
 
 #### Interprétations
 
+```{r}
+prob_lachine = round((exp(-1.22293+2.80111)/(1+exp(-1.22293+2.80111)))*100, digits = 1)
+
+```
+
 Selon ce premier modèle, on voit que comparé à l'arrondissement du Plateau-Mont-Royal, les déplacements faits dans tous les autres arrondissements et villes ont plus de chances d'être plus long que 15 minutes en moyennes. Cette observations est significative à au moins 99% pour tout les facteurs.
+
+Par exemple, la probabilité que la moyenne des voyages dure plus de 15 minutes à une station dans l'arrondissement Lachine est de `r prob_lachine`%.
 
 ### Modèle 2
 
@@ -132,7 +144,7 @@ Nous allons d'abord comparer le modèle avec le précédent avant de l'interpré
 
 Nous allons donc faire le test suivant :
 
-$H_0$ : Les modèles sont équivalents
+$H_0$ : Les modèles sont équivalents.
 
 $H_1$ : Les modèles ne sont pas équivalents, donc l'ajout des nouvelles variables améliorent significativement l'ajustement du modèle.
 
@@ -142,9 +154,9 @@ anova(mod_u15_1, mod_u15_2, test = "Chisq")
 
 Ainsi, nous voyons que la valeur-P associée au test ci-dessus est inférieure à 0.1%, donc nous pouvons rejeter l'hypothèse nulle. En conclusion, le deuxième modèle s'ajuste mieux au données.
 
-Dans ce cas, nous allons interpréter les résultats pour pouvoir dégager des informations pertinentes et stratégiques pour l'entreprise Bixi. 
+Dans ce cas, nous allons interpréter les résultats pour pouvoir dégager des informations pertinentes et stratégiques pour l'entreprise Bixi.
 
-```{r}
+```{r tab-top}
 top_arrondissements <- dat_full %>%
   group_by(arrond) %>%
   summarise(nb_stations = mean(nb_stations, na.rm = TRUE)) %>%
@@ -152,15 +164,18 @@ top_arrondissements <- dat_full %>%
   head(5)
 
 # Afficher le top 5 des arrondissements avec le plus grand nombre de stations
-print(top_arrondissements)
+kable(top_arrondissements, col.names = c("Arrondissements", "Stations"))
 ```
 
-Nous allons donc interpréter le top 5 des arrondissements avec le plus de stations uniques (dans notre échantillon de données).
+Nous allons donc interpréter le top 5 des arrondissements (comme indiqué dans le \@ref(tab:tab-top) avec le plus de stations uniques (dans notre échantillon de données).
 
-```{r}
-top_arrondissements$logodd = NA
+```{r tab-prob}
+top_arrondissements$prob_mem0 = NA
+top_arrondissements$prob_mem1 = NA
 
 intercept <- coef(mod_u15_2)[1]  # Intercept
+mm7 = coef(mod_u15_2)[24]
+mem = coef(mod_u15_2)[21]
 
 # Liste des arrondissements
 arrondissements <- c("Le Plateau-Mont-Royal", "Ville-Marie", "Rosemont-La Petite-Patrie", "Villeray-Saint-Michel-Parc-Extension", "Le Sud-Ouest")
@@ -169,7 +184,9 @@ arrondissements <- c("Le Plateau-Mont-Royal", "Ville-Marie", "Rosemont-La Petite
 data <- data.frame(
   arrond = arrondissements,
   nb_stations = c(157, 154, 99, 62, 56),
-  logodd = NA
+  prob_mem0 = NA,
+  prob_mem1 = NA,
+  mois = c("Juillet","Juillet","Juillet","Juillet","Juillet")
 )
 
 # Calculer les log-odds pour chaque arrondissement
@@ -177,25 +194,35 @@ for (i in 1:nrow(data)) {
   arrond_name <- data$arrond[i]
   if (arrond_name == "Le Plateau-Mont-Royal") {
     # Utiliser uniquement l'intercepte
-    data$logodd[i] <- exp(intercept)
+    data$prob_mem0[i] <- round((exp(intercept+mm7)/(1+exp(intercept+mm7))*100), digits = 1)
   } else {
     # Utiliser le coefficient approprié pour les autres arrondissements
     coef_arrond <- coef(mod_u15_2)[paste0("arrond", arrond_name)]
-    log_odds <- intercept + coef_arrond
-    data$logodd[i] <- exp(log_odds)
+    odd <- intercept + coef_arrond + mm7
+    data$prob_mem0[i] <- round((exp(odd)/(1+exp(odd))*100), digits =1)
+  }
+}
+
+for (i in 1:nrow(data)) {
+  arrond_name <- data$arrond[i]
+  if (arrond_name == "Le Plateau-Mont-Royal") {
+    # Utiliser uniquement l'intercepte
+    data$prob_mem1[i] <- round((exp(intercept+mm7+mem)/(1+exp(intercept+mm7+mem))*100), digits = 1)
+  } else {
+    # Utiliser le coefficient approprié pour les autres arrondissements
+    coef_arrond <- coef(mod_u15_2)[paste0("arrond", arrond_name)]
+    odd <- intercept + coef_arrond + mm7 +mem
+    data$prob_mem1[i] <- round((exp(odd)/(1+exp(odd))*100), digits =1)
   }
 }
 
 # Afficher le tableau mis à jour
-print(data)
+kable(data, col.names = c("Arrondissements", "Stations", "Prob. non-membres", "Prob.  membres", "Mois"))
 ```
 
-Arrondissement | Log-odds | Probabilité que u15 = 1
-Le Plateau-Mont-Royal |		
-Ville-Marie	|
-Rosemont-La Petite-Patrie	|	
-Villeray-Saint-Michel-Parc-Extension	|
-Le Sud-Ouest |
+Comme il est possible de voir ci-dessus dans le tableau /\@ref(tab:tab-prob), selon ce deuxième modèle, les probabilités prédites changent selon l'arrondissement, le fait d'être un membre ou non et le mois d'utilisation. Par exemple, la probabilité que la durée moyenne des déplacements à une station du Plateau Mont-Royale au mois de juillet est de 37,5% pour les non-membres et de 17,9% pour les membres.
+
+## Conclusion sur l'effet des arrondissements
 
 # n_tot (Abdoul)
 
@@ -206,7 +233,9 @@ Le Sud-Ouest |
 Question a écrire Sam
 
 Pour commencer, examinons la distribution du nombre de déplacements en AM:
+
 ```{r distRn_AM, out.height = "30%", fig.align = 'center', fig.cap = "Distribution de n_AM"}}
 hist(dat$n_AM)
 ```
+
 Comme on peut le constater avec la figure @ref(fig:distRn_AM), la distribution n'est pas normale.
