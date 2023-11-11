@@ -202,3 +202,11 @@ Le Sud-Ouest |
 # n_PM (Alfred)
 
 # n_AM (Samuel)
+
+Question a écrire Sam
+
+Pour commencer, examinons la distribution du nombre de déplacements en AM:
+```{r distRn_AM, out.height = "30%", fig.align = 'center', fig.cap = "Distribution de n_AM"}}
+hist(dat$n_AM)
+```
+Comme on peut le constater avec la figure @ref(fig:distRn_AM), la distribution n'est pas normale.
