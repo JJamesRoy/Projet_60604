@@ -28,6 +28,7 @@ header-includes:
 - \usepackage{float}
 - \usepackage{amsmath}
 - \usepackage{ragged2e}
+- \floatplacement{figure}{H}
 ---
 
 ```{r setup, include=FALSE}
@@ -45,6 +46,7 @@ library(cleandata)
 library(data.table)
 library(kableExtra)
 library(gridExtra)
+library(jtools)
 ```
 
 ```{r read}
@@ -75,7 +77,7 @@ Tout le monde ajouter un petit truc... Question: à suivre...
 
 L'entreprise Bixi cherche à savoir qu'est-ce qui affecte la disponibilité dans ses stations. En effet, dans certaines stations ils ne restent plus de Bixi pour les autres usagers. Elle croit que cela peut être du à des utilisateurs qui font des voyagent trop long (plus de 15 minutes) et donc monopolisent les Bixi pour eux. En l'absence de variables sur la disponibilités, nous proposons d'utiliser une variable binaire `u15` qui prend la valeur de 1 si la durée moyenne à partir d'une certaine station à une certaine journée de l'année est supérieure à 15 minutes, 0 sinon. Bien que cette variable est imparfaite, il sera possible de cibler certaines conditions spécifiques (comme les arrondissements, les mois de l'année, etc.) qui agissent sur la disponibilité des Bixi.
 
-```{r plot-u15, out.height = "25%", fig.align='center', fig.cap="Distribution de u15"}
+```{r plot-u15, out.height = "22%", fig.align='center', fig.cap="Distribution de u15"}
 barplot(table(dat_full$u15), col = c("red", "blue"), main = "", xlab = "Valeurs", ylab = "Fréquence")
 ```
 
@@ -96,10 +98,11 @@ pop <- dat_full %>%
 
 Étant donné que les stations sont installées au début de la saison, l'entreprise doit trouver les arrondissements problématiques. Il est donc possible d'ajuster un modèle simple pour voir les effets des différents arrondissements.
 
-```{r, out.height = "30%"}
+```{r, out.height = "10%"}
 dat_full$arrond <- relevel(dat_full$arrond, ref = "Le Plateau-Mont-Royal")
 mod_u15_1 = glm(u15 ~ arrond, data = dat_full, family = binomial(link = "logit"))
-summary(mod_u15_1)
+#summary(mod_u15_1)
+summ(mod_u15_1)
 ```
 
 #### Interprétations
@@ -108,6 +111,7 @@ summary(mod_u15_1)
 prob_lachine = round((exp(-1.22293+2.80111)/(1+exp(-1.22293+2.80111)))*100, digits = 1)
 ```
 
+\
 
 Selon ce premier modèle, on voit que comparé à l'arrondissement du Plateau-Mont-Royal, les déplacements faits dans tous les autres arrondissements et villes ont plus de chances d'être plus long que 15 minutes en moyennes. Cette observations est significative à au moins 99% pour tout les facteurs.
 
@@ -117,9 +121,9 @@ Par exemple, la probabilité que la moyenne des voyages dure plus de 15 minutes 
 
 Maintenant, nous pouvons ajuster un modèle plus complexe pour voir s'il est possible de raffiner l'analyse.
 
-```{r, out.height = "30%"}
+```{r, out.height = "10%"}
 mod_u15_2 = glm(u15 ~ arrond + mem + as.factor(mm), wkend + rain_bin, data = dat_full, family = binomial(link = "logit"))
-summary(mod_u15_2)
+summ(mod_u15_2)
 ```
 
 Nous allons d'abord comparer le modèle avec le précédent avant de l'interpréter, car il se peut que le premier modèle soit une simplifcation correcte du deuxième modèle. C'est-à-dire que les deux modèles ne sont pas significativement différent en terme de qualité d'ajustement.
@@ -146,12 +150,15 @@ top_arrondissements <- dat_full %>%
   head(5)
 
 # Afficher le top 5 des arrondissements avec le plus grand nombre de stations
-kable(top_arrondissements, col.names = c("Arrondissements", "Stations"))
+#kable(top_arrondissements, col.names = c("Arrondissements", "Stations"))
 ```
 
-Nous allons donc interpréter le top 5 des arrondissements (comme indiqué dans le \@ref(tbl:tab-top)) avec le plus de stations uniques (dans notre échantillon de données).
+#### Interprétations
 
-```{r tab-prob}
+\
+Nous allons donc interpréter le top 5 des arrondissements avec le plus de stations uniques (dans notre échantillon de données).
+
+```{r tab-prob, fig}
 top_arrondissements$prob_mem0 = NA
 top_arrondissements$prob_mem1 = NA
 
@@ -199,10 +206,12 @@ for (i in 1:nrow(data)) {
 }
 
 # Afficher le tableau mis à jour
-kable(data, col.names = c("Arrondissements", "Stations", "Prob. non-membres", "Prob.  membres", "Mois"))
+kable(data, col.names = c("Arrondissements", "Stations", "Prob. non-membres", "Prob.  membres", "Mois"), caption = "Tableau des probabilités")
 ```
 
-Comme il est possible de voir ci-dessus dans le tableau \@ref(tbl:tab-prob), selon ce deuxième modèle, les probabilités prédites changent selon l'arrondissement, le fait d'être un membre ou non et le mois d'utilisation. Par exemple, la probabilité que la durée moyenne des déplacements à une station du Plateau Mont-Royale au mois d'août est de 31,2% pour les non-membres et de 14,1% pour les membres. Il est à noter que ces interprétations sont significatifs à 99,9%.
+Comme il est possible de voir ci-dessus dans le tableau 1, selon ce deuxième modèle, les probabilités prédites changent selon l'arrondissement, le fait d'être un membre ou non et le mois d'utilisation. Par exemple, la probabilité que la durée moyenne des déplacements à une station du Plateau Mont-Royale au mois d'août est de 31,2% pour les non-membres et de 14,1% pour les membres. Il est à noter que ces interprétations sont significatifs à 99,9%.
+
+\newpage
 
 ## Conclusion sur l'effet des arrondissements
 
@@ -237,8 +246,6 @@ Question a écrire Sam
 
 Pour commencer, examinons la distribution du nombre de déplacements en AM:
 
-```{#{r distRn-AM, out.height = "30%", fig.align = 'center', fig.cap = "Distribution de n_AM"}
-#hist(dat$n_AM)
-```
+`{#{r distRn-AM, out.height = "30%", fig.align = 'center', fig.cap = "Distribution de n_AM"} #hist(dat$n_AM)`
 
 Comme on peut le constater avec la figure /@ref(fig:distRn-AM), la distribution n'est pas normale.
