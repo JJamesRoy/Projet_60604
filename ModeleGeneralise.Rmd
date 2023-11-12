@@ -244,15 +244,7 @@ ggplot(pop, aes(y = reorder(arrond, dens))) +
 La question sur l'achalandage sera séparée en 3 parties. Quant à savoir qu'est ce qui affecte l'utilisation en matinée, en soirée et pour finir, on abordera l'utilisation totale. Enfin, nous comparerons les 3 métriques sur l'achalandage et conseillerons la compagnie sur les questions de planification des stations.  
 
 
-## n_AM (Samuel)
 
-Question a écrire Sam
-
-Pour commencer, examinons la distribution du nombre de déplacements en AM:
-
-`{#{r distRn-AM, out.height = "30%", fig.align = 'center', fig.cap = "Distribution de n_AM"} #hist(dat$n_AM)`
-
-Comme on peut le constater avec la figure \@ref(fig:distRn-AM), la distribution n'est pas normale.
 
 ## n_PM (Alfred)
 
@@ -267,16 +259,24 @@ plot(fr)
 
 ### Modèle de base pour l'achalandage en après-midi
 
-Dans le cadre du premier modèle portant sur l'achalandage en après-midi, l'objectif est d'évaluer, à l'aide d'un modèle sans interaction, comment les membres, la durée d'utilisation `dur`, l'arrondissement spécifique `arrond`, et le fait que la journée soit la fin de semaine `wkend`, influent sur le nombre d'utilisations durant cette période. Il est délibéré de ne pas inclure d'autres variables telles que la densité de population `density`, la superficie des arrondissements `superficie`, et d'autres covariables qui varient uniquement inter-arrondissement, car ces informations sont directement captées par la variable de l'arrondissement même. Cela étant dit, les variables choisies pour les modèles qui suivent sont ceux qui peuvent varier intra-arrondissement en affectant le nombre d’utilisations en après-midi, sans que l’information soit captée par les autres covariables. Aussi, on n'ajoute pas les variables liées à la température pour la simple raison que ces variables sont codées de sorte à être les mêmes pour toute la région métropolitaine de Montréal. Par ailleurs, ce sont des variables qui sont hors du contrôle de l'entreprise, c'est-à-dire que même si l’on apprend que la pluie fait diminuer le nombre d'utilisations des Bixis en après-midi, l'entreprise ne peut rien y faire.
+Dans le cadre du premier modèle portant sur l'achalandage en après-midi, l'objectif est d'évaluer, à l'aide d'un modèle sans interaction, comment les membres `mem`, la durée d'utilisation `dur`, l'arrondissement spécifique `arrond`, et le fait que la journée soit la fin de semaine `wkend`, influent sur le nombre d'utilisations durant cette période. Il est délibéré de ne pas inclure d'autres variables telles que la densité de population `density`, la superficie des arrondissements `superficie`, et d'autres covariables qui varient uniquement inter-arrondissement, car ces informations sont directement captées par la variable de l'arrondissement même. Cela étant dit, les variables choisies pour les modèles qui suivent sont ceux qui peuvent varier intra-arrondissement en affectant le nombre d’utilisations en après-midi, sans que l’information soit captée par les autres covariables. Aussi, on n'ajoute pas les variables liées à la température pour la simple raison que ces variables sont codées de sorte à être les mêmes pour toute la région métropolitaine de Montréal. Par ailleurs, ce sont des variables qui sont hors du contrôle de l'entreprise, c'est-à-dire que même si l’on apprend que la pluie fait diminuer le nombre d'utilisations des Bixis en après-midi, l'entreprise ne peut rien y faire.
 
 ```{r}
 mod_PM1 <- glm(n_PM ~ as.factor(mem), data = dat_full, family = poisson)
 summary(mod_PM1)
-dat_full$superficie
+
 
 
 ```
 
+## n_AM (Samuel)
 
+Question a écrire Sam
+
+Pour commencer, examinons la distribution du nombre de déplacements en AM:
+
+`{#{r distRn-AM, out.height = "30%", fig.align = 'center', fig.cap = "Distribution de n_AM"} #hist(dat$n_AM)`
+
+Comme on peut le constater avec la figure \@ref(fig:distRn-AM), la distribution n'est pas normale.
 
 ## n_tot (Abdoul)
