@@ -251,11 +251,11 @@ Pour commencer, examinons la distribution du nombre de déplacements en AM:
 
 `{#{r distRn-AM, out.height = "30%", fig.align = 'center', fig.cap = "Distribution de n_AM"} #hist(dat$n_AM)`
 
-Comme on peut le constater avec la figure /@ref(fig:distRn-AM), la distribution n'est pas normale.
+Comme on peut le constater avec la figure \@ref(fig:distRn-AM), la distribution n'est pas normale.
 
 ## n_PM (Alfred)
 
-Avant d'explorer un modèle, il est essentiel d'examiner la nature de la distribution des données. Dans ce contexte, la figure /\@ref(fig:fig-histnPM) indique clairement qu'entre 0 et 10 utilisations, la fréquence est nettement plus élevée que pour les autres valeurs. De plus, étant donné que le nombre d'utilisations est un décompte, on peut en déduire que la variable n_PM suit également une distribution de Poisson.
+Avant d'explorer un modèle, il est essentiel d'examiner la nature de la distribution des données. Dans ce contexte, la figure \@ref(fig:fig-histnPM) indique clairement qu'entre 0 et 10 utilisations, la fréquence est nettement plus élevée que pour les autres valeurs. De plus, étant donné que le nombre d'utilisations est un décompte, on peut en déduire que la variable n_PM suit également une distribution de Poisson.
 
 ```{r fig-histnPM, out.height = "30%",fig.align='center', fig.cap= "Histogramme des déplacements en matinée"}
 #dat_full$n_AM <- as.factor(dat_full$n_AM)
