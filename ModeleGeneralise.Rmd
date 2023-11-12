@@ -237,11 +237,11 @@ ggplot(pop, aes(y = reorder(arrond, dens))) +
                     name = "")
 ```
 
-# Achalandage 
-À première vue, il est crucial d’avoir de l’information sur l’achalandage pour une entreprise comme BIXI. Notamment, lorsqu’il est question d’augmenter le nombre de vélos pour certaines stations, de faire les entretiens au bon moment de la journée, ou même de déterminer certaines zones d’expansion possible. À cet effet, nous avons des données sur le nombre d’utilisations en matinée(`n_AM`), le nombre d'utilisations en soirée(`n_PM`) et le nombre d'utilisations total(`n_tot`). Avec ces données, nous essaierons d’observer qu’est-ce qui affecte l’achalandage, pour mieux équiper l’entreprise à répondre aux questions stratégiques mentionnées précédemment. 
+# Achalandage
 
-La question sur l’achalandage sera séparée en 3 parties. Quant à savoir qu’est ce qui affecte l’utilisation en matinée, en soirée et pour finir, on abordera l’utilisation totale. Enfin, nous comparerons les 3 métriques sur l’achalandage et conseillerons la compagnie sur les questions de planification des stations. 
+À première vue, il est crucial d'avoir de l'information sur l'achalandage pour une entreprise comme BIXI. Notamment, lorsqu'il est question d'augmenter le nombre de vélos pour certaines stations, de faire les entretiens au bon moment de la journée, ou même de déterminer certaines zones d'expansion possible. À cet effet, nous avons des données sur le nombre d'utilisations en matinée(`n_AM`), le nombre d'utilisations en soirée(`n_PM`) et le nombre d'utilisations total(`n_tot`). Avec ces données, nous essaierons d'observer qu'est-ce qui affecte l'achalandage, pour mieux équiper l'entreprise à répondre aux questions stratégiques mentionnées précédemment.
 
+La question sur l'achalandage sera séparée en 3 parties. Quant à savoir qu'est ce qui affecte l'utilisation en matinée, en soirée et pour finir, on abordera l'utilisation totale. Enfin, nous comparerons les 3 métriques sur l'achalandage et conseillerons la compagnie sur les questions de planification des stations.
 
 ## n_AM (Samuel)
 
@@ -253,18 +253,15 @@ Pour commencer, examinons la distribution du nombre de déplacements en AM:
 
 Comme on peut le constater avec la figure /@ref(fig:distRn-AM), la distribution n'est pas normale.
 
-
 ## n_PM (Alfred)
 
-```{r}
+Avant d'explorer un modèle, il est essentiel d'examiner la nature de la distribution des données. Dans ce contexte, la figure /\@ref(fig:fig-histnPM) indique clairement qu'entre 0 et 10 utilisations, la fréquence est nettement plus élevée que pour les autres valeurs. De plus, étant donné que le nombre d'utilisations est un décompte, on peut en déduire que la variable n_PM suit également une distribution de Poisson.
+
+```{r fig-histnPM, out.height = "30%",fig.align='center', fig.cap= "Histogramme des déplacements en matinée"}
 #dat_full$n_AM <- as.factor(dat_full$n_AM)
 
-fr <- freq(ordered(dat_full$n_AM), plot = FALSE)
+fr <- freq(ordered(dat_full$n_PM), plot = FALSE)
 plot(fr)
 ```
 
 ## n_tot (Abdoul)
-
-
-
-
