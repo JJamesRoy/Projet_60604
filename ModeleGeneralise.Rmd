@@ -47,6 +47,7 @@ library(data.table)
 library(kableExtra)
 library(gridExtra)
 library(jtools)
+library(descr)
 ```
 
 ```{r read}
@@ -236,11 +237,13 @@ ggplot(pop, aes(y = reorder(arrond, dens))) +
                     name = "")
 ```
 
-# n_tot (Abdoul)
+# Achalandage 
+À première vue, il est crucial d’avoir de l’information sur l’achalandage pour une entreprise comme BIXI. Notamment, lorsqu’il est question d’augmenter le nombre de vélos pour certaines stations, de faire les entretiens au bon moment de la journée, ou même de déterminer certaines zones d’expansion possible. À cet effet, nous avons des données sur le nombre d’utilisations en matinée(`n_AM`), le nombre d'utilisations en soirée(`n_PM`) et le nombre d'utilisations total(`n_tot`). Avec ces données, nous essaierons d’observer qu’est-ce qui affecte l’achalandage, pour mieux équiper l’entreprise à répondre aux questions stratégiques mentionnées précédemment. 
 
-# n_PM (Alfred)
+La question sur l’achalandage sera séparée en 3 parties. Quant à savoir qu’est ce qui affecte l’utilisation en matinée, en soirée et pour finir, on abordera l’utilisation totale. Enfin, nous comparerons les 3 métriques sur l’achalandage et conseillerons la compagnie sur les questions de planification des stations. 
 
-# n_AM (Samuel)
+
+## n_AM (Samuel)
 
 Question a écrire Sam
 
@@ -249,3 +252,19 @@ Pour commencer, examinons la distribution du nombre de déplacements en AM:
 `{#{r distRn-AM, out.height = "30%", fig.align = 'center', fig.cap = "Distribution de n_AM"} #hist(dat$n_AM)`
 
 Comme on peut le constater avec la figure /@ref(fig:distRn-AM), la distribution n'est pas normale.
+
+
+## n_PM (Alfred)
+
+```{r}
+#dat_full$n_AM <- as.factor(dat_full$n_AM)
+
+fr <- freq(ordered(dat_full$n_AM), plot = FALSE)
+plot(fr)
+```
+
+## n_tot (Abdoul)
+
+
+
+
