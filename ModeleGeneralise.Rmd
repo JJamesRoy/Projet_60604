@@ -239,19 +239,15 @@ ggplot(pop, aes(y = reorder(arrond, dens))) +
 
 # Achalandage
 
-À première vue, il est crucial d'avoir de l'information sur l'achalandage pour une entreprise comme BIXI. Notamment, lorsqu'il est question d'augmenter le nombre de vélos pour certaines stations, de faire les entretiens au bon moment de la journée, ou même de déterminer certaines zones d'expansion possible. À cet effet, nous avons des données sur le nombre d'utilisations en matinée(`n_AM`), le nombre d'utilisations en soirée(`n_PM`) et le nombre d'utilisations total(`n_tot`). Avec ces données, nous essaierons d'observer qu'est-ce qui affecte l'achalandage, pour mieux équiper l'entreprise à répondre aux questions stratégiques mentionnées précédemment.
+À première vue, il est crucial d'avoir de l'information sur l'achalandage pour une entreprise comme BIXI. Notamment, lorsqu'il est question d'augmenter le nombre de vélos pour certaines stations, de faire les entretiens au bon moment de la journée, ou même de déterminer certaines zones d'expansion possible. À cet effet, nous avons des données sur le nombre d'utilisations en après-midi(`n_PM`), le nombre d'utilisations en matinée (`n_AM`) et le nombre d'utilisations total(`n_tot`). Avec ces données, nous essaierons d'observer qu'est-ce qui affecte l'achalandage, pour mieux équiper l'entreprise à répondre aux questions stratégiques mentionnées précédemment.
 
-La question sur l'achalandage sera séparée en 3 parties. Quant à savoir qu'est ce qui affecte l'utilisation en matinée, en soirée et pour finir, on abordera l'utilisation totale. Enfin, nous comparerons les 3 métriques sur l'achalandage et conseillerons la compagnie sur les questions de planification des stations.  
-
-
-
+La question sur l'achalandage sera séparée en 3 parties. Quant à savoir qu'est ce qui affecte l'utilisation en matinée, en soirée et pour finir, on abordera l'utilisation totale. Enfin, nous comparerons les 3 métriques sur l'achalandage et conseillerons la compagnie sur les questions de planification des stations.
 
 ## n_PM (Alfred)
 
 Avant d'explorer un modèle, il est essentiel d'examiner la nature de la distribution des données. Dans ce contexte, la figure \@ref(fig:fig-histnPM) indique clairement qu'entre 0 et 10 utilisations, la fréquence est nettement plus élevée que pour les autres valeurs.En ajouta à ceci que le nombre d'utilisations est un décompte, on peut en déduire que la variable `n_PM` suit également une distribution de Poisson.
 
 ```{r fig-histnPM, out.height = "30%",fig.align='center', fig.cap= "Histogramme des déplacements en matinée"}
-#dat_full$n_AM <- as.factor(dat_full$n_AM)
 
 fr <- freq(ordered(dat_full$n_PM), plot = FALSE)
 plot(fr)
@@ -259,15 +255,45 @@ plot(fr)
 
 ### Modèle de base pour l'achalandage en après-midi
 
-Dans le cadre du premier modèle portant sur l'achalandage en après-midi, l'objectif est d'évaluer, à l'aide d'un modèle sans interaction, comment les membres `mem`, la durée d'utilisation `dur`, l'arrondissement spécifique `arrond`, et le fait que la journée soit la fin de semaine `wkend`, influent sur le nombre d'utilisations durant cette période. Il est délibéré de ne pas inclure d'autres variables telles que la densité de population `density`, la superficie des arrondissements `superficie`, et d'autres covariables qui varient uniquement inter-arrondissement, car ces informations sont directement captées par la variable de l'arrondissement même. Cela étant dit, les variables choisies pour les modèles qui suivent sont ceux qui peuvent varier intra-arrondissement en affectant le nombre d’utilisations en après-midi, sans que l’information soit captée par les autres covariables. Aussi, on n'ajoute pas les variables liées à la température pour la simple raison que ces variables sont codées de sorte à être les mêmes pour toute la région métropolitaine de Montréal. Par ailleurs, ce sont des variables qui sont hors du contrôle de l'entreprise, c'est-à-dire que même si l’on apprend que la pluie fait diminuer le nombre d'utilisations des Bixis en après-midi, l'entreprise ne peut rien y faire.
+Dans le cadre du premier modèle portant sur l'achalandage en après-midi, l'objectif est d'évaluer, à l'aide d'un modèle sans interaction, comment les membres `mem`, la durée d'utilisation `dur`, l'arrondissement spécifique `arrond`, et le fait que la journée soit la fin de semaine `wkend`, influent sur le nombre d'utilisations durant cette période. Il est délibéré de ne pas inclure d'autres variables telles que la densité de population `density`, la superficie des arrondissements `superficie`, et d'autres covariables qui varient uniquement inter-arrondissement, car ces informations sont directement captées par la variable de l'arrondissement même. Cela étant dit, les variables choisies pour les modèles qui suivent sont ceux qui peuvent varier intra-arrondissement en affectant le nombre d'utilisations en après-midi, sans que l'information soit captée par les autres covariables. Aussi, on n'ajoute pas les variables liées à la température pour la simple raison que ces variables sont codées de sorte à être les mêmes pour toute la région métropolitaine de Montréal. Par ailleurs, ce sont des variables qui sont hors du contrôle de l'entreprise, c'est-à-dire que même si l'on apprend que la pluie fait diminuer le nombre d'utilisations des Bixis en après-midi, l'entreprise ne peut rien y faire.
+
+Autrement dit, ce que nous essayons de tester ici, c'est l'hypothèse H0 contre l'hypothèse H1 ci-dessous. Nous voulons savoir si au moins une des covariables à un effet significatif sur le nombre de déplacements en après-midi.
+
+$H_0 : \beta_{mem} = \beta_{wkend} = \beta_{dur} = \beta_{arrond} = 0 $
+
+$H_1$ : au moin un des $\beta_i$ est différent de différent de 0
 
 ```{r}
-mod_PM1 <- glm(n_PM ~ as.factor(mem), data = dat_full, family = poisson)
+
+mod_PM1 <- glm(n_PM ~ as.factor(mem) + as.factor(wkend) + dur + arrond ,data = dat_full, family = poisson)
+summ(mod_PM1,digits = getOption("jtools-digits", default = 4))
+
+# Calcul du rapport deviance/df.residual
+overdispersion_ratio <- mod_PM1$deviance / mod_PM1$df.residual
+
+# Affichage du rapport avec un commentaire sur la surdispersion
+cat("Le rapport deviance nous montre que :", paste(round(overdispersion_ratio, 2), "(\u03C6) > 1"))
+
 summary(mod_PM1)
 
+```
 
+Selon le tableau de régression ci-dessus, il est possible de voir qu'en moyenne les déplacements en après-midi fait par les membres sont 2.9 fois plus élevés que ceux faits des non-membres. Par ailleurs, pendant les fins de semaine, il y a une diminution d'en moyenne 5% du nombre de déplacements en après-midi. Cela est surement dû au fait que les membres utilisent moins Bixi pendant la fin de semaine (cette observation a été faite dans le premier rapport). Concernant la durée totale des déplacements, le tableau montre que pour chaque minute additionnelle d'utilisation de de bixi, le nombre de déplacements en après-midi augmente d'en moyenne de 1%.Enfin, il est possible d'observer que tous les coefficients des arrondissements sont négatifs, cela veut dire que l'arrondissement de référence, dans ce cas le plateau-mont royal, a un achalandage en après-midi plus important que tous les autres arrondissements. Bien sûr, ces observations sont seulement possibles lorsque toutes les variables restent inchangées.
+
+Cela étant dit, en regardant le rapport des déviances, on peut conclure qu'il y a un problème de surdispersion. Conséquemment, cela entraîne des intervalles de confiance incorrects et des tests de significativité inappropriés. Il nous est alors, impossible de vérifier le test d'hypothèse mentionnée précédemment. Pour combler ce problème, il est préférable d'utiliser un modèle quasi-poisson.
+
+```{r}
+mod_QPM1 <- glm(n_PM ~ as.factor(mem) + as.factor(wkend) + dur + arrond ,data = dat_full, family = quasipoisson)
+summ(mod_QPM1)
+Anova(mod_QPM1, type = 3)
 
 ```
+
+En analysant le tableau Anova pour le modèle quasi-Poisson, on observe que, lors de la comparaison des modèles avec ou sans chaque variable, toutes les covariables présentent une significativité statistique. Par conséquent, il est justifiable de rejeter l'hypothèse nulle (H0) et d'affirmer que, dans ce contexte, toutes les covariables diffèrent significativement de zéro. Autrement dit, l'entreprise peut se fier aux covariables incluses dans le modèle pour expliquer le nombre de déplacements en après-midi.
+
+### Modèle avec intéraction
+
+
 
 ## n_AM (Samuel)
 
