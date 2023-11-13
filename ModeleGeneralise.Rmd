@@ -274,8 +274,6 @@ overdispersion_ratio <- mod_PM1$deviance / mod_PM1$df.residual
 # Affichage du rapport avec un commentaire sur la surdispersion
 cat("Le rapport deviance nous montre que :", paste(round(overdispersion_ratio, 2), "(\u03C6) > 1"))
 
-summary(mod_PM1)
-
 ```
 
 Selon le tableau de régression ci-dessus, il est possible de voir qu'en moyenne les déplacements en après-midi fait par les membres sont 2.9 fois plus élevés que ceux faits des non-membres. Par ailleurs, pendant les fins de semaine, il y a une diminution d'en moyenne 5% du nombre de déplacements en après-midi. Cela est surement dû au fait que les membres utilisent moins Bixi pendant la fin de semaine (cette observation a été faite dans le premier rapport). Concernant la durée totale des déplacements, le tableau montre que pour chaque minute additionnelle d'utilisation de de bixi, le nombre de déplacements en après-midi augmente d'en moyenne de 1%.Enfin, il est possible d'observer que tous les coefficients des arrondissements sont négatifs, cela veut dire que l'arrondissement de référence, dans ce cas le plateau-mont royal, a un achalandage en après-midi plus important que tous les autres arrondissements. Bien sûr, ces observations sont seulement possibles lorsque toutes les variables restent inchangées.
@@ -291,8 +289,33 @@ Anova(mod_QPM1, type = 3)
 
 En analysant le tableau Anova pour le modèle quasi-Poisson, on observe que, lors de la comparaison des modèles avec ou sans chaque variable, toutes les covariables présentent une significativité statistique. Par conséquent, il est justifiable de rejeter l'hypothèse nulle (H0) et d'affirmer que, dans ce contexte, toutes les covariables diffèrent significativement de zéro. Autrement dit, l'entreprise peut se fier aux covariables incluses dans le modèle pour expliquer le nombre de déplacements en après-midi.
 
-### Modèle avec intéraction
+### Modèle ajusté avec intéraction
 
+Dans le contexte du modèle avec interaction, il est raisonnable de postuler qu'une interaction pertinente existe entre le statut de membre `mem` et l'arrondissement `arrond`. Cette conjecture se fonde sur l'idée que certains arrondissements affichent une densité de population plus élevée que d'autres. En conséquence, il est anticipé que les arrondissements densément peuplés génèreront naturellement un nombre plus élevé de déplacements en après-mid tout en étant plus sucéptible d'attirer davantage de membre. 
+
+Dans ce même ordre d'idée, il est plausible d'affirmer qu'il y aura aussi une interaction entre le statut de membre `mem` et la durée totale des déplacements `dur`. La logique étant qu'il y a certains avantages tarifaires à être membres, de sorte que le comportement des déplacements en après-midi selon la durée de déplacement sera différent selon le statut d'abonnement.
+
+Enfin, la derniere interaction cohérente serait celle entre la durée totale de déplacement `dur` et les arondissements `arrond`. Pour ce cas spécifique il est possible de voir l'intéraction dans le graphique \@ref(fig:interDurArrond). 
+
+
+```{r interDurArrond, out.height = "30%",fig.align='center', fig.cap= "Intéraction entre la durée des déplacement et les arrondissements"}
+
+ggplot(data = dat_full, aes(x = dur, y = n_PM, col = as.factor(arrond))) +
+  geom_point()+
+   geom_smooth(method = "lm", se = FALSE, formula = "y ~ x",
+show.legend = FALSE, fullrange = T, size=0.5)+
+  theme_minimal()
+  
+```
+
+```{r}
+mod_QPM2 <- glm(n_PM ~ as.factor(mem) + as.factor(wkend) + dur + arrond
+                + as.factor(mem)*dur +as.factor(mem)*arrond
+                ,data = dat_full, family = quasipoisson)
+summ(mod_QPM2,digits = getOption("jtools-digits", default = 4))
+
+
+```
 
 
 ## n_AM (Samuel)
