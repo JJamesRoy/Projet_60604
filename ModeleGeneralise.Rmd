@@ -61,7 +61,7 @@ dat_full$arrond <- factor(dat_full$arrond)
 ```
 
 ```{r}
-dat_full = dat_full %>% mutate(u15 = ifelse(avg > 15,1,0)) %>% select(-c("name","X"))
+dat_full = dat_full %>% mutate(u15 = ifelse(avg > 15,1,0))
 ```
 
 ```{r}
