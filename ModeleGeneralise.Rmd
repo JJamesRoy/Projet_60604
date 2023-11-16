@@ -62,7 +62,7 @@ dat_full$arrond <- factor(dat_full$arrond)
 ```
 
 ```{r}
-dat_full = dat_full %>% mutate(u15 = ifelse(avg > 15,1,0)) %>% select(-c("name","X"))
+dat_full = dat_full %>% mutate(u15 = ifelse(avg > 15,1,0))
 ```
 
 ```{r}
@@ -73,8 +73,7 @@ dat_full <- dat_full %>%
 ```
 
 # Introduction
-
-Tout le monde ajouter un petit truc... Question: à suivre...
+Dans ce document, nous allons nous pencher sur deux questions d'affaires pour aider l'entreprise Bixi à comprendre la disponibilité des vélos dans leurs stations ainsi que l'achalandage d'après différents moments de la journée en développant différents modèles linéaires.
 
 # Bin_u15min (James)
 
@@ -261,12 +260,10 @@ Dans le cadre du premier modèle portant sur l'achalandage en après-midi, l'obj
 
 Autrement dit, ce que nous essayons de tester ici, c'est l'hypothèse H0 contre l'hypothèse H1 ci-dessous. Nous voulons savoir si au moins une des covariables à un effet significatif sur le nombre de déplacements en après-midi.
 
-$$ H_0 : \beta_{mem} = \beta_{wkend} = \beta_{dur} = \beta_{arrond} = 0 $$
-
-$H_1$ : au moin un des $\beta_i$ est différent de différent de 0
+<!-- $H_0 : \beta_{mem} = \beta_{wkend} = \beta_{dur} = \beta_{arrond} = 0 $ 
+$H_1$ : au moin un des $\beta_i$ est différent de différent de 0-->
 
 ```{r}
-
 mod_PM1 <- glm(n_PM ~ as.factor(mem) + as.factor(wkend) + dur + arrond ,data = dat_full, family = poisson)
 summ(mod_PM1,digits = getOption("jtools-digits", default = 4))
 
@@ -274,7 +271,7 @@ summ(mod_PM1,digits = getOption("jtools-digits", default = 4))
 overdispersion_ratio <- mod_PM1$deviance / mod_PM1$df.residual
 
 # Affichage du rapport avec un commentaire sur la surdispersion
-cat("Le rapport deviance nous montre que :", paste(round(overdispersion_ratio, 2), "(\u03C6) > 1"))
+cat("Le rapport deviance nous montre que : Phi =", paste(round(overdispersion_ratio, 2), ", > 1"))
 
 ```
 
@@ -314,22 +311,65 @@ show.legend = FALSE, fullrange = T, size=0.5)+
 mod_QPM2 <- glm(n_PM ~ as.factor(mem) + as.factor(wkend) + dur + arrond
                 + as.factor(mem)*dur +as.factor(mem)*arrond
                 ,data = dat_full, family = quasipoisson)
-summ(mod_QPM2,digits = getOption("jtools-digits", default = 4))
+#summ(mod_QPM2,digits = getOption("jtools-digits", default = 4))
 
 
 ```
 
 
-## n_AM (Samuel)
+## Modèle pour le nombre de déplacement en avant-midi (n_AM)
+### Distribution
 
-Question a écrire Sam
+L'analyse précédente pour le nombre de déplacements en PM peut aussi être effectué pour les déplacements en AM. Pour commencer, examinons la distribution du nombre de déplacements en AM avec la figure \@ref(fig:distnAM):
+```{r distnAM, out.height = "30%", fig.align = 'center', fig.cap = "Distribution de nAM"}
+frnAM <-(freq(ordered(dat_full$n_AM), plot = TRUE))
+```
+### Statistiques
+Comme on peut le constater avec la figure \@ref(fig:distnAM), la distribution n'est pas d'allure normale. Comme n_AM est une variable de dénombrement, la distribution s'approche plus d'une distribution de Poisson, les statistiques de n_AM sont les suivantes:
+```{r}
+Moyenne_n_AM = mean(dat_full$n_AM)
+Var_n_AM = var(dat_full$n_AM)
+summary(dat_full$n_AM)
+cat("Moyenne de n_AM :", Moyenne_n_AM,"Variance de n_AM :", Var_n_AM)
+```
+### Modèle de base pour l'achalandage en avant-midi
+À première vue, la moyenne et la variance ne semblent pas égales et donc un modèle de Poisson ne semble pas être approprié. Calculons ainsi le paramètre de dispersion basé sur la déviance sur un modèle de Poisson avec les variables explicatives pertinentes:
+```{r}
+mod_AM <- glm(n_AM ~ arrond + holiday + mem + wkend + dur,data = dat_full, family = poisson)
+summ(mod_AM,digits = getOption("jtools-digits", default = 4))
+overdispersion_ratio <- mod_AM$deviance / mod_AM$df.residual
+cat("Le rapport deviance nous montre que Phi =", paste(round(overdispersion_ratio, 2), "> 1"))
+```
+### Interprétation et modèle binomiale négative
+Le rapport de déviance suggère de l'overdispersion avec un paramètre de dispersion de 1.97. La variance de n_AM étant plus élevée que la moyenne, un modèle de binomiale négative semblerait plus approprié. À partir de ce modèle, il sera aussi possible de tester l'hyphotèse comme quoi un modèle de Poisson est une simplification adéquate ou non du modèle de binomiale négative. Le modèle de binomiale négative est le suivant:
 
-Pour commencer, examinons la distribution du nombre de déplacements en AM:
+```{r}
+mod.nbnAM <- glm.nb(n_AM ~ arrond + holiday + mem + wkend + dur, data = dat_full)
+#options(digits = 4)
+summary(mod.nbnAM)
+#summ(mod.nbnAM, digits = getOption("jtools-digits", default = 4))
 
-`{#{r distRn-AM, out.height = "30%", fig.align = 'center', fig.cap = "Distribution de n_AM"} #hist(dat$n_AM)`
+```
+### Interprétation
+On constate que toutes les variables explicatives sont significatives avec un niveau d'alpha de moins de 0.1%, nous pourrions donc jeter l'hypothèse nulle (comme quoi Ho: Bj = 0 contre H1: Bj != 0). De plus, par exemple, on peut aussi faire le constat que la moyenne du nombre de déplacement en avant-midi est multiplié par exp(1.242) = 3.46 pour les membres comparativement aux non-membres lorsque toutes les autres variables sont fixes, puis cette moyenne est multiplié par exp(-0.3096) = 0.73, donc une diminution d'environ 27% de la moyenne des déplacements en avant-midi pour les jours de fin de semaine comparativement à la semaine lorsque toutes les autres variables sont fixes. Pour les jours fériés, la moyenne de n_AM diminue d'environ 27% aussi. Comme pour le modèle de n_PM, tous les coefficients des arrondissements sont négatifs, cela veut dire le plateau-mont royal, a un achalandage en avant-midi plus important que tous les autres arrondissements lorsque toutes les autres variables sont fixes.
 
-Comme on peut le constater avec la figure \@ref(fig:distRn-AM), la distribution n'est pas normale.
+De plus, d'après la sortie, on a une valeur de Theta de 4.804, qui est une estimation de l'inverse de k, k vaut donc = 1/4.804 = 0.208. On peut aussi faire le test H0: k = 0 contre H1: k > 0.
+On obtient un LRT de 3320 et une valeur p avec la distribution khi-deux très petite. Ce qui suggère qu'on peut rejeter l'hypothèse comme quoi le modèle de Poisson est une simplification adéquate du modèle de biomiale négative et conclure que le modèle de binomiale négative est plus approprié.
+```{r}
+lrt <- -2 * as.numeric(logLik(mod_AM) - logLik(mod.nbnAM))
+pval <- pchisq(lrt, df = 1, lower.tail = FALSE)/2
+```
+### Modèle ajusté avec interactions
+Certaines des interactions utilisées pour le modèle en PM sont aussi pertinentes pour ce modèle, en effet, on peut penser qu'il y a un lien entre la durée d'un trajet et le fait d'être membre ou non, car les membres ont accès à des prix avantageux d'après la durée. Puis, entre la durée et l'arrondissement, car la durée d'un trajet peut dépendre de la destination où l'on va. Soit, une interaction entre `mem` et `dur`,puis l'une avec `dur` et `arrond`. Ce modèle ajusté avec les interactions est le suivant:
+```{r}
+mod.nbnAMa <- glm.nb(n_AM ~ arrond + holiday + mem + wkend + dur + arrond*dur + mem*dur, data = dat_full)
+summary(mod.nbnAMa)
+```
+### Interprétation
+D'après ce modèle, on peut remarquer que nos variables seules sont encore significativement différentes de 0 avec un niveau de confiance avec un alpha de moins de 0.1%. On remarque aussi que certaines interactions sont significativement différentes de 0 et d'autres non dépendamment du niveau d'alpha. On remarque aussi que l'intervalle des coefficient des interactions est en moyenne entre -4.104e-05 et 6.917e-03, soit une multiplication entre 0.99996 et 1.00694 du nombre de déplacement, ce qui plus près de 1 que tous les autres coefficients du modèle (sauf `dur`).
 
+**Conclusion AM** (ajouter dans une conclusion globale)
+Pour conclure, les points importants à réaliser pour comprendre comment interragi le nombre de déplacement en AM avec les autres facteurs est que les membres ont tendance à effectuer plus de déplacement en AM que les non-membres et l'arrondissement avec le plus grand achalandage est l'arrondissement du platea Mont-Royal.
 ## n_tot (Abdoul)
 
 Nous cherchons à comprendre les éléments qui ont un impact sur le nombre de total de déplacement  partant de chaque station (`n_tot`)
