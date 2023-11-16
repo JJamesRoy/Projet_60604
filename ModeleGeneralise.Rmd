@@ -5,13 +5,13 @@ author: "Abdoul Wassi Badirou, Alfred Assal, James Roy, Samuel Croteau"
 date: "`r Sys.Date()`"
 geometry: margin=1.5cm
 output:
-  # bookdown::html_document2:
+  bookdown::html_document2:
+    toc: yes
+    number_sections: yes
+    toc_float:
+      collapsed: no
   #   toc: yes
-  #   number_sections: yes
-  #   toc_float:
-  #     collapsed: no
-  # #   toc: yes
-  # #   toc_depth: '3'
+  #   toc_depth: '3'
   bookdown::pdf_document2:
     toc: yes
     toc_depth: 1
@@ -48,6 +48,8 @@ library(kableExtra)
 library(gridExtra)
 library(jtools)
 library(descr)
+library(MASS)
+library(emmeans)
 ```
 
 ```{r read}
@@ -259,7 +261,7 @@ Dans le cadre du premier modèle portant sur l'achalandage en après-midi, l'obj
 
 Autrement dit, ce que nous essayons de tester ici, c'est l'hypothèse H0 contre l'hypothèse H1 ci-dessous. Nous voulons savoir si au moins une des covariables à un effet significatif sur le nombre de déplacements en après-midi.
 
-$H_0 : \beta_{mem} = \beta_{wkend} = \beta_{dur} = \beta_{arrond} = 0 $
+$$ H_0 : \beta_{mem} = \beta_{wkend} = \beta_{dur} = \beta_{arrond} = 0 $$
 
 $H_1$ : au moin un des $\beta_i$ est différent de différent de 0
 
@@ -329,3 +331,115 @@ Pour commencer, examinons la distribution du nombre de déplacements en AM:
 Comme on peut le constater avec la figure \@ref(fig:distRn-AM), la distribution n'est pas normale.
 
 ## n_tot (Abdoul)
+
+Nous cherchons à comprendre les éléments qui ont un impact sur le nombre de total de déplacement  partant de chaque station (`n_tot`)
+```{r, results='hide'}
+bixi_withArr_df=read.csv("bixi1WithArrondissement.csv", stringsAsFactors = T)
+bixi_withArr_df
+```
+```{r, results='hide'}
+str(bixi_withArr_df)
+```
+```{r, results='hide'}
+#Rajoutons une variable indicatrice wkend qui vaut 1 si c'est un weekend et 0 autrement
+bixi_withArr_df$wkend <- as.integer(bixi_withArr_df$wday == "Saturday" | bixi_withArr_df$wday == "Sunday")
+bixi_withArr_df
+```
+
+```{r, results='hide'}
+summary(bixi_withArr_df)
+```
+```{r distNtot,out.height = "30%",fig.align='center', fig.cap="Distribution du nombre total de déplacement"}
+brx <- pretty(range(bixi_withArr_df$n_tot), 
+              n= nclass.Sturges(bixi_withArr_df$n_tot), min.n = 1)
+ggplot(data = bixi_withArr_df, mapping = aes(x=n_tot)) + 
+  geom_histogram( breaks=brx, alpha=0.5) + 
+  scale_x_continuous(breaks = brx) 
+```
+```{r, results='hide'}
+n_tot.moy=mean(bixi_withArr_df$n_tot)
+n_tot.var=var(bixi_withArr_df$n_tot)
+
+print(paste("Moyenne: ", n_tot.moy,"| Variance: ", n_tot.var))
+```
+
+La figure \@ref(fig:distNtot) nous montre la distribution du nombre total de déplacement. Elle ressemble beaucoup à celle d'une loi de poisson. De plus, il s'agit d'une variable de dénombrement. Par ailleurs, la moyenne de cette variable est d'environ `r round(n_tot.moy,0)` et sa variance d'environ `r round(n_tot.var,0)`, ce qui met en évidence un enjeu potentiel de sur-dispersion. Nous comparerons donc entre eux, les modèles de poisson, quasi-poisson et de binomiale négative afin d'en sélectionner le meilleur pour nos analyses. Vu la présence de la sur-dispersion, nous nous attendons à ce que le modèle de binomiale négative soit meilleure.
+
+<!-- Nous explorons donc dans un premier temps un modèle de régression poisson. -->
+
+Afin d'écrire nos modèles, nous devons déterminer les variables pertinentes à notre question de recherche. Rappelons, que notre objectif est de déterminer les éléments qui impactent le nombre total de déplacement. Nous allons donc considérer les variables liées à la météo (`temp`et `rain`), l'indicateur de jour férié (`holiday`), l'indicateur de membre (`mem`), l'indicateur de fin de semaine (`wkend`) et la durée totale (`dur`). L'inclusion de ce dernier peut paraitre moins évident. Il est possible que des stations dans lesquelles les bixis sont utilisés pour de longues périodes créent un problème de disponibilité qui impacterait le nombre de déplacements. Donc nous jugeons utile de contrôler pour cette variable pour bien mesurer l'impact des autres variables. L'indicateur de fin de semaine est une variable que nous avons introduite qui remplace la variable correspondant au jour de semaine (`wday`). Elle vaut 1 lorsque le jour de semaine est samedi ou dimanche et 0 autrement. 
+
+Nous savons que les paramètres estimés des modèle poisson et quasi-poisson sont les mêmes. Ils diffèrent dans l'évaluation des erreurs types associés aux différents paramètres et donc aux valeurs-p correspondant. Notre objectif en les comparons est donc de déterminer s'il y a une différence dans la pertinence des différentes variables considérées dans nos modèles. 
+
+```{r, results='hide'}
+n_tot_mod1.poisson = glm(n_tot ~ wkend + mem + holiday + dur + temp + rain, data=bixi_withArr_df, family = poisson(link = "log"))
+out.n_tot_mod1.poisson <- summary(n_tot_mod1.poisson)
+out.n_tot_mod1.poisson
+```
+
+
+
+<!-- La valeur-p associée à toutes les variables du modèle est très petite sauf celle de la variable indicatrice correspondant au mercredi. On peut donc conclure, qu'elles ont un effet marginal significatif sur le nombre total de déplacement en moyenne. Par ailleurs, il ne semble pas y avoir une différence significative entre la moyenne du nombre total de déplacement les mercredi par rapport au vendredi. De plus, il apparait qu'en moyenne il y a moins de déplacement les fins de semaine par rapport au vendredi après avoir ajusté pour les autres variables.  -->
+
+```{r, results='hide'}
+n_tot_mod1.quasi = glm(n_tot ~ wkend + mem + holiday + dur + temp + rain, data=bixi_withArr_df, family = quasipoisson)
+out.n_tot_mod1.quasi <- summary(n_tot_mod1.quasi)
+out.n_tot_mod1.quasi
+```
+```{r comparePvaluePoissonVsQuasi}
+pvalue_compare_df = data.frame(poisson=out.n_tot_mod1.poisson$coefficients[,4], quasiPoisson=out.n_tot_mod1.quasi$coefficients[,4])
+knitr::kable(pvalue_compare_df, caption = "Comparaison valeur-p: poisson Vs Quasi-poisson")
+```
+
+Le tableau \@ref(tab:comparePvaluePoissonVsQuasi) nous montre que toutes les valeur-p associées aux variables pour les deux modèles sont très petite. On conclue donc, qu'autant avec le modèle poisson que le modèle quasi-poisson, les variables ont un effet marginal significatif sur le nombre total de déplacement en moyenne.  
+
+```{r}
+n_tot_mod1.nb = glm.nb(n_tot ~ wkend + mem + holiday + dur + temp + rain, data=bixi_withArr_df)
+out.n_tot_mod1.nb=summary(n_tot_mod1.nb)
+out.n_tot_mod1.nb
+out.n_tot_mod1.nb.coeff=out.n_tot_mod1.nb$coefficients
+```
+```{r, results='hide'}
+k_stat=-2 * as.numeric(logLik(n_tot_mod1.poisson)-logLik(n_tot_mod1.nb))
+k_stat
+
+k_pvalue=pchisq(k_stat, df=1, lower.tail = FALSE)/2
+k_pvalue
+```
+
+Avec la sortie ci-dessus, nous constatons qu'avec le modèle de binomiale négative, les journées fériées n'ont pas un impact significatif sur le nombre total de déplacement moyen. Toutefois, le modèle poisson est-il une simplification adéquate du modèle binomial négatif? Pour y répondre, nous testons $H_0: k=0$ contre $H_1: k > 0$. La valeur-p associée à ce test est `r k_pvalue` ce qui est très petit. On rejète donc $H_0$ et on conclu que le modèle binomial négatif est plus approprié. Nous nous fions donc aux interprétations basées sur ce dernier.
+
+Plus la température augmente, plus le nombre total de déplacement moyen augmente. En fait, pour chaque degré d'augmentation de la température, le nombre total de déplacement croit en moyenne de `r round((exp(out.n_tot_mod1.nb.coeff['temp','Estimate'])-1)*100,2)` % lorsque les autres variables demeurent constantes. Par contre, plus il y a des précipitations, moins il y a des déplacements (toujours lorsque les autres variables demeurent constantes) ce qui est logique.
+
+En moyenne le nombre total de déplacement au départ des stations pour les membres bixi est `r round(exp(out.n_tot_mod1.nb.coeff['mem','Estimate']),2)` fois plus élevé que les non-membres lorsque les autres variables restent constantes.
+
+Il est intéressant de constater que, plus la durée totale des déplacements augmente, plus le nombre total de déplacements augmente. Celà nous laisse croire qu'il y a probablement une bonne gestion des flottes. C'est très important pour éviter des péneries de bixi dans les stations lorsque la demande augmente et que les usagers conservent plus longtemps leur vélo.
+
+Enfin, il apparait qu'en moyenne le nombre total de déplacements est moins élevé les fins de semaine que pendant la semaine.
+
+Le fait que les déplacements soient plus élevé pour les membres que les non-membres et que son usage se fait d'avantage en semaine qu'en fin de semaine, nous laisse penser que les bixi servent d'avantage à des habitudes courantes qui ont lieu en semaine. Probablement qu'ils sont surtout utilisés comme moyen de transport par les usagers pour se rendre au boulot. 
+
+```{r, results='hide'}
+n_tot_mod2.nb = glm.nb(n_tot ~ wday + mem + holiday + dur + temp + rain, data=bixi_withArr_df)
+out.n_tot_mod2.nb=summary(n_tot_mod2.nb)
+out.n_tot_mod2.nb
+```
+```{r, results='hide'}
+wday_emmeans <- emmeans(n_tot_mod2.nb, ~ wday)
+contrast(wday_emmeans, method = "pairwise", adjust="none")
+```
+
+
+```{r, include=FALSE}
+ggplot(data=bixi_withArr_df, mapping=aes(x=as.factor(wkend), y=n_tot)) + 
+  geom_boxplot()
+
+ggplot(data = bixi_withArr_df, mapping = aes(x=wkend, y=n_tot)) + 
+  geom_point()
+```
+
+```{r, include=FALSE}
+n_tot_mod2.poisson = glm(n_tot ~ wday + mem + holiday + dur + temp + rain, data=bixi_withArr_df, family = poisson(link = "log"))
+summary(n_tot_mod2.poisson)
+```
+
