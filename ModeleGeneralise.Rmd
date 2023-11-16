@@ -5,24 +5,23 @@ author: "Abdoul Wassi Badirou, Alfred Assal, James Roy, Samuel Croteau"
 date: "`r Sys.Date()`"
 geometry: margin=1.5cm
 output:
+  bookdown::pdf_document2:
+    toc: yes
+    toc_depth: 1
+    extra_dependencies: ["flafter"]
+  #   toc: yes
+  #   toc_depth: '3'
   bookdown::html_document2:
     toc: yes
     number_sections: yes
     toc_float:
       collapsed: no
-  #   toc: yes
-  #   toc_depth: '3'
-  bookdown::pdf_document2:
-    toc: yes
-    toc_depth: 1
-    extra_dependencies: ["flafter"]
   # pdf_document:
 params:
   created_date: "2023-09-12"
 header-includes:
 - \usepackage{tikz}
 - \usepackage{subcaption}
-#- \usepackage{subfig}
 - \usepackage{graphicx}
 - \usepackage{sidecap}
 - \usepackage{float}
@@ -75,9 +74,9 @@ dat_full <- dat_full %>%
 # Introduction
 Dans ce document, nous allons nous pencher sur deux questions d'affaires pour aider l'entreprise Bixi à comprendre la disponibilité des vélos dans leurs stations ainsi que l'achalandage d'après différents moments de la journée en développant différents modèles linéaires.
 
-# Modèles sur les voyages de plus ou moins 15 minutes (James)
+# Modèles sur les voyages de plus ou moins 15 minutes
 
-L'entreprise Bixi cherche à savoir qu'est-ce qui affecte la disponibilité dans ses stations. En effet, dans certaines stations ils ne restent plus de Bixi pour les autres usagers. Elle croit que cela peut être du à des utilisateurs qui font des voyagent trop long (plus de 15 minutes) et donc monopolisent les Bixi pour eux. En l'absence de variables sur la disponibilités, nous proposons d'utiliser une variable binaire `u15` qui prend la valeur de 1 si la durée moyenne à partir d'une certaine station à une certaine journée de l'année est supérieure à 15 minutes, 0 sinon. Bien que cette variable est imparfaite, il sera possible de cibler certaines conditions spécifiques (comme les arrondissements, les mois de l'année, etc.) qui agissent sur la disponibilité des Bixi.
+L'entreprise Bixi cherche à savoir qu'est-ce qui affecte la disponibilité dans ses stations. En effet, dans certaines stations ils ne restent plus de Bixi pour les autres usagers. Elle croit que cela peut être du à des utilisateurs qui font des voyages trop long (plus de 15 minutes) et donc monopolisent les Bixi pour eux. En l'absence de variables sur la disponibilités, nous proposons d'utiliser une variable binaire `u15` qui prend la valeur de 1 si la durée moyenne à partir d'une certaine station à une certaine journée de l'année est supérieure à 15 minutes, 0 sinon. Bien que cette variable est imparfaite, il sera possible de cibler certaines conditions spécifiques (comme les arrondissements, les mois de l'année, etc.) qui agissent sur la disponibilité des Bixi.
 
 ```{r plot-u15, out.height = "22%", fig.align='center', fig.cap="Distribution de u15"}
 barplot(table(dat_full$u15), col = c("red", "blue"), main = "", xlab = "Valeurs", ylab = "Fréquence")
@@ -86,8 +85,6 @@ barplot(table(dat_full$u15), col = c("red", "blue"), main = "", xlab = "Valeurs"
 Comme il est possible de le voir dans le graphique \@ref(fig:plot-u15), la variable cible est binaire, il faut ainsi faire une régression généralisée *logit.*
 
 ## Effets des arrondissements sur la variable `u15`
-
-Étant donné que les stations sont installées au début de la saison, l'entreprise doit trouver les arrondissements problématiques. Il est donc possible d'ajuster un modèle simple pour voir les effets des différents arrondissements sur si la probabilité d'avoir des stations où le déplacement moyen est supérieur à 15 minutes.
 
 ```{r}
 pop <- dat_full %>%
@@ -98,7 +95,7 @@ pop <- dat_full %>%
 
 ### Modèle 1
 
-Étant donné que les stations sont installées au début de la saison, l'entreprise doit trouver les arrondissements problématiques. Il est donc possible d'ajuster un modèle simple pour voir les effets des différents arrondissements.
+Il est possible d'ajuster un modèle simple pour voir les effets des différents arrondissements sur la probabilité d'avoir des stations où le déplacement moyen est supérieur à 15 minutes afin de trouver les arrondssements plus problématiques.
 
 ```{r, out.height = "10%"}
 dat_full$arrond <- relevel(dat_full$arrond, ref = "Le Plateau-Mont-Royal")
@@ -117,11 +114,11 @@ prob_lachine = round((exp(-1.22293+2.80111)/(1+exp(-1.22293+2.80111)))*100, digi
 
 Selon ce premier modèle, on voit que comparé à l'arrondissement du Plateau-Mont-Royal, les déplacements faits dans tous les autres arrondissements et villes ont plus de chances d'être plus long que 15 minutes en moyennes. Cette observations est significative à au moins 99% pour tout les facteurs.
 
-Par exemple, la probabilité que la moyenne des voyages dure plus de 15 minutes à une station dans l'arrondissement Lachine est de `r prob_lachine`%.
+Par exemple, la probabilité que la moyenne des voyages soit de plus de 15 minutes à une station dans l'arrondissement Lachine est de `r prob_lachine`%. En comparaison au Plateau Mont-Royal, la quote que la moyenne des voyages est de 2,80, c'est-à-dire...
 
 ### Modèle 2
 
-Maintenant, nous pouvons ajuster un modèle plus complexe pour voir s'il est possible de raffiner l'analyse.
+Maintenant, nous pouvons ajuster un modèle plus complexe pour voir s'il est possible de raffiner l'analyse et obtenir un modèle plus juste.
 
 ```{r, out.height = "10%"}
 mod_u15_2 = glm(u15 ~ arrond + mem + as.factor(mm), wkend + rain_bin, data = dat_full, family = binomial(link = "logit"))
@@ -140,7 +137,7 @@ $H_1$ : Les modèles ne sont pas équivalents, donc l'ajout des nouvelles variab
 anova(mod_u15_1, mod_u15_2, test = "Chisq")
 ```
 
-Ainsi, nous voyons que la valeur-P associée au test ci-dessus est inférieure à 0.1%, donc nous pouvons rejeter l'hypothèse nulle. En conclusion, le deuxième modèle s'ajuste mieux au données.
+Ainsi, nous voyons que la valeur-P associée au test ci-dessus est inférieure à 0.1%, donc nous pouvons rejeter l'hypothèse nulle. En conclusion, le deuxième modèle s'ajuste mieux aux données.
 
 Dans ce cas, nous allons interpréter les résultats pour pouvoir dégager des informations pertinentes et stratégiques pour l'entreprise Bixi.
 
@@ -158,7 +155,7 @@ top_arrondissements <- dat_full %>%
 #### Interprétations
 
 \
-Nous allons donc interpréter le top 5 des arrondissements avec le plus de stations uniques (dans notre échantillon de données).
+Nous allons donc interpréter le top 5 des arrondissements avec le plus de stations uniques (dans notre échantillon de données). (interpréter l'ensemble des coefficients serait redondant)
 
 ```{r tab-prob, fig}
 top_arrondissements$prob_mem0 = NA
@@ -211,13 +208,20 @@ for (i in 1:nrow(data)) {
 kable(data, col.names = c("Arrondissements", "Stations", "Prob. non-membres", "Prob.  membres", "Mois"), caption = "Tableau des probabilités")
 ```
 
-Comme il est possible de voir ci-dessus dans le tableau 1, selon ce deuxième modèle, les probabilités prédites changent selon l'arrondissement, le fait d'être un membre ou non et le mois d'utilisation. Par exemple, la probabilité que la durée moyenne des déplacements à une station du Plateau Mont-Royale au mois d'août est de 31,2% pour les non-membres et de 14,1% pour les membres. Il est à noter que ces interprétations sont significatifs à 99,9%.
+Comme il est possible de voir ci-dessus dans le tableau 1, selon ce deuxième modèle, les probabilités prédites changent selon l'arrondissement, le fait d'être un membre ou non et le mois d'utilisation. Par exemple, la probabilité que la durée moyenne des déplacements à une station du Plateau Mont-Royal au mois d'août est de 31,2% pour les non-membres et de 14,1% pour les membres. Il est à noter que ces interprétations sont significatives à 99,9%.
 
 \newpage
 
 ## Conclusion sur l'effet des arrondissements
 
-Selon les interprétations faites ultérieurement, l'entreprise Bixi est capable de cibler les arrondissements problématiques où la durée moyenne des déplacements a plus de probabilités d'être élevé. En effet, si on prend l'exemple de l'arrondissement Villeray-Saint-Michel-Parc-Extension, la probabilité est plutot élevé. Donc d'un point de vue d'affaire, il serait plus efficace d'installer des stations supplémentaires dans cet arrondissement. De plus, d'un point de vue général, il est efficace de fidéliser les utilisateurs à être membre, car il semble que les membres ont des voyages plus courts en moyenne. De plus, l'entreprise peut se servir du graphique \@ref(fig:fig-densite) pour trouver les arrondissements où il y a un débalancement entre la densité de stations et de populations en addition aux résultats du modèle pour régler le problème.
+Selon les interprétations faites ultérieurement, l'entreprise Bixi est capable de cibler les arrondissements problématiques où la durée moyenne des déplacements a plus de probabilités d'être élevé. En effet, si on prend l'exemple de l'arrondissement Villeray-Saint-Michel-Parc-Extension, la probabilité est plutot élevé. Donc d'un point de vue d'affaire, il serait plus efficace d'installer des stations supplémentaires dans cet arrondissement. De plus, d'un point de vue général, il est efficace de fidéliser les utilisateurs à être membre, car il semble que les membres ont des voyages plus courts en moyenne. 
+
+### Limites
+
+Le modèle inteprété possède des limites. En effet, il est impossible d'isoler l'effet des arrondissements selon si l'abonnements. Il faudrait faire un modèle avec interactions entre `mem` et `arrond`. Par la suite, il serait nécessaire de tester si ce modèle est plus juste que le précédent.
+
+
+De plus, l'entreprise peut se servir du graphique \@ref(fig:fig-densite) pour trouver les arrondissements où il y a un débalancement entre la densité de stations et de populations en addition aux résultats du modèle pour régler le problème....`***`
 
 ```{r fig-densite, out.height = "30%", fig.align='center', fig.cap= "Densité de pop. et de stations par arrondissement"}
 ylim.prim <- c(0, 20000)
@@ -228,7 +232,7 @@ a <- ylim.prim[1] - b*ylim.sec[1]
 
 adjustment_factor <- max(pop$dens) / max(pop$dens_stat)
 
-ggplot(pop, aes(y = reorder(arrond, dens))) +
+p=ggplot(pop, aes(y = reorder(arrond, dens))) +
   geom_bar(aes(x = dens, fill = "Densité de population"), stat = "identity", color = "black") +
   geom_bar(aes(x = dens_stat * adjustment_factor, fill = "Densité de station"), stat = "identity", alpha = 0.7, color = "black") +
   scale_x_continuous("Densité", sec.axis = sec_axis(~ (. - a)/b, name = "Densité de station")) +
