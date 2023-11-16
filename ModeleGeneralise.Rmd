@@ -75,7 +75,7 @@ dat_full <- dat_full %>%
 # Introduction
 Dans ce document, nous allons nous pencher sur deux questions d'affaires pour aider l'entreprise Bixi à comprendre la disponibilité des vélos dans leurs stations ainsi que l'achalandage d'après différents moments de la journée en développant différents modèles linéaires.
 
-# Bin_u15min (James)
+# Modèles sur les voyages de plus ou moins 15 minutes (James)
 
 L'entreprise Bixi cherche à savoir qu'est-ce qui affecte la disponibilité dans ses stations. En effet, dans certaines stations ils ne restent plus de Bixi pour les autres usagers. Elle croit que cela peut être du à des utilisateurs qui font des voyagent trop long (plus de 15 minutes) et donc monopolisent les Bixi pour eux. En l'absence de variables sur la disponibilités, nous proposons d'utiliser une variable binaire `u15` qui prend la valeur de 1 si la durée moyenne à partir d'une certaine station à une certaine journée de l'année est supérieure à 15 minutes, 0 sinon. Bien que cette variable est imparfaite, il sera possible de cibler certaines conditions spécifiques (comme les arrondissements, les mois de l'année, etc.) qui agissent sur la disponibilité des Bixi.
 
