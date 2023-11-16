@@ -469,6 +469,8 @@ Enfin, il apparait qu'en moyenne le nombre total de déplacements est moins éle
 
 
 **COMME EXPLIQUE DANS LA PREMIERE PARTIE**
+
+**FAIRE INTERACTIBO ENTRE MEMEBRES ET WEEKEND**
 Le fait que les déplacements soient plus élevé pour les membres que les non-membres et que son usage se fait d'avantage en semaine qu'en fin de semaine, nous laisse penser que les bixi servent d'avantage à des habitudes courantes qui ont lieu en semaine. Probablement qu'ils sont surtout utilisés comme moyen de transport par les usagers pour se rendre au boulot. 
 
 ```{r, results='hide'}
