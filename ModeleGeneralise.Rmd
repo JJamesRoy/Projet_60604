@@ -72,11 +72,12 @@ dat_full <- dat_full %>%
 ```
 
 # Introduction
+
 Dans ce document, nous allons nous pencher sur deux questions d'affaires pour aider l'entreprise Bixi à comprendre la disponibilité des vélos dans leurs stations ainsi que l'achalandage d'après différents moments de la journée en développant différents modèles linéaires.
 
 # Modèles sur les voyages de plus ou moins 15 minutes
 
-*PORTE A CONFUSION*L'entreprise Bixi cherche à savoir qu'est-ce qui affecte la disponibilité dans ses stations. En effet, dans certaines stations ils ne restent plus de Bixi pour les autres usagers. Elle croit que cela peut être du à des utilisateurs qui font des voyages trop long (plus de 15 minutes) et donc monopolisent les Bixi pour eux. En l'absence de variables sur la disponibilités, nous proposons d'utiliser une variable binaire `u15` qui prend la valeur de 1 si la durée moyenne à partir d'une certaine station à une certaine journée de l'année est supérieure à 15 minutes, 0 sinon. Bien que cette variable est imparfaite, il sera possible de cibler certaines conditions spécifiques (comme les arrondissements, les mois de l'année, etc.) qui agissent sur la disponibilité des Bixi.
+L'entreprise est confronté à un problème de disponibilités dans certains arrondissements, dans certaines stations ils ne restent plus de Bixi pour les autres usagers. Elle croit que cela peut être du à des utilisateurs qui font des voyages trop long (plus de 15 minutes) et donc monopolisent les Bixi pour eux. En l'absence de variables sur la disponibilités, nous proposons d'utiliser une variable binaire `u15` qui prend la valeur de 1 si la durée moyenne à partir d'une certaine station à une certaine journée de l'année est supérieure à 15 minutes, 0 sinon. Bien que cette variable est imparfaite, il sera possible de cibler certaines conditions spécifiques (comme les arrondissements, les mois de l'année, etc.) qui agissent sur la disponibilité des Bixi.
 
 ```{r plot-u15, out.height = "22%", fig.align='center', fig.cap="Distribution de u15"}
 barplot(table(dat_full$u15), col = c("red", "blue"), main = "", xlab = "Valeurs", ylab = "Fréquence")
@@ -95,7 +96,9 @@ pop <- dat_full %>%
 
 ### Modèle 1
 
-Il est possible d'ajuster un modèle simple pour voir les effets des différents arrondissements sur la probabilité d'avoir des stations où le déplacement moyen est supérieur à 15 minutes afin de trouver les arrondssements plus problématiques. *ENLEVER PREMERE FIGURE DE SUMM et PEUT ETRE DORTIE AU COMPLET ÉTANT DONNÉ QU'ON LINTERPTREE PAS*
+Il est possible d'ajuster un modèle simple pour voir les effets des différents arrondissements sur la probabilité d'avoir des stations où le déplacement moyen est supérieur à 15 minutes afin de trouver les arrondssements plus problématiques. Nous allons ajuster ce modèle :
+
+$$u15_i = B_0 + \sum_{i \epsilon n}arrond_{i} + e_i$$ Où $j$ est un arrondissement dans la liste des arrondissements $N_s$.
 
 ```{r, out.height = "10%"}
 dat_full$arrond <- relevel(dat_full$arrond, ref = "Le Plateau-Mont-Royal")
@@ -104,7 +107,7 @@ mod_u15_1 = glm(u15 ~ arrond, data = dat_full, family = binomial(link = "logit")
 summ(mod_u15_1, model.info = FALSE)
 ```
 
-#### Interprétations
+Avant d'interpréter ce modèle, nous allons voir s'il est possible d'ajuster un modèle plus juste et plus complet.
 
 ```{r}
 prob_lachine = round((exp(-1.22293+2.80111)/(1+exp(-1.22293+2.80111)))*100, digits = 1)
@@ -112,32 +115,37 @@ prob_lachine = round((exp(-1.22293+2.80111)/(1+exp(-1.22293+2.80111)))*100, digi
 
 \
 
-Selon ce premier modèle, on voit que comparé à l'arrondissement du Plateau-Mont-Royal, les déplacements faits dans tous les autres arrondissements et villes ont plus de chances d'être plus long que 15 minutes en moyennes. Cette observations est significative pour un niveau de significativité de 1%.
+```{=html}
+<!---Selon ce premier modèle, on voit que comparé à l'arrondissement du Plateau-Mont-Royal, les déplacements faits dans tous les autres arrondissements et villes ont plus de chances d'être plus long que 15 minutes en moyennes. Cette observations est significative pour un niveau de significativité de 1%.
 
-Par exemple, la probabilité que la moyenne des voyages soit de plus de 15 minutes à une station dans l'arrondissement Lachine est de `r prob_lachine`%. En comparaison au Plateau Mont-Royal, la quote que la moyenne des voyages est de 2,80, c'est-à-dire...
-
+Par exemple, la probabilité que la moyenne des voyages soit de plus de 15 minutes à une station dans l'arrondissement Lachine est de `r prob_lachine`%. En comparaison au Plateau Mont-Royal, la quote que la moyenne des voyages est de 2,80, c'est-à-dire...--->
+```
 ### Modèle 2
 
-Maintenant, nous pouvons ajuster un modèle plus complexe pour voir s'il est possible de raffiner l'analyse et obtenir un modèle plus juste. *DIRE VARIABLE AJOUTÉE*
+Maintenant, nous pouvons ajuster un modèle plus complexe pour voir s'il est possible de raffiner l'analyse et obtenir un modèle plus juste. Le modèle à ajuster sera :
+
+$$u15_i = B_0 + \sum_{j \epsilon N_s}B_jarrond_{i} + B_2mem_i + \sum_{m \epsilon M}B_mmm_{i} + B_3wkend_i + B_4rain\_bin_i + e_i$$
 
 ```{r, out.height = "10%"}
-mod_u15_2 = glm(u15 ~ arrond + mem + as.factor(mm), wkend + rain_bin, data = dat_full, family = binomial(link = "logit"))
+mod_u15_2 = glm(u15 ~ arrond + mem + as.factor(mm) + wkend + rain_bin, data = dat_full, family = binomial(link = "logit"))
 summ(mod_u15_2, model.info = FALSE)
 ```
 
-Nous allons d'abord comparer le modèle avec le précédent avant de l'interpréter, car il se peut que le premier modèle soit une simplifcation correcte du deuxième modèle. C'est-à-dire que les deux modèles ne sont pas significativement différent en terme de qualité d'ajustement. *PAS NÉCESSAIREMENT MIEUX AJUSTER MAIS PLSU REALISTE, VOIR NOTE PROF, VOIR AIC/BIC *
+Nous allons d'abord comparer le modèle avec le précédent avant de l'interpréter, car il se peut que le premier modèle soit une simplifcation correcte du deuxième modèle. C'est-à-dire que les deux modèles ne sont pas significativement différent en terme de qualité d'ajustement.
 
 Nous allons donc faire le test suivant :
 
-$H_0$ : Les modèles sont équivalents.
+$H_0$ : Les modèles sont équivalents, soit $B_2=\sum_{m \epsilon M}B_m=B_3=B_4 = 0$
 
-$H_1$ : Les modèles ne sont pas équivalents, donc l'ajout des nouvelles variables améliorent significativement l'ajustement du modèle.
+$H_1$ : Les modèles ne sont pas équivalents, donc l'ajout des nouvelles variables améliorent significativement l'ajustement du modèle, soit un des $B$ ci-haut $\neq 0$.
 
 ```{r}
 anova(mod_u15_1, mod_u15_2, test = "Chisq")
 ```
 
-Ainsi, nous voyons que la valeur-P associée au test ci-dessus est inférieure à 0.1%, donc nous pouvons rejeter l'hypothèse nulle. En conclusion, le deuxième modèle s'ajuste mieux aux données.
+Ainsi, nous voyons que la valeur-P associée au test ci-dessus est inférieure à 0.1%, donc nous pouvons rejeter l'hypothèse nulle. En conclusion, un des $B$ ci-haut $\neq 0$, donc on peut continuer et interpréter le 2e modèle.
+
+De plus, selon les critères AIC et BIC, le deuxième modèle minimise ces critères (AIC : 11794 \< 12825 et BIC : 12011 \< 12969). Ainsi, cela rejoint la conclusion faite pour le test ci-dessus.
 
 Dans ce cas, nous allons interpréter les résultats pour pouvoir dégager des informations pertinentes et stratégiques pour l'entreprise Bixi.
 
@@ -152,12 +160,12 @@ top_arrondissements <- dat_full %>%
 #kable(top_arrondissements, col.names = c("Arrondissements", "Stations"))
 ```
 
-#### Interprétations
+### Interprétations
 
 \
-Nous allons donc interpréter le top 5 des arrondissements avec le plus de stations uniques (dans notre échantillon de données). (interpréter l'ensemble des coefficients serait redondant)
+Nous allons donc interpréter le top 5 des arrondissements avec le plus de stations uniques (dans notre échantillon de données). (interpréter l'ensemble des coefficients serait redondant et nous manquerons d'espace)
 
-```{r tab-prob, fig}
+```{r}
 top_arrondissements$prob_mem0 = NA
 top_arrondissements$prob_mem1 = NA
 
@@ -203,25 +211,29 @@ for (i in 1:nrow(data)) {
     data$prob_mem1[i] <- round((exp(odd)/(1+exp(odd))*100), digits =1)
   }
 }
+```
 
+
+```{r tab-prob}
 # Afficher le tableau mis à jour
 kable(data, col.names = c("Arrondissements", "Stations", "Prob. non-membres", "Prob.  membres", "Mois"), caption = "Tableau des probabilités")
 ```
 
-Comme il est possible de voir ci-dessus dans le tableau 1, selon ce deuxième modèle, les probabilités prédites changent selon l'arrondissement, le fait d'être un membre ou non et le mois d'utilisation. Par exemple, la probabilité que la durée moyenne des déplacements à une station du Plateau Mont-Royal au mois d'août est de 31,2% pour les non-membres et de 14,1% pour les membres. Il est à noter que ces interprétations sont significatives pour tous niveau de alpha raisonnable.
+Il est à noter qu'on peut inférer ces effets quand les autres variables (rain_bin et wkend) sont constantes
 
-\newpage
+Comme il est possible de voir ci-dessus dans la table 1, selon ce deuxième modèle, les probabilités prédites changent selon l'arrondissement, le fait d'être un membre ou non et le mois d'utilisation. Par exemple, la probabilité que la durée moyenne des déplacements à une station du Plateau Mont-Royal au mois d'août est de 31,2% pour les non-membres et de 14,1% pour les membres. Il est à noter que ces interprétations sont significatives pour tous niveau de alpha raisonnable.
+
+Il n'est pas très utile d'interpréter les deux autres constantes, car l'entreprise Bixi installe des stations permanentes au début de la saison. Si on voulait les interpréter on pourrait le faire comme cela : le weekend multiplie la cote de u15 de 1.75 en moyenne et lorsque les autres variables sont constantes. La pluie multiplie la cote de u15 de 0.74 en moyenne et lorsque les autres variables sont constantes. Ces deux interprétations sont significatives pour toutes valeurs d'alpha raisonnables.
 
 ## Conclusion sur l'effet des arrondissements
 
-Selon les interprétations faites ultérieurement, l'entreprise Bixi est capable de cibler les arrondissements problématiques où la durée moyenne des déplacements a plus de probabilités d'être élevé. En effet, si on prend l'exemple de l'arrondissement Villeray-Saint-Michel-Parc-Extension, la probabilité est plutot élevé. Donc d'un point de vue d'affaire, il serait plus efficace d'installer des stations supplémentaires dans cet arrondissement. De plus, d'un point de vue général, il est efficace de fidéliser les utilisateurs à être membre, car il semble que les membres ont des voyages plus courts en moyenne. 
+Selon les interprétations faites ultérieurement, l'entreprise Bixi est capable de cibler les arrondissements problématiques où la durée moyenne des déplacements a plus de probabilités d'être élevé. En effet, si on prend l'exemple de l'arrondissement Villeray-Saint-Michel-Parc-Extension, la probabilité est plutot élevé. Donc d'un point de vue d'affaire, il serait plus efficace d'installer des stations supplémentaires dans cet arrondissement. De plus, d'un point de vue général, il est efficace de fidéliser les utilisateurs à être membre, car il semble que les membres ont des voyages plus courts en moyenne (dans les arrondissements que nous avons interpréter).
 
 ### Limites
 
-Le modèle inteprété possède des limites. En effet, il est impossible d'isoler l'effet des arrondissements selon si l'abonnements. Il faudrait faire un modèle avec interactions entre `mem` et `arrond`. Par la suite, il serait nécessaire de tester si ce modèle est plus juste que le précédent.
+Le modèle inteprété possède des limites. En effet, il est impossible d'isoler l'effet des arrondissements selon si l'abonnements. Il faudrait faire un modèle avec interactions entre `mem` et `arrond`. Par la suite, il serait nécessaire de tester si ce modèle est plus juste que le précédent. Or, par manque d'espace dans ce travail, nous n'allons pas réaliser cette analyse.
 
-
-De plus, l'entreprise peut se servir du graphique \@ref(fig:fig-densite) pour trouver les arrondissements où il y a un débalancement entre la densité de stations et de populations en addition aux résultats du modèle pour régler le problème....`***`
+<!---De plus, l'entreprise peut se servir du graphique \@ref(fig:fig-densite) pour trouver les arrondissements où il y a un débalancement entre la densité de stations et de populations en addition aux résultats du modèle pour régler le problème....`***`--->
 
 ```{r fig-densite, out.height = "30%", fig.align='center', fig.cap= "Densité de pop. et de stations par arrondissement"}
 ylim.prim <- c(0, 20000)
@@ -249,7 +261,9 @@ p=ggplot(pop, aes(y = reorder(arrond, dens))) +
 La question sur l'achalandage sera séparée en 3 parties. Quant à savoir qu'est ce qui affecte l'utilisation en matinée, en soirée et pour finir, on abordera l'utilisation totale. Enfin, nous comparerons les 3 métriques sur l'achalandage et conseillerons la compagnie sur les questions de planification des stations.
 
 ## Distribution
+
 Pour commencer, voici la distribution des déplacements sur les figures suivantes:\@ref(fig:three-fig) en PM (à gauche) en AM (au centre) et total (à droite):
+
 ```{r three-fig, out.height = "90%",fig.align='center', fig.cap= "Histogramme des déplacements en PM et AM"}
 #plot1 <- freq(ordered(dat_full$n_PM), plot = FALSE)
 
@@ -268,6 +282,7 @@ plot3<-ggplot(data.frame(x = dat_full$n_tot), aes(x)) +
 grid.arrange(plot1,plot2,plot3, ncol = 3)
 
 ```
+
 Dans les sections qui suivent, un modèle pour chacune de ses variables réponses sera développé.
 
 ## n_PM (Alfred)
@@ -286,9 +301,10 @@ Dans le cadre du premier modèle portant sur l'achalandage en après-midi, l'obj
 
 Autrement dit, ce que nous essayons de tester ici, c'est l'hypothèse H0 contre l'hypothèse H1 ci-dessous. Nous voulons savoir si au moins une des covariables à un effet significatif sur le nombre de déplacements en après-midi.
 
+```{=html}
 <!--$$H_0 : \beta_{mem} = \beta_{wkend} = \beta_{dur} = \beta_{arrond} = 0 $$
 $H_1$ : au moin un des $\beta_i$ est différent de différent de 0-->
-
+```
 ```{r}
 mod_PM1 <- glm(n_PM ~ as.factor(mem) + as.factor(wkend) + dur + arrond ,data = dat_full, family = poisson)
 summ(mod_PM1,digits = getOption("jtools-digits", default = 4), model.info = FALSE)
@@ -316,12 +332,11 @@ En analysant le tableau Anova pour le modèle quasi-Poisson, on observe que, lor
 
 ### Modèle ajusté avec interaction
 
-Dans le contexte du modèle avec interaction, il est raisonnable de postuler qu'une interaction pertinente existe entre le statut de membre `mem` et l'arrondissement `arrond`. Cette conjecture se fonde sur l'idée que certains arrondissements affichent une densité de population plus élevée que d'autres. En conséquence, il est anticipé que les arrondissements densément peuplés génèreront naturellement un nombre plus élevé de déplacements en après-mid tout en étant plus sucéptible d'attirer davantage de membre. 
+Dans le contexte du modèle avec interaction, il est raisonnable de postuler qu'une interaction pertinente existe entre le statut de membre `mem` et l'arrondissement `arrond`. Cette conjecture se fonde sur l'idée que certains arrondissements affichent une densité de population plus élevée que d'autres. En conséquence, il est anticipé que les arrondissements densément peuplés génèreront naturellement un nombre plus élevé de déplacements en après-mid tout en étant plus sucéptible d'attirer davantage de membre.
 
 Dans ce même ordre d'idée, il est plausible d'affirmer qu'il y aura aussi une interaction entre le statut de membre `mem` et la durée totale des déplacements `dur`. La logique étant qu'il y a certains avantages tarifaires à être membre, de sorte que le comportement des déplacements en après-midi selon la durée de déplacement sera différent selon le statut d'abonnement.
 
-Enfin, la derniere interaction cohérente serait celle entre la durée totale de déplacement `dur` et les arondissements `arrond`. Pour ce cas spécifique il est possible de voir l'intéraction dans le graphique \@ref(fig:interDurArrond). 
-
+Enfin, la derniere interaction cohérente serait celle entre la durée totale de déplacement `dur` et les arondissements `arrond`. Pour ce cas spécifique il est possible de voir l'intéraction dans le graphique \@ref(fig:interDurArrond).
 
 ```{r interDurArrond, out.height = "30%",fig.align='center', fig.cap= "Interaction entre la durée des déplacement et les arrondissements"}
 
@@ -342,22 +357,27 @@ mod_QPM2 <- glm(n_PM ~ as.factor(mem) + as.factor(wkend) + dur + arrond
 
 ```
 
-
 ## Modèle pour le nombre de déplacement en avant-midi (n_AM)
+
 ### Distribution
 
 L'analyse précédente pour le nombre de déplacements en PM peut aussi être effectué pour les déplacements en AM. Pour commencer, examinons la distribution du nombre de déplacements en AM d'après la figure \@ref(fig:three-fig) au centre vue précédemment.
+
 ```{r distnAM, out.height = "30%", fig.align = 'center', fig.cap = "Distribution de nAM"}
 #frnAM <-(freq(ordered(dat_full$n_AM), plot = TRUE))
 ```
+
 Comme on peut le constater avec la figure \@ref(fig:three-fig), la distribution n'est pas d'allure normale. Comme n_AM est une variable de dénombrement, la distribution s'approche plus d'une distribution de Poisson, n_AM a une moyenne de 4.3095 et une variance de 31.12.
+
 ```{r}
 Moyenne_n_AM = mean(dat_full$n_AM)
 Var_n_AM = var(dat_full$n_AM)
 #summary(dat_full$n_AM)
 #cat("Moyenne de n_AM :", Moyenne_n_AM,"Variance de n_AM :", Var_n_AM)
 ```
+
 À première vue, la moyenne et la variance ne semblent pas égales et donc un modèle de Poisson ne semble pas être approprié. En calculant le paramètre de dispersion basé sur la déviance sur un modèle de Poisson incluant les variables explicatives `arrond` (arrondissement), `holiday` (jour férié), `mem` (membre), `wkend` (jour de fin de semaine) et `dur` (durée).
+
 ```{r}
 mod_AM <- glm(n_AM ~ arrond + holiday + mem + wkend + dur,data = dat_full, family = poisson)
 #summ(mod_AM,digits = getOption("jtools-digits", default = 4))
@@ -365,9 +385,11 @@ overdispersion_ratio <- mod_AM$deviance / mod_AM$df.residual
 phi_2 = round(overdispersion_ratio, 2)
 #cat("Le rapport deviance nous montre que Phi =", paste(round(overdispersion_ratio, 2), "> 1"))
 ```
-Le rapport de deviance nous montre que Phi = `r phi_2` > 1. La dristribution de n_AM et le rapport de déviance suggère de l'overdispersion avec un paramètre de dispersion de 1.97. La variance de n_AM étant plus élevée que la moyenne, un modèle de binomiale négative semblerait plus approprié (cette hypothèse sera testé prochainement).
+
+Le rapport de deviance nous montre que Phi = `r phi_2` \> 1. La dristribution de n_AM et le rapport de déviance suggère de l'overdispersion avec un paramètre de dispersion de 1.97. La variance de n_AM étant plus élevée que la moyenne, un modèle de binomiale négative semblerait plus approprié (cette hypothèse sera testé prochainement).
 
 ### Modèle binomiale négative
+
 Le modèle de binomiale négative incluant les mêmes varibales explicatives utilisées pour faire obtenir le rapport de déviance est le suivant:
 
 ```{r}
@@ -377,32 +399,39 @@ summary(mod.nbnAM)
 #summ(mod.nbnAM, digits = getOption("jtools-digits", default = 4))
 
 ```
+
 ### Interprétation
+
 On constate que toutes les variables explicatives sont significatives avec un niveau d'alpha de moins de 0.1%, nous pourrions donc rejeter l'hypothèse nulle (comme quoi Ho: Bj = 0 contre H1: Bj != 0, pour tous les coefficients). De plus, par exemple, on peut aussi faire le constat que la moyenne du nombre de déplacement en avant-midi est multiplié par exp(1.242) = 3.46 pour les membres comparativement aux non-membres lorsque toutes les autres variables sont fixes, puis cette moyenne est multiplié par exp(-0.3096) = 0.73, donc une diminution d'environ 27% de la moyenne des déplacements en avant-midi pour les jours de fin de semaine comparativement à la semaine lorsque toutes les autres variables sont fixes. Pour les jours fériés, la moyenne de n_AM diminue d'environ 27% aussi. Comme pour le modèle de n_PM, tous les coefficients des arrondissements sont négatifs, cela veut dire le plateau-mont royal (arrondissement de référence) a un achalandage en avant-midi plus important que tous les autres arrondissements lorsque toutes les autres variables sont fixes.
 
-De plus, d'après la sortie, on a une valeur de Theta de 4.804, qui est une estimation de l'inverse de k, k vaut donc = 1/4.804 = 0.208. On peut aussi faire le test H0: k = 0 contre H1: k > 0.
-On obtient un LRT de 3320 et une valeur p avec la distribution khi-deux très petite. Ce qui suggère qu'on peut rejeter l'hypothèse pour tout niveau d'alpha raisonnable comme quoi le modèle de Poisson est une simplification adéquate du modèle de biomiale négative et conclure que le modèle de binomiale négative est nécessaire.
+De plus, d'après la sortie, on a une valeur de Theta de 4.804, qui est une estimation de l'inverse de k, k vaut donc = 1/4.804 = 0.208. On peut aussi faire le test H0: k = 0 contre H1: k \> 0. On obtient un LRT de 3320 et une valeur p avec la distribution khi-deux très petite. Ce qui suggère qu'on peut rejeter l'hypothèse pour tout niveau d'alpha raisonnable comme quoi le modèle de Poisson est une simplification adéquate du modèle de biomiale négative et conclure que le modèle de binomiale négative est nécessaire.
+
 ```{r}
 lrt <- -2 * as.numeric(logLik(mod_AM) - logLik(mod.nbnAM))
 pval <- pchisq(lrt, df = 1, lower.tail = FALSE)/2
 ```
+
 ### Limitations
-Le modèle ci-dessus comporte quelques limitations. En effet, celui-ci ne comporte pas d'interactions entre les variables. Cependant, nous sommes porter à croire qu'il en existe. En effet, on peut penser qu'il y a un lien entre la durée d'un trajet et le fait d'être membre ou non, car les membres ont accès à des prix avantageux d'après la durée. Puis, entre la durée et l'arrondissement, car la durée d'un trajet peut dépendre de la destination où l'on va. Soit, une interaction entre `mem` et `dur`, puis une avec `dur` et `arrond`. 
+
+Le modèle ci-dessus comporte quelques limitations. En effet, celui-ci ne comporte pas d'interactions entre les variables. Cependant, nous sommes porter à croire qu'il en existe. En effet, on peut penser qu'il y a un lien entre la durée d'un trajet et le fait d'être membre ou non, car les membres ont accès à des prix avantageux d'après la durée. Puis, entre la durée et l'arrondissement, car la durée d'un trajet peut dépendre de la destination où l'on va. Soit, une interaction entre `mem` et `dur`, puis une avec `dur` et `arrond`.
 
 ### Conclusion AM
+
 Pour conclure, les points importants à réaliser pour comprendre comment interragi le nombre de déplacement en AM avec les autres facteurs est que les membres ont tendance à effectuer plus de déplacement en AM que les non-membres et l'arrondissement avec le plus grand achalandage est l'arrondissement du plateau Mont-Royal. Cependant, il serait possible de pousser plus loin l'analyse en ajoutant des interactions et en vérifiant la significativité de celles-ci.
 
 ## n_tot (Abdoul)
 
+Nous cherchons à comprendre les éléments qui ont un impact sur le nombre de total de déplacement partant de chaque station (`n_tot`)
 
-Nous cherchons à comprendre les éléments qui ont un impact sur le nombre de total de déplacement  partant de chaque station (`n_tot`)
 ```{r, results='hide'}
 bixi_withArr_df=read.csv("bixi1WithArrondissement.csv", stringsAsFactors = T)
 bixi_withArr_df
 ```
+
 ```{r, results='hide'}
 str(bixi_withArr_df)
 ```
+
 ```{r, results='hide'}
 #Rajoutons une variable indicatrice wkend qui vaut 1 si c'est un weekend et 0 autrement
 bixi_withArr_df$wkend <- as.integer(bixi_withArr_df$wday == "Saturday" | bixi_withArr_df$wday == "Sunday")
@@ -412,6 +441,7 @@ bixi_withArr_df
 ```{r, results='hide'}
 summary(bixi_withArr_df)
 ```
+
 ```{r distNtot,out.height = "30%",fig.align='center', fig.cap="Distribution du nombre total de déplacement"}
 #brx <- pretty(range(bixi_withArr_df$n_tot), 
 #              n= nclass.Sturges(bixi_withArr_df$n_tot), min.n = 1)
@@ -419,6 +449,7 @@ summary(bixi_withArr_df)
 #  geom_histogram( breaks=brx, alpha=0.5) + 
 #  scale_x_continuous(breaks = brx) 
 ```
+
 ```{r, results='hide'}
 n_tot.moy=mean(bixi_withArr_df$n_tot)
 n_tot.var=var(bixi_withArr_df$n_tot)
@@ -430,17 +461,15 @@ La figure \@ref(fig:distNtot) nous montre la distribution du nombre total de dé
 
 <!-- Nous explorons donc dans un premier temps un modèle de régression poisson. -->
 
-Afin d'écrire nos modèles, nous devons déterminer les variables pertinentes à notre question de recherche. Rappelons, que notre objectif est de déterminer les éléments qui impactent le nombre total de déplacement. Nous allons donc considérer les variables liées à la météo (`temp` et `rain`), l'indicateur de jour férié (`holiday`), l'indicateur de membre (`mem`), l'indicateur de fin de semaine (`wkend`) et la durée totale (`dur`). L'inclusion de ce dernier peut paraitre moins évident. Il est possible que des stations dans lesquelles les bixis sont utilisés pour de longues périodes créent un problème de disponibilité qui impacterait le nombre de déplacements. Donc nous jugeons utile de contrôler pour cette variable pour bien mesurer l'impact des autres variables. L'indicateur de fin de semaine est une variable que nous avons introduite qui remplace la variable correspondant au jour de semaine (`wday`). Elle vaut 1 lorsque le jour de semaine est samedi ou dimanche et 0 autrement. 
+Afin d'écrire nos modèles, nous devons déterminer les variables pertinentes à notre question de recherche. Rappelons, que notre objectif est de déterminer les éléments qui impactent le nombre total de déplacement. Nous allons donc considérer les variables liées à la météo (`temp` et `rain`), l'indicateur de jour férié (`holiday`), l'indicateur de membre (`mem`), l'indicateur de fin de semaine (`wkend`) et la durée totale (`dur`). L'inclusion de ce dernier peut paraitre moins évident. Il est possible que des stations dans lesquelles les bixis sont utilisés pour de longues périodes créent un problème de disponibilité qui impacterait le nombre de déplacements. Donc nous jugeons utile de contrôler pour cette variable pour bien mesurer l'impact des autres variables. L'indicateur de fin de semaine est une variable que nous avons introduite qui remplace la variable correspondant au jour de semaine (`wday`). Elle vaut 1 lorsque le jour de semaine est samedi ou dimanche et 0 autrement.
 
-Nous savons que les paramètres estimés des modèle poisson et quasi-poisson sont les mêmes. Ils diffèrent dans l'évaluation des erreurs types associés aux différents paramètres et donc aux valeurs-p correspondant. Notre objectif en les comparons est donc de déterminer s'il y a une différence dans la pertinence des différentes variables considérées dans nos modèles. 
+Nous savons que les paramètres estimés des modèle poisson et quasi-poisson sont les mêmes. Ils diffèrent dans l'évaluation des erreurs types associés aux différents paramètres et donc aux valeurs-p correspondant. Notre objectif en les comparons est donc de déterminer s'il y a une différence dans la pertinence des différentes variables considérées dans nos modèles.
 
 ```{r, results='hide'}
 n_tot_mod1.poisson = glm(n_tot ~ wkend + mem + holiday + dur + temp + rain, data=bixi_withArr_df, family = poisson(link = "log"))
 out.n_tot_mod1.poisson <- summary(n_tot_mod1.poisson)
 out.n_tot_mod1.poisson
 ```
-
-
 
 <!-- La valeur-p associée à toutes les variables du modèle est très petite sauf celle de la variable indicatrice correspondant au mercredi. On peut donc conclure, qu'elles ont un effet marginal significatif sur le nombre total de déplacement en moyenne. Par ailleurs, il ne semble pas y avoir une différence significative entre la moyenne du nombre total de déplacement les mercredi par rapport au vendredi. De plus, il apparait qu'en moyenne il y a moins de déplacement les fins de semaine par rapport au vendredi après avoir ajusté pour les autres variables.  -->
 
@@ -449,12 +478,13 @@ n_tot_mod1.quasi = glm(n_tot ~ wkend + mem + holiday + dur + temp + rain, data=b
 out.n_tot_mod1.quasi <- summary(n_tot_mod1.quasi)
 out.n_tot_mod1.quasi
 ```
+
 ```{r comparePvaluePoissonVsQuasi}
 pvalue_compare_df = data.frame(poisson=out.n_tot_mod1.poisson$coefficients[,4], quasiPoisson=out.n_tot_mod1.quasi$coefficients[,4])
 knitr::kable(pvalue_compare_df, caption = "Comparaison valeur-p: poisson Vs Quasi-poisson")
 ```
 
-Le tableau \@ref(tab:comparePvaluePoissonVsQuasi) nous montre que toutes les valeur-p associées aux variables pour les deux modèles sont très petite. On conclue donc, qu'autant avec le modèle poisson que le modèle quasi-poisson, les variables ont un effet marginal significatif sur le nombre total de déplacement en moyenne.  
+Le tableau \@ref(tab:comparePvaluePoissonVsQuasi) nous montre que toutes les valeur-p associées aux variables pour les deux modèles sont très petite. On conclue donc, qu'autant avec le modèle poisson que le modèle quasi-poisson, les variables ont un effet marginal significatif sur le nombre total de déplacement en moyenne.
 
 ```{r}
 n_tot_mod1.nb = glm.nb(n_tot ~ wkend + mem + holiday + dur + temp + rain, data=bixi_withArr_df)
@@ -462,6 +492,7 @@ out.n_tot_mod1.nb=summary(n_tot_mod1.nb)
 out.n_tot_mod1.nb
 out.n_tot_mod1.nb.coeff=out.n_tot_mod1.nb$coefficients
 ```
+
 ```{r, results='hide'}
 k_stat=-2 * as.numeric(logLik(n_tot_mod1.poisson)-logLik(n_tot_mod1.nb))
 k_stat
@@ -480,22 +511,20 @@ Il est intéressant de constater que, plus la durée totale des déplacements au
 
 Enfin, il apparait qu'en moyenne le nombre total de déplacements est moins élevé les fins de semaine que pendant la semaine.
 
-
 **COMME EXPLIQUE DANS LA PREMIERE PARTIE**
 
-**FAIRE INTERACTIBO ENTRE MEMEBRES ET WEEKEND**
-Le fait que les déplacements soient plus élevé pour les membres que les non-membres et que son usage se fait d'avantage en semaine qu'en fin de semaine, nous laisse penser que les bixi servent d'avantage à des habitudes courantes qui ont lieu en semaine. Probablement qu'ils sont surtout utilisés comme moyen de transport par les usagers pour se rendre au boulot. 
+**FAIRE INTERACTIBO ENTRE MEMEBRES ET WEEKEND** Le fait que les déplacements soient plus élevé pour les membres que les non-membres et que son usage se fait d'avantage en semaine qu'en fin de semaine, nous laisse penser que les bixi servent d'avantage à des habitudes courantes qui ont lieu en semaine. Probablement qu'ils sont surtout utilisés comme moyen de transport par les usagers pour se rendre au boulot.
 
 ```{r, results='hide'}
 n_tot_mod2.nb = glm.nb(n_tot ~ wday + mem + holiday + dur + temp + rain, data=bixi_withArr_df)
 out.n_tot_mod2.nb=summary(n_tot_mod2.nb)
 out.n_tot_mod2.nb
 ```
+
 ```{r, results='hide'}
 wday_emmeans <- emmeans(n_tot_mod2.nb, ~ wday)
 contrast(wday_emmeans, method = "pairwise", adjust="none")
 ```
-
 
 ```{r, include=FALSE}
 ggplot(data=bixi_withArr_df, mapping=aes(x=as.factor(wkend), y=n_tot)) + 
@@ -509,4 +538,3 @@ ggplot(data = bixi_withArr_df, mapping = aes(x=wkend, y=n_tot)) +
 n_tot_mod2.poisson = glm(n_tot ~ wday + mem + holiday + dur + temp + rain, data=bixi_withArr_df, family = poisson(link = "log"))
 summary(n_tot_mod2.poisson)
 ```
-
