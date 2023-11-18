@@ -71,7 +71,7 @@ dat_full <- dat_full %>%
 
 # Introduction
 
-Dans cette troisième partie du projet, nous devons explorer des modèles linéaires généralisés pour expliquer le nombre de déplacements dans les stations Bixi, de même que les déplacements de plus ou moins 15 minutes. En effet, comprendre l'utilisation des Bixi permettrait d'alimenter des plans stratégiques d'expansion des activités à travers le territoire et par ricochet l'accroissement du portefeuille de clients. Cette compréhension peut servir de base également à des plans tactiques qui viseraient à déterminer le meilleur moment pour l'entretien de la flotte de Bixi.
+Dans cette troisième partie du projet, nous allons explorer des modèles linéaires généralisés pour expliquer le nombre de déplacements dans les stations Bixi, de même que les déplacements de plus ou moins 15 minutes. En effet, comprendre l'utilisation des Bixi permettrait d'alimenter des plans stratégiques d'expansion des activités à travers le territoire et par ricochet l'accroissement du portefeuille de clients. Cette compréhension peut servir de base également à des plans tactiques qui viseraient à déterminer le meilleur moment pour l'entretien de la flotte de Bixi.
 
 Ainsi nos travaux sont segmentés en deux volets principaux. Le premier  sur la compréhension des voyages de plus ou moins 15 minutes et le deuxième sur l'achalandage. Dans ce dernier, nous explorons les modèles sur le nombre de déplacements en matinée, en après-midi et toute la journée. Dans chacun de ces modèles nous définissons le meilleur modèle qui nous permet d'avoir une interprétation le plus réaliste possible, puis nous tirons des conclusions d'un point de vue d'affaire avant de discuter des limites de nos analyses.
 
