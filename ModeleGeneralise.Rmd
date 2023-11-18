@@ -439,7 +439,7 @@ pval <- pchisq(lrt, df = 1, lower.tail = FALSE)/2
 
 ### Limitations
 
-Le modèle ci-dessus comporte quelques limitations. En effet, celui-ci ne comporte pas d'interactions entre les variables. Cependant, nous sommes porter à croire qu'il en existe. En effet, on peut penser qu'il y a un lien entre la durée d'un trajet et le fait d'être membre ou non, car les membres ont accès à des prix avantageux d'après la durée. Puis, entre la durée et l'arrondissement, car la durée d'un trajet peut dépendre de la destination où l'on va. Soit, une interaction entre `mem` et `dur`, puis une avec `dur` et `arrond`.
+Le modèle ci-dessus comporte les mêmes limitations que le modèle pour les déplacements en PM. En effet, celui-ci ne comporte pas d'interactions entre les variables. Cependant, nous sommes porter à croire qu'il en existe entre `mem` et `dur`, `mem` et `dur` ainsi qu'entre `dur` et les arondissements `arrond`.
 
 ### Conclusion AM
 
@@ -579,3 +579,12 @@ Tout d'abord nous voyons dans la sortie du modèle ci-dessus que la valeur-p du 
 
 ### Limites
 Les modèles développés nous indiquent que plus la température augmente plus le nombre de déplacement augmente en moyenne. Mais intuitivement on peut croire qu'au delà d'une certaine température que les déplacements diminuent. Puisqu'il deviendrait très désagréable pour les usagers de se déplacer en bixi. Un tel comportement ne peut pas être bien capturé par nos modèles. Une autre limite de nos modèles concernent l'hypothèse de variance sous-jacente. En effet, nos modèles font l'hypothèse que la variance entre les différentes observations sont constantes. Or il est possible et même probable qu'il y ait une certaine corrélation entre les usagers d'une même station. En effet, chaque secteur ou quartier à comme un profil socio-économique et démographique qui lui est propre.
+
+# Conclusions
+
+# Contribution des membres de l'équipe
+-Modèle sur les voyages de plus ou moins de 15 minutes (James)
+-Modèle pour les déplacements en PM (Alfred)
+-Modèle pour les déplacements en AM (Samuel)
+-Modèle pour les déplacement totaux (Abdoul)
+>>>>>>> 5f08f492f642d821ab62e1d397c81e0c8b9abee6
