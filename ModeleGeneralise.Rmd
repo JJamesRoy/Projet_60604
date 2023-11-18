@@ -20,14 +20,14 @@ output:
 params:
   created_date: "2023-09-12"
 header-includes:
-- \usepackage{tikz}
-- \usepackage{subcaption}
-- \usepackage{graphicx}
-- \usepackage{sidecap}
+#- \usepackage{tikz}
+#- \usepackage{subcaption}
+#- \usepackage{graphicx}
+#- \usepackage{sidecap}
 - \usepackage{float}
 - \usepackage{amsmath}
 - \usepackage{ragged2e}
-- \floatplacement{figure}{H}
+#- \floatplacement{figure}{H}
 ---
 
 ```{r setup, include=FALSE}
@@ -297,9 +297,16 @@ Avant d'explorer un modèle, il est essentiel d'examiner la nature de la distrib
 
 ### Modèle de base pour l'achalandage en après-midi
 
-Dans le cadre du premier modèle portant sur l'achalandage en après-midi, l'objectif est d'évaluer, à l'aide d'un modèle sans interaction, comment les membres `mem`, la durée d'utilisation `dur`, l'arrondissement spécifique `arrond`, et le fait que la journée soit la fin de semaine `wkend`, influent sur le nombre d'utilisations durant cette période. Il est délibéré de ne pas inclure d'autres variables telles que la densité de population `density`, la superficie des arrondissements `superficie`, et d'autres covariables qui varient uniquement inter-arrondissement, car ces informations sont directement captées par la variable de l'arrondissement même `arrond`. Cela étant dit, les variables choisies pour les modèles qui suivent sont ceux qui peuvent varier intra-arrondissement en affectant le nombre d'utilisations en après-midi, sans que l'information soit captée par les autres covariables. Aussi, on n'ajoute pas les variables liées à la température pour la simple raison que ces variables sont codées de sorte à être les mêmes pour toute la région métropolitaine de Montréal. Par ailleurs, ce sont des variables qui sont hors du contrôle de l'entreprise, c'est-à-dire que même si l'on apprend que la pluie fait diminuer le nombre d'utilisations des Bixis en après-midi, l'entreprise ne peut rien y faire.Le modèle utilisé dans ce cas est : $ \hat{dur} = \hat{\beta}_0 + \hat{\beta}_{mem} + \hat{\beta}_{wkend} + \hat{\beta}_{dur} + \hat{\beta}_{arrond}$
+Dans le cadre du premier modèle portant sur l'achalandage en après-midi, l'objectif est d'évaluer, à l'aide d'un modèle sans interaction, comment les membres `mem`, la durée d'utilisation `dur`, l'arrondissement spécifique `arrond`, et le fait que la journée soit la fin de semaine `wkend`, influent sur le nombre d'utilisations durant cette période. Il est délibéré de ne pas inclure d'autres variables telles que la densité de population `density`, la superficie des arrondissements `superficie`, et d'autres covariables qui varient uniquement inter-arrondissement, car ces informations sont directement captées par la variable de l'arrondissement même `arrond`. Cela étant dit, les variables choisies pour les modèles qui suivent sont ceux qui peuvent varier intra-arrondissement en affectant le nombre d'utilisations en après-midi, sans que l'information soit captée par les autres covariables. Aussi, on n'ajoute pas les variables liées à la température pour la simple raison que ces variables sont codées de sorte à être les mêmes pour toute la région métropolitaine de Montréal. Par ailleurs, ce sont des variables qui sont hors du contrôle de l'entreprise, c'est-à-dire que même si l'on apprend que la pluie fait diminuer le nombre d'utilisations des Bixis en après-midi, l'entreprise ne peut rien y faire.Le modèle utilisé dans ce cas est : $dur = \beta_0 + \beta_{mem} + \beta_{wkend} + \beta_{dur} + \beta_{arrond}$
 
-Autrement dit, ce que nous essayons de tester ici, c'est l'hypothèse $H_0 : \beta_{mem} = \beta_{wkend} = \beta_{dur} = \beta_{arrond} = 0$ contre l'hypothèse hypothèse $H_1$ : au moin un des $\beta_i$ est différent de 0. Nous voulons savoir si au moins une des covariables à un effet significatif sur le nombre de déplacements en après-midi.  
+Autrement dit, ce que nous essayons de tester ici, c'est l'hypothès l'hypothèse H0 contre l'hypothèse H1 ci-dessous. C'est à dire que nous voulons savoir si au moins une des covariables à un effet significatif sur le nombre de déplacements en après-midi.
+
+\[
+\begin{aligned}
+H_0 : \beta_{mem} = \beta_{wkend} = \beta_{dur} = \beta_{arrond} = 0\\
+H_1: \text{Au moins un des } \beta_i \text{ est différent de } 0
+\end{aligned}
+\]
 
 ```{=html}
 <!--$$H_0 : \beta_{mem} = \beta_{wkend} = \beta_{dur} = \beta_{arrond} = 0 $$
@@ -321,7 +328,7 @@ mean_values <- tapply(residuals^2, fitted_values, mean)
 variance_values <- tapply(residuals^2, fitted_values, var)
 
 # Graphique moyenne variance
-plot(mean_values_quasi, variance_values_quasi, xlab = "Moyenne", ylab = "Variance",
+plot(mean_values, variance_values, xlab = "Moyenne", ylab = "Variance",
      main = "",
      xlim = c(0, 10 ), ylim = c(0, max(150)))
 
@@ -357,7 +364,7 @@ Les limites du modèles présenté sont principalement le fait qu'il n'y ai pas 
 
 Dans ce même ordre d'idée, il est plausible d'affirmer qu'il y a aussi une interaction entre le statut de membre `mem` et la durée totale des déplacements `dur`. La logique étant qu'il y a certains avantages tarifaires à être membre, de sorte que le comportement des déplacements en après-midi selon la durée de déplacement sera différent selon le statut d'abonnement.Enfin, la derniere interaction cohérente serait celle entre la durée totale de déplacement `dur` et les arondissements `arrond`. Pour ce cas spécifique il est possible de voir l'intéraction dans le graphique \@ref(fig:interDurArrond).
 
-Cependant, la justification de ne pas inclure d'interactions dans le modèle repose principalement sur le fait que la plupart des interactions sont associées à la variable d'arrondissement `arrond`. Étant donné que `arrond` est une variable catégorielle avec près de 20 niveaux, l'introduction d'interactions créerait un grand nombre de coefficients β, ce qui aurait pour effet d'augmenter considérablement la variance du modèle. Une approche alternative serait d'opter pour un modèle avec des effets aléatoires, ce qui nous permettrait de contrôler les effets fixes sans nécessairement introduire une multitude de paramètres additionnels.
+Cependant, la justification de ne pas inclure d'interactions dans le modèle repose principalement sur le fait que la plupart des interactions sont associées à la variable d'arrondissement `arrond`. Étant donné que `arrond` est une variable catégorielle avec près de 20 niveaux, l'introduction d'interactions créerait un grand nombre de coefficients, ce qui aurait pour effet d'augmenter considérablement la variance du modèle. Une approche alternative serait d'opter pour un modèle avec des effets aléatoires, ce qui nous permettrait de contrôler les effets fixes sans nécessairement introduire une multitude de paramètres additionnels.
 
 ```{r interDurArrond, out.height = "30%",fig.align='center', fig.cap= "Interaction entre la durée des déplacement et les arrondissements"}
 
