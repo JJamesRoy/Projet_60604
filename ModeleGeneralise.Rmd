@@ -10,7 +10,6 @@ output:
   #   number_sections: yes
   #   toc_float:
   #     collapsed: no
-  # #   toc: yes
   # #   toc_depth: '3'
   bookdown::pdf_document2:
     toc: yes
@@ -260,22 +259,22 @@ La question sur l'achalandage sera séparée en 3 parties. Quant à savoir qu'es
 
 ## Distribution
 
-Pour commencer, voici la distribution des déplacements sur les figures suivantes:\@ref(fig:three-fig) en PM (à gauche) en AM (au centre) et total (à droite):
+Pour commencer, voici la distribution des déplacements sur les figures suivantes:\@ref(fig:distnPMnAMnTot) en PM (à gauche) en AM (au centre) et total (à droite):
 
-```{r three-fig, out.height = "90%",fig.align='center', fig.cap= "Histogramme des déplacements en PM et AM"}
+```{r distnPMnAMnTot, out.height = "90%",fig.align='center', fig.cap= "Histogramme du nombre total de déplacements en PM, AM et toute la journée (total)"}
 #plot1 <- freq(ordered(dat_full$n_PM), plot = FALSE)
 
 plot1<-ggplot(data.frame(x = dat_full$n_PM), aes(x)) +
   geom_histogram(fill = "lightblue", color = "black", bins = 50) +
-  ggtitle("n_PM")
+  labs(x='n_PM')
 
 plot2<-ggplot(data.frame(x = dat_full$n_AM), aes(x)) +
   geom_histogram(fill = "lightblue", color = "black", bins = 50) +
-  ggtitle("n_AM")
+  labs(x="n_AM")
 
 plot3<-ggplot(data.frame(x = dat_full$n_tot), aes(x)) +
   geom_histogram(fill = "lightblue", color = "black", bins = 50) +
-  ggtitle("n_tot")
+  labs(x="n_tot")
 
 grid.arrange(plot1,plot2,plot3, ncol = 3)
 
@@ -286,7 +285,7 @@ Dans les sections qui suivent, un modèle pour chacune de ses variables réponse
 ## Modèle pour le nombre de déplacement en après-midi (n_PM)
 
 ### Distribution
-Avant d'explorer un modèle, il est essentiel d'examiner la nature de la distribution des données. Dans ce contexte, l'illustration n_PM dans la figure \@ref(fig:three-fig) indique clairement qu'entre 0 et 10 utilisations, la fréquence est nettement plus élevée que pour les autres valeurs. En ajouta à ceci que le nombre d'utilisations est un décompte, on peut en déduire que la variable `n_PM` suit également une distribution de Poisson.
+Avant d'explorer un modèle, il est essentiel d'examiner la nature de la distribution des données. Dans ce contexte, l'illustration n_PM dans la figure \@ref(fig:distnPMnAMnTot) indique clairement qu'entre 0 et 10 utilisations, la fréquence est nettement plus élevée que pour les autres valeurs. En ajouta à ceci que le nombre d'utilisations est un décompte, on peut en déduire que la variable `n_PM` suit également une distribution de Poisson.
 
 ```{r fig-histnPM, out.height = "30%",fig.align='center', fig.cap= "Histogramme des déplacements en matinée"}
 
@@ -388,13 +387,13 @@ mod_QPM2 <- glm(n_PM ~ as.factor(mem) + as.factor(wkend) + dur + arrond
 
 ### Distribution
 
-L'analyse précédente pour le nombre de déplacements en PM peut aussi être effectué pour les déplacements en AM. Pour commencer, examinons la distribution du nombre de déplacements en AM d'après la figure \@ref(fig:three-fig) au centre vue précédemment.
+L'analyse précédente pour le nombre de déplacements en PM peut aussi être effectué pour les déplacements en AM. Pour commencer, examinons la distribution du nombre de déplacements en AM d'après la figure \@ref(fig:distnPMnAMnTot) au centre vue précédemment.
 
 ```{r distnAM, out.height = "30%", fig.align = 'center', fig.cap = "Distribution de nAM"}
 #frnAM <-(freq(ordered(dat_full$n_AM), plot = TRUE))
 ```
 
-Comme on peut le constater avec la figure \@ref(fig:three-fig), la distribution n'est pas d'allure normale. Comme n_AM est une variable de dénombrement, la distribution s'approche plus d'une distribution de Poisson, n_AM a une moyenne de 4.3095 et une variance de 31.12.
+Comme on peut le constater avec la figure \@ref(fig:distnPMnAMnTot), la distribution n'est pas d'allure normale. Comme n_AM est une variable de dénombrement, la distribution s'approche plus d'une distribution de Poisson, n_AM a une moyenne de 4.3095 et une variance de 31.12.
 
 ```{r}
 Moyenne_n_AM = mean(dat_full$n_AM)
@@ -446,9 +445,11 @@ Le modèle ci-dessus comporte quelques limitations. En effet, celui-ci ne compor
 
 Pour conclure, les points importants à réaliser pour comprendre comment interragi le nombre de déplacement en AM avec les autres facteurs est que les membres ont tendance à effectuer plus de déplacement en AM que les non-membres et l'arrondissement avec le plus grand achalandage est l'arrondissement du plateau Mont-Royal. Cependant, il serait possible de pousser plus loin l'analyse en ajoutant des interactions et en vérifiant la significativité de celles-ci.
 
-## n_tot (Abdoul)
+## Modèle pour le nombre total de déplacements partant d'une station tout au long de la journée
 
-Nous cherchons à comprendre les éléments qui ont un impact sur le nombre de total de déplacement partant de chaque station (`n_tot`)
+### Modélisation
+
+Nous cherchons à comprendre les éléments qui ont un impact sur le nombre total de déplacement partant de chaque station (`n_tot`)
 
 ```{r, results='hide'}
 bixi_withArr_df=read.csv("bixi1WithArrondissement.csv", stringsAsFactors = T)
@@ -469,12 +470,12 @@ bixi_withArr_df
 summary(bixi_withArr_df)
 ```
 
-```{r distNtot,out.height = "30%",fig.align='center', fig.cap="Distribution du nombre total de déplacement"}
-#brx <- pretty(range(bixi_withArr_df$n_tot), 
-#              n= nclass.Sturges(bixi_withArr_df$n_tot), min.n = 1)
-#ggplot(data = bixi_withArr_df, mapping = aes(x=n_tot)) + 
-#  geom_histogram( breaks=brx, alpha=0.5) + 
-#  scale_x_continuous(breaks = brx) 
+```{r distNtot,out.height = "30%",fig.align='center', fig.cap="Distribution du nombre total de déplacement", results='hide', fig.keep='none'}
+brx <- pretty(range(bixi_withArr_df$n_tot),
+             n= nclass.Sturges(bixi_withArr_df$n_tot), min.n = 1)
+ggplot(data = bixi_withArr_df, mapping = aes(x=n_tot)) +
+ geom_histogram( breaks=brx, alpha=0.5) +
+ scale_x_continuous(breaks = brx)
 ```
 
 ```{r, results='hide'}
@@ -484,13 +485,9 @@ n_tot.var=var(bixi_withArr_df$n_tot)
 print(paste("Moyenne: ", n_tot.moy,"| Variance: ", n_tot.var))
 ```
 
-La figure \@ref(fig:distNtot) nous montre la distribution du nombre total de déplacement. Elle ressemble beaucoup à celle d'une loi de poisson. De plus, il s'agit d'une variable de dénombrement. Par ailleurs, la moyenne de cette variable est d'environ `r round(n_tot.moy,0)` et sa variance d'environ `r round(n_tot.var,0)`, ce qui met en évidence un enjeu potentiel de sur-dispersion. Nous comparerons donc entre eux, les modèles de poisson, quasi-poisson et de binomiale négative afin d'en sélectionner le meilleur pour nos analyses. Vu la présence de la sur-dispersion, nous nous attendons à ce que le modèle de binomiale négative soit meilleure.
-
-<!-- Nous explorons donc dans un premier temps un modèle de régression poisson. -->
+La figure de droite sur \@ref(fig:distnPMnAMnTot) nous montre la distribution du nombre total de déplacement. Elle ressemble beaucoup à celle d'une loi de poisson. De plus, il s'agit d'une variable de dénombrement. Par ailleurs, la moyenne de cette variable est d'environ `r round(n_tot.moy,0)` et sa variance d'environ `r round(n_tot.var,0)`, ce qui met en évidence un enjeu potentiel de sur-dispersion. De ce fait, le modèle poisson ne sera probablement pas le meilleur. Pour nous en convaincre, nous ferons un test formel pour le comparer au modèle binomial négatif. Par ailleurs, nous savons que les paramètres estimés des modèles poisson et quasi-poisson sont les mêmes. Ils diffèrent dans l'évaluation des erreurs types associés aux différents paramètres et donc aux valeurs-p correspondant. Nous comparerons donc les valeur-p du modèle poisson à celui de quasi-possoin afin de voir s'il y a une différence dans la pertinence des différentes variables considérées dans nos modèles.  
 
 Afin d'écrire nos modèles, nous devons déterminer les variables pertinentes à notre question de recherche. Rappelons, que notre objectif est de déterminer les éléments qui impactent le nombre total de déplacement. Nous allons donc considérer les variables liées à la météo (`temp` et `rain`), l'indicateur de jour férié (`holiday`), l'indicateur de membre (`mem`), l'indicateur de fin de semaine (`wkend`) et la durée totale (`dur`). L'inclusion de ce dernier peut paraitre moins évident. Il est possible que des stations dans lesquelles les bixis sont utilisés pour de longues périodes créent un problème de disponibilité qui impacterait le nombre de déplacements. Donc nous jugeons utile de contrôler pour cette variable pour bien mesurer l'impact des autres variables. L'indicateur de fin de semaine est une variable que nous avons introduite qui remplace la variable correspondant au jour de semaine (`wday`). Elle vaut 1 lorsque le jour de semaine est samedi ou dimanche et 0 autrement.
-
-Nous savons que les paramètres estimés des modèle poisson et quasi-poisson sont les mêmes. Ils diffèrent dans l'évaluation des erreurs types associés aux différents paramètres et donc aux valeurs-p correspondant. Notre objectif en les comparons est donc de déterminer s'il y a une différence dans la pertinence des différentes variables considérées dans nos modèles.
 
 ```{r, results='hide'}
 n_tot_mod1.poisson = glm(n_tot ~ wkend + mem + holiday + dur + temp + rain, data=bixi_withArr_df, family = poisson(link = "log"))
@@ -511,7 +508,7 @@ pvalue_compare_df = data.frame(poisson=out.n_tot_mod1.poisson$coefficients[,4], 
 knitr::kable(pvalue_compare_df, caption = "Comparaison valeur-p: poisson Vs Quasi-poisson")
 ```
 
-Le tableau \@ref(tab:comparePvaluePoissonVsQuasi) nous montre que toutes les valeur-p associées aux variables pour les deux modèles sont très petite. On conclue donc, qu'autant avec le modèle poisson que le modèle quasi-poisson, les variables ont un effet marginal significatif sur le nombre total de déplacement en moyenne.
+Le tableau \@ref(tab:comparePvaluePoissonVsQuasi) nous montre que toutes les valeur-p associées aux variables pour les deux modèles (modèle poisson Vs modèle quasi-poisson) sont très petites. On conclue donc, qu'autant avec le modèle poisson que le modèle quasi-poisson, toutes les variables incluses ont un effet marginal significatif sur le nombre total de déplacement en moyenne.
 
 ```{r}
 n_tot_mod1.nb = glm.nb(n_tot ~ wkend + mem + holiday + dur + temp + rain, data=bixi_withArr_df)
@@ -528,9 +525,11 @@ k_pvalue=pchisq(k_stat, df=1, lower.tail = FALSE)/2
 k_pvalue
 ```
 
-Avec la sortie ci-dessus, nous constatons qu'avec le modèle de binomiale négative, les journées fériées n'ont pas un impact significatif sur le nombre total de déplacement moyen. Toutefois, le modèle poisson est-il une simplification adéquate du modèle binomial négatif? Pour y répondre, nous testons $H_0: k=0$ contre $H_1: k > 0$. La valeur-p associée à ce test est `r k_pvalue` ce qui est très petit. On rejète donc $H_0$ et on conclu que le modèle binomial négatif est plus approprié. Nous nous fions donc aux interprétations basées sur ce dernier.
+Avec la sortie ci-dessus, nous constatons qu'avec le modèle de binomiale négative, les journées fériées n'ont pas un impact significatif sur le nombre total de déplacement moyen. Toutefois, le modèle poisson est-il une simplification adéquate du modèle binomial négatif? Pour y répondre, nous testons $H_0: k=0$ contre $H_1: k > 0$. La valeur-p associée à ce test est `r k_pvalue` ce qui est très petit par rapport à n'importe quel niveau de significativité $\alpha$ acceptable. On rejète donc $H_0$ et on conclu que le modèle binomial négatif est plus approprié. Nous nous fions donc aux interprétations basées sur ce dernier.
 
-Plus la température augmente, plus le nombre total de déplacement moyen augmente. En fait, pour chaque degré d'augmentation de la température, le nombre total de déplacement croit en moyenne de `r round((exp(out.n_tot_mod1.nb.coeff['temp','Estimate'])-1)*100,2)` % lorsque les autres variables demeurent constantes. Par contre, plus il y a des précipitations, moins il y a des déplacements (toujours lorsque les autres variables demeurent constantes) ce qui est logique.
+### Interprétations
+
+Plus la température augmente, plus le nombre total de déplacement moyen augmente. En fait, pour chaque degré d'augmentation de la température, le nombre total de déplacement augmente en moyenne de `r round((exp(out.n_tot_mod1.nb.coeff['temp','Estimate'])-1)*100,2)` % lorsque les autres variables demeurent constantes. Par contre, plus il y a des précipitations, moins il y a des déplacements (toujours lorsque les autres variables demeurent constantes) ce qui est logique. Il peut donc s'avérer utile de se doter d'un modèle prédictif de la météo pour déterminer les moments propices pour faire la maintenance de la flotte sans affecter la demande des usagers. 
 
 En moyenne le nombre total de déplacement au départ des stations pour les membres bixi est `r round(exp(out.n_tot_mod1.nb.coeff['mem','Estimate']),2)` fois plus élevé que les non-membres lorsque les autres variables restent constantes.
 
@@ -538,9 +537,8 @@ Il est intéressant de constater que, plus la durée totale des déplacements au
 
 Enfin, il apparait qu'en moyenne le nombre total de déplacements est moins élevé les fins de semaine que pendant la semaine.
 
-**COMME EXPLIQUE DANS LA PREMIERE PARTIE**
-
-**FAIRE INTERACTIBO ENTRE MEMEBRES ET WEEKEND** Le fait que les déplacements soient plus élevé pour les membres que les non-membres et que son usage se fait d'avantage en semaine qu'en fin de semaine, nous laisse penser que les bixi servent d'avantage à des habitudes courantes qui ont lieu en semaine. Probablement qu'ils sont surtout utilisés comme moyen de transport par les usagers pour se rendre au boulot.
+ Le fait que les déplacements soient plus élevé pour les membres que les non-membres et que son usage se fait d'avantage en semaine qu'en fin de semaine, nous laisse penser que les bixi servent d'avantage à des habitudes courantes qui ont lieu en semaine. Probablement qu'ils sont surtout utilisés comme moyen de transport par les usagers pour se rendre au boulot. Toutefois, est-ce que l'utilisation des bixis en semaine par rapport aux fins de semaine est différente selon qu'on soit membre ou non-membre? Pour y répondre nous introduisons dans le modèle une interaction entre les variables `wkend` et `mem`. 
+ 
 
 ```{r, results='hide'}
 n_tot_mod2.nb = glm.nb(n_tot ~ wday + mem + holiday + dur + temp + rain, data=bixi_withArr_df)
@@ -565,3 +563,19 @@ ggplot(data = bixi_withArr_df, mapping = aes(x=wkend, y=n_tot)) +
 n_tot_mod2.poisson = glm(n_tot ~ wday + mem + holiday + dur + temp + rain, data=bixi_withArr_df, family = poisson(link = "log"))
 summary(n_tot_mod2.poisson)
 ```
+
+```{r}
+n_tot_mod3.nb = glm.nb(n_tot ~ wkend*mem + holiday + dur + temp + rain, data=bixi_withArr_df)
+out.n_tot_mod3.nb=summary(n_tot_mod3.nb)
+out.n_tot_mod3.nb
+out.n_tot_mod3.nb.coeff=out.n_tot_mod3.nb$coefficients
+beta0=out.n_tot_mod3.nb.coeff[1,'Estimate']
+beta1=out.n_tot_mod3.nb.coeff['wkend','Estimate']
+beta2=out.n_tot_mod3.nb.coeff['mem','Estimate']
+beta3=out.n_tot_mod3.nb.coeff['wkend:mem','Estimate']
+```
+
+Tout d'abord nous voyons dans la sortie du modèle ci-dessus que la valeur-p du paramètre estimé du terme d'interaction est très petite (1.53e-09) donc l'effet de l'interaction entre les variables `wkend` et `mem` est significatif pour n'importe quel niveau $\alpha$ acceptable. Autrement dit, la différence du nombre total de déplacement en semaine par rapport à la fin de semaine change selon qu'on soit membre ou non-membre. En fait pour les membres, l'utilisation totale en fin de semaine est en moyenne `r abs(round((exp(beta1+beta3)-1)*100,0))` % de moins que celle en semaine lorsque les autres variables restent inchangées. À contrario, pour les non-membres, l'utilisation totale en fin de semaine est en moyenne `r round((exp(beta1)-1)*100,0)`% de plus que celle en semaine lorsque les autres variables restent inchangées. Ces constats viennent étayer les découvertes faites lors de l'exploration des données dans la première partie du projet.  
+
+### Limites
+Les modèles développés nous indiquent que plus la température augmente plus le nombre de déplacement augmente en moyenne. Mais intuitivement on peut croire qu'au delà d'une certaine température que les déplacements diminuent. Puisqu'il deviendrait très désagréable pour les usagers de se déplacer en bixi. Un tel comportement ne peut pas être bien capturé par nos modèles. Une autre limite de nos modèles concernent l'hypothèse de variance sous-jacente. En effet, nos modèles font l'hypothèse que la variance entre les différentes observations sont constantes. Or il est possible et même probable qu'il y ait une certaine corrélation entre les usagers d'une même station. En effet, chaque secteur ou quartier à comme un profil socio-économique et démographique qui lui est propre.
