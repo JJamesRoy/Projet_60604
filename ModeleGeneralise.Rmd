@@ -284,8 +284,9 @@ grid.arrange(plot1,plot2,plot3, ncol = 3)
 
 Dans les sections qui suivent, un modèle pour chacune de ses variables réponses sera développé.
 
-## n_PM (Alfred)
+## Modèle pour le nombre de déplacement en après-midi (n_PM)
 
+### Distribution
 Avant d'explorer un modèle, il est essentiel d'examiner la nature de la distribution des données. Dans ce contexte, l'illustration n_PM dans la figure \@ref(fig:three-fig) indique clairement qu'entre 0 et 10 utilisations, la fréquence est nettement plus élevée que pour les autres valeurs. En ajouta à ceci que le nombre d'utilisations est un décompte, on peut en déduire que la variable `n_PM` suit également une distribution de Poisson.
 
 ```{r fig-histnPM, out.height = "30%",fig.align='center', fig.cap= "Histogramme des déplacements en matinée"}
@@ -296,7 +297,7 @@ Avant d'explorer un modèle, il est essentiel d'examiner la nature de la distrib
 
 ### Modèle de base pour l'achalandage en après-midi
 
-Dans le cadre du premier modèle portant sur l'achalandage en après-midi, l'objectif est d'évaluer, à l'aide d'un modèle sans interaction, comment les membres `mem`, la durée d'utilisation `dur`, l'arrondissement spécifique `arrond`, et le fait que la journée soit la fin de semaine `wkend`, influent sur le nombre d'utilisations durant cette période. Il est délibéré de ne pas inclure d'autres variables telles que la densité de population `density`, la superficie des arrondissements `superficie`, et d'autres covariables qui varient uniquement inter-arrondissement, car ces informations sont directement captées par la variable de l'arrondissement même `arrond`. Cela étant dit, les variables choisies pour les modèles qui suivent sont ceux qui peuvent varier intra-arrondissement en affectant le nombre d'utilisations en après-midi, sans que l'information soit captée par les autres covariables. Aussi, on n'ajoute pas les variables liées à la température pour la simple raison que ces variables sont codées de sorte à être les mêmes pour toute la région métropolitaine de Montréal. Par ailleurs, ce sont des variables qui sont hors du contrôle de l'entreprise, c'est-à-dire que même si l'on apprend que la pluie fait diminuer le nombre d'utilisations des Bixis en après-midi, l'entreprise ne peut rien y faire.Le modèle utilisé dans ce cas est : $ \hat{dur} = \hat{\beta}_0 + \hat{\beta}_{mem} + \hat{\beta}_{wkend} + \hat{\beta}_{dur} + \hat{\beta}_{arrond} $
+Dans le cadre du premier modèle portant sur l'achalandage en après-midi, l'objectif est d'évaluer, à l'aide d'un modèle sans interaction, comment les membres `mem`, la durée d'utilisation `dur`, l'arrondissement spécifique `arrond`, et le fait que la journée soit la fin de semaine `wkend`, influent sur le nombre d'utilisations durant cette période. Il est délibéré de ne pas inclure d'autres variables telles que la densité de population `density`, la superficie des arrondissements `superficie`, et d'autres covariables qui varient uniquement inter-arrondissement, car ces informations sont directement captées par la variable de l'arrondissement même `arrond`. Cela étant dit, les variables choisies pour les modèles qui suivent sont ceux qui peuvent varier intra-arrondissement en affectant le nombre d'utilisations en après-midi, sans que l'information soit captée par les autres covariables. Aussi, on n'ajoute pas les variables liées à la température pour la simple raison que ces variables sont codées de sorte à être les mêmes pour toute la région métropolitaine de Montréal. Par ailleurs, ce sont des variables qui sont hors du contrôle de l'entreprise, c'est-à-dire que même si l'on apprend que la pluie fait diminuer le nombre d'utilisations des Bixis en après-midi, l'entreprise ne peut rien y faire.Le modèle utilisé dans ce cas est : $ \hat{dur} = \hat{\beta}_0 + \hat{\beta}_{mem} + \hat{\beta}_{wkend} + \hat{\beta}_{dur} + \hat{\beta}_{arrond}$
 
 Autrement dit, ce que nous essayons de tester ici, c'est l'hypothèse $H_0 : \beta_{mem} = \beta_{wkend} = \beta_{dur} = \beta_{arrond} = 0$ contre l'hypothèse hypothèse $H_1$ : au moin un des $\beta_i$ est différent de 0. Nous voulons savoir si au moins une des covariables à un effet significatif sur le nombre de déplacements en après-midi.  
 
@@ -306,14 +307,6 @@ $H_1$ : au moin un des $\beta_i$ est différent de différent de 0-->
 ```
 ```{r}
 mod_PM1 <- glm(n_PM ~ as.factor(mem) + as.factor(wkend) + dur + arrond ,data = dat_full, family = poisson)
-#summ(mod_PM1,digits = getOption("jtools-digits", default = 4), model.info = FALSE)
-
-# Calcul du rapport deviance/df.residual
-#overdispersion_ratio <- mod_PM1$deviance / mod_PM1$df.residual
-
-# Affichage du rapport avec un commentaire sur la surdispersion
-#cat("Le rapport deviance nous montre que : Phi =", paste(round(overdispersion_ratio, 2), " > 1"))
-
 
 ```
 
@@ -338,7 +331,9 @@ abline(0, 1, col = "red")
 ```
 
 
-Comme illustré dans la figure \@ref(fig:overdispAM), l'utilisation d'un modèle de Poisson révèle un problème de surdispersion, en particulier à partir du 3e groupe. Dans de telles situations, même un modèle quasi-Poisson ne convient pas pour résoudre ce problème, principalement parce que la surdispersion n'est pas linéaire. Conséquemment, nous opterons pour l'utilisation d'un modèle binomial négatif.
+Comme illustré dans la figure \@ref(fig:overdispAM), l'utilisation d'un modèle de Poisson révèle un problème de surdispersion, en particulier à partir du 3e groupe. Dans de telles situations, même un modèle quasi-Poisson ne convient pas pour résoudre ce problème, principalement parce que la surdispersion n'est pas linéaire. Conséquemment, nous opterons pour l'utilisation d'un modèle binomial négatif. Le tableau de régression du modèle de base n'est pas présenté dans ce cas-ci, puisqu'il n'est pas approprié. 
+
+### Modèle binomial négatif
 
 ```{r}
 mod.PMnb <- glm.nb(n_PM ~ as.factor(mem) + as.factor(wkend) + dur + arrond ,data = dat_full)
@@ -356,13 +351,13 @@ Anova(mod.PMnb, type = 3)
 
 En analysant le tableau Anova pour le modèle binomial négatif, on observe que, lors de la comparaison des modèles avec ou sans chaque variable, toutes les covariables présentent une significativité statistique lorsqu'on les ajoute 1 a 1. Par conséquent, il est justifiable de rejeter l'hypothèse nulle (H0) et d'affirmer que, dans ce contexte, au moins un $\beta_i$ est différent de 0.
 
-### Limite du modèle PM
+### Limite du modèle pour le nombre de déplacement en après-midi (n_PM)
 
 Les limites du modèles présenté sont principalement le fait qu'il n'y ai pas d'interaction entre les covariables.Dans le contexte d'un modèle avec interaction, il est raisonnable de postuler qu'une interaction pertinente existe entre le statut de membre `mem` et l'arrondissement `arrond`. Cette conjecture se fonde sur l'idée que certains arrondissements affichent une densité de population plus élevée que d'autres. En conséquence, il est anticipé que les arrondissements densément peuplés génèreront naturellement un nombre plus élevé de déplacements en après-mid tout en étant plus sucéptible d'attirer davantage de membre.
 
 Dans ce même ordre d'idée, il est plausible d'affirmer qu'il y a aussi une interaction entre le statut de membre `mem` et la durée totale des déplacements `dur`. La logique étant qu'il y a certains avantages tarifaires à être membre, de sorte que le comportement des déplacements en après-midi selon la durée de déplacement sera différent selon le statut d'abonnement.Enfin, la derniere interaction cohérente serait celle entre la durée totale de déplacement `dur` et les arondissements `arrond`. Pour ce cas spécifique il est possible de voir l'intéraction dans le graphique \@ref(fig:interDurArrond).
 
-Cependant, la justification de ne pas inclure d'interactions dans le modèle repose principalement sur le fait que la plupart des interactions sont associées à la variable d'arrondissement `arrond`. Étant donné que arrond est une variable catégorielle avec près de 20 niveaux, l'introduction d'interactions créerait un grand nombre de coefficients β, ce qui aurait pour effet d'augmenter considérablement la variance du modèle. Une approche alternative serait d'opter pour un modèle avec des effets aléatoires, ce qui nous permettrait de contrôler les effets fixes sans nécessairement introduire une multitude de paramètres additionnels.
+Cependant, la justification de ne pas inclure d'interactions dans le modèle repose principalement sur le fait que la plupart des interactions sont associées à la variable d'arrondissement `arrond`. Étant donné que `arrond` est une variable catégorielle avec près de 20 niveaux, l'introduction d'interactions créerait un grand nombre de coefficients β, ce qui aurait pour effet d'augmenter considérablement la variance du modèle. Une approche alternative serait d'opter pour un modèle avec des effets aléatoires, ce qui nous permettrait de contrôler les effets fixes sans nécessairement introduire une multitude de paramètres additionnels.
 
 ```{r interDurArrond, out.height = "30%",fig.align='center', fig.cap= "Interaction entre la durée des déplacement et les arrondissements"}
 
