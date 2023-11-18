@@ -440,7 +440,7 @@ pval <- pchisq(lrt, df = 1, lower.tail = FALSE)/2
 
 ### Limitations
 
-Le modèle ci-dessus comporte quelques limitations. En effet, celui-ci ne comporte pas d'interactions entre les variables. Cependant, nous sommes porter à croire qu'il en existe. En effet, on peut penser qu'il y a un lien entre la durée d'un trajet et le fait d'être membre ou non, car les membres ont accès à des prix avantageux d'après la durée. Puis, entre la durée et l'arrondissement, car la durée d'un trajet peut dépendre de la destination où l'on va. Soit, une interaction entre `mem` et `dur`, puis une avec `dur` et `arrond`.
+Le modèle ci-dessus comporte les mêmes limitations que le modèle pour les déplacements en PM. En effet, celui-ci ne comporte pas d'interactions entre les variables. Cependant, nous sommes porter à croire qu'il en existe entre `mem` et `dur`, `mem` et `dur` ains qu'entre `dur` et les arondissements `arrond`.
 
 ### Conclusion AM
 
@@ -565,3 +565,10 @@ ggplot(data = bixi_withArr_df, mapping = aes(x=wkend, y=n_tot)) +
 n_tot_mod2.poisson = glm(n_tot ~ wday + mem + holiday + dur + temp + rain, data=bixi_withArr_df, family = poisson(link = "log"))
 summary(n_tot_mod2.poisson)
 ```
+
+
+### Division du travail:
+-Modèle sur les voyages de plus ou moins de 15 minutes (James)
+-Modèle pour les déplacements en PM (Alfred)
+-Modèle pour les déplacements en AM (Samuel)
+-Modèle pour les déplacement totaux (Abdoul)
