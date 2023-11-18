@@ -440,7 +440,7 @@ pval <- pchisq(lrt, df = 1, lower.tail = FALSE)/2
 
 ### Limitations
 
-Le modèle ci-dessus comporte les mêmes limitations que le modèle pour les déplacements en PM. En effet, celui-ci ne comporte pas d'interactions entre les variables. Cependant, nous sommes porter à croire qu'il en existe entre `mem` et `dur`, `mem` et `dur` ains qu'entre `dur` et les arondissements `arrond`.
+Le modèle ci-dessus comporte les mêmes limitations que le modèle pour les déplacements en PM. En effet, celui-ci ne comporte pas d'interactions entre les variables. Cependant, nous sommes porter à croire qu'il en existe entre `mem` et `dur`, `mem` et `dur` ainsi qu'entre `dur` et les arondissements `arrond`.
 
 ### Conclusion AM
 
