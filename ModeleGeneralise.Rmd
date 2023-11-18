@@ -5,13 +5,13 @@ author: "Abdoul Wassi Badirou, Alfred Assal, James Roy, Samuel Croteau"
 date: "`r Sys.Date()`"
 geometry: margin=1.5cm
 output:
-  bookdown::html_document2:
-    toc: yes
-    number_sections: yes
-    toc_float:
-      collapsed: no
+  # bookdown::html_document2:
   #   toc: yes
-  #   toc_depth: '3'
+  #   number_sections: yes
+  #   toc_float:
+  #     collapsed: no
+  # #   toc: yes
+  # #   toc_depth: '3'
   bookdown::pdf_document2:
     toc: yes
     toc_depth: 1
