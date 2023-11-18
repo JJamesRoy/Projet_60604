@@ -262,7 +262,7 @@ La question sur l'achalandage sera séparée en 3 parties. Quant à savoir qu'es
 
 ## Distribution
 
-Pour commencer, voici la distribution des déplacements sur les figures suivantes:\@ref(fig:distnPMnAMnTot) en PM (à gauche) en AM (au centre) et total (à droite):
+Tout d'abord, la figure \@ref(fig:distnPMnAMnTot) montre la distribution des déplacements en PM (à gauche), en AM (au centre) et au total pour la journée entière  (à droite):
 
 ```{r distnPMnAMnTot, out.height = "90%",fig.align='center', fig.cap= "Histogramme du nombre total de déplacements en PM, AM et toute la journée (total)"}
 #plot1 <- freq(ordered(dat_full$n_PM), plot = FALSE)
