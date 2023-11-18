@@ -71,7 +71,10 @@ dat_full <- dat_full %>%
 
 # Introduction
 
-Dans ce document, nous allons nous pencher sur deux questions d'affaires pour aider l'entreprise Bixi à comprendre la disponibilité des vélos dans leurs stations ainsi que l'achalandage d'après différents moments de la journée en développant différents modèles linéaires.
+Dans cette troisième partie du projet, nous devons explorer des modèles linéaires généralisés pour expliquer le nombre de déplacements dans les stations Bixi, de même que les déplacements de plus ou moins 15 minutes. En effet, comprendre l'utilisation des Bixi permettrait d'alimenter des plans stratégiques d'expansion des activités à travers le territoire et par ricochet l'accroissement du portefeuille de clients. Cette compréhension peut servir de base également à des plans tactiques qui viseraient à déterminer le meilleur moment pour l'entretien de la flotte de Bixi.
+
+Ainsi nos travaux sont segmentés en deux volets principaux. Le premier  sur la compréhension des voyages de plus ou moins 15 minutes et le deuxième sur l'achalandage. Dans ce dernier, nous explorons les modèles sur le nombre de déplacements en matinée, en après-midi et toute la journée. Dans chacun de ces modèles nous définissons le meilleur modèle qui nous permet d'avoir une interprétation le plus réaliste possible, puis nous tirons des conclusions d'un point de vue d'affaire avant de discuter des limites de nos analyses.
+
 
 # Modèles sur les voyages de plus ou moins 15 minutes
 
@@ -583,8 +586,8 @@ Les modèles développés nous indiquent que plus la température augmente plus 
 # Conclusions
 
 # Contribution des membres de l'équipe
--Modèle sur les voyages de plus ou moins de 15 minutes (James)
--Modèle pour les déplacements en PM (Alfred)
--Modèle pour les déplacements en AM (Samuel)
--Modèle pour les déplacement totaux (Abdoul)
->>>>>>> 5f08f492f642d821ab62e1d397c81e0c8b9abee6
+
+- Modèle sur les voyages de plus ou moins de 15 minutes (James)
+- Modèle pour les déplacements en PM (Alfred)
+- Modèle pour les déplacements en AM (Samuel)
+- Modèle pour les déplacement totaux (Abdoul)
