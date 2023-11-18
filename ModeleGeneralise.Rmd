@@ -356,7 +356,7 @@ Ainsi, la variable `wkend` à une valeur-p assez élevée, soit de 0.14. Ce qui 
 Anova(mod.PMnb, type = 3)
 ```
 
-En analysant le tableau Anova pour le modèle binomial négatif, on observe que, lors de la comparaison des modèles avec ou sans chaque variable, toutes les covariables présentent une significativité statistique lorsqu'on les ajoute 1 a 1. Par conséquent, il est justifiable de rejeter l'hypothèse nulle (H0) et d'affirmer que, dans ce contexte, au moins un $\beta_i$ est différent de 0.
+En analysant le tableau Anova pour le modèle binomial négatif, on observe que, lors de la comparaison des modèles avec ou sans chaque variable, toutes les covariables présentent une significativité statistique lorsqu'on les ajoute 1 a 1, sauf `wkend` qui à été expliqué précédemment. Par conséquent, il est justifiable de rejeter l'hypothèse nulle (H0) et d'affirmer que, dans ce contexte, au moins un $\beta_i$ autre que `wkend` est différent de 0.
 
 ### Limite du modèle pour le nombre de déplacement en après-midi (n_PM)
 
