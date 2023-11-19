@@ -228,7 +228,7 @@ Selon les interprétations faites ultérieurement, l'entreprise Bixi est capable
 
 ### Limites
 
-Le modèle inteprété possède des limites. En effet, il est impossible d'isoler l'effet des arrondissements selon si l'abonnements. Il faudrait faire un modèle avec interactions entre `mem` et `arrond`. Par la suite, il serait nécessaire de tester si ce modèle est plus juste que le précédent. Or, par manque d'espace dans ce travail, nous n'allons pas réaliser cette analyse.
+Le modèle inteprété possède des limites. En effet, il est impossible d'isoler l'effet des arrondissements selon si le client est abonné ou non. Il faudrait faire un modèle avec interactions entre `mem` et `arrond`. Par la suite, il serait nécessaire de tester si ce modèle est plus juste que le précédent. Or, par manque d'espace dans ce travail, nous n'allons pas réaliser cette analyse.
 
 <!---De plus, l'entreprise peut se servir du graphique @ref(fig:fig-densite) pour trouver les arrondissements où il y a un débalancement entre la densité de stations et de populations en addition aux résultats du modèle pour régler le problème....`***`--->
 
