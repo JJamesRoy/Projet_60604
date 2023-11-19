@@ -96,20 +96,19 @@ pop <- dat_full %>%
             dens_stat = mean(station_density))
 ```
 
-
 <!-- Il est possible d'ajuster un modèle simple pour voir les effets des différents arrondissements sur la probabilité d'avoir des stations où le déplacement moyen est supérieur à 15 minutes afin de trouver les arrondissements plus problématiques. Nous allons ajuster ce modèle : -->
 
 \begin{equation}
 u15_i = B_0 + \sum_{j \epsilon Ns}B_jarrond_{i} + e_i (\#eq:mod1)
-\end{equation}
-Où $j$ est un arrondissement dans la liste des arrondissements $N_s$.
+\end{equation} Où $j$ est un arrondissement dans la liste des arrondissements $N_s$.
 
+Voici ci-bas les statistiques sur l'ajustement du modèle. Nous n'affichons pas les coefficients, car nous attendons de voir si nous devrions les interpréter.
 
-```{r, out.height = "10%", results='hide'}
+```{r, out.height = "10%"}
 dat_full$arrond <- relevel(dat_full$arrond, ref = "Le Plateau-Mont-Royal")
 mod_u15_1 = glm(u15 ~ arrond, data = dat_full, family = binomial(link = "logit"))
 #summary(mod_u15_1)
-summ(mod_u15_1, model.info = FALSE)
+summ(mod_u15_1, model.info = FALSE, model.coefs = FALSE)
 ```
 
 <!-- Avant d'interpréter ce modèle, nous allons voir s'il est possible d'ajuster un modèle plus juste et plus complet. -->
@@ -125,13 +124,14 @@ prob_lachine = round((exp(-1.22293+2.80111)/(1+exp(-1.22293+2.80111)))*100, digi
 
 Par exemple, la probabilité que la moyenne des voyages soit de plus de 15 minutes à une station dans l'arrondissement Lachine est de `r prob_lachine`%. En comparaison au Plateau Mont-Royal, la quote que la moyenne des voyages est de 2,80, c'est-à-dire...--->
 ```
-
 <!-- Maintenant, nous pouvons ajuster un modèle plus complexe pour voir s'il est possible de raffiner l'analyse et obtenir un modèle plus juste. Le modèle à ajuster sera : -->
 
+```{=tex}
 \begin{equation}
 u15_i = B_0 + \sum_{j \epsilon N_s}B_jarrond_{i} + B_2mem_i + \sum_{m \epsilon M}B_mmm_{i} + B_3wkend_i + B_4rain\_bin_i + e_i (\#eq:mod2)
 \end{equation}
-
+```
+Voici ci-dessous les statistiques et les coefficients liés au deuxième modèle.
 
 ```{r, out.height = "10%"}
 mod_u15_2 = glm(u15 ~ arrond + mem + as.factor(mm) + wkend + rain_bin, data = dat_full, family = binomial(link = "logit"))
@@ -139,6 +139,8 @@ summ(mod_u15_2, model.info = FALSE)
 ```
 
 <!-- Nous allons d'abord comparer le modèle avec le précédent avant de l'interpréter, car il se peut que le premier modèle soit une simplifcation correcte du deuxième modèle. C'est-à-dire que les deux modèles ne sont pas significativement différent en terme de qualité d'ajustement. -->
+
+\newpage
 
 Nous allons donc faire le test suivant :
 
@@ -343,9 +345,7 @@ abline(0, 1, col = "red")
 
 ```
 
-
-Comme illustré dans la figure \@ref(fig:overdispAM), l'utilisation d'un modèle de Poisson révèle un problème de surdispersion, en particulier à partir du 3e groupe. Dans de telles situations, même un modèle quasi-Poisson ne convient pas pour résoudre ce problème, principalement parce que la surdispersion ne semble pas être linéaire. Conséquemment, nous opterons pour l'utilisation d'un modèle binomial négatif. Le tableau de régression du modèle de base n'est pas présenté dans ce cas-ci, puisqu'il n'est pas approprié. 
-
+Comme illustré dans la figure \@ref(fig:overdispAM), l'utilisation d'un modèle de Poisson révèle un problème de surdispersion, en particulier à partir du 3e groupe. Dans de telles situations, même un modèle quasi-Poisson ne convient pas pour résoudre ce problème, principalement parce que la surdispersion ne semble pas être linéaire. Conséquemment, nous opterons pour l'utilisation d'un modèle binomial négatif. Le tableau de régression du modèle de base n'est pas présenté dans ce cas-ci, puisqu'il n'est pas approprié.
 
 ### Modèle binomial négatif
 
@@ -591,10 +591,9 @@ Les modèles développés nous indiquent que plus la température augmente plus 
 
 # Conclusions
 
-Pour conclure, d’une part, nous utilisons la probabilité prédite des déplacements de plus ou moins de 15 minutes comme proxy pour la disponibilité des Bixi dans certains arrondissements. Ce type d’information peut être décisive pour une entreprise comme Bixi. Comme mentionné précédemment, ce proxy est imparfait, il semble néanmoins fournir une idée de quels arrondissements peuvent avoir des problèmes de disponibilité. Toutefois, le fait qu'en général le nombre d'utilisation augmente avec la durée d'utilisation nous laisse croire qu'il y a une bonne gestion de la flotte.
+Pour conclure, d'une part, nous utilisons la probabilité prédite des déplacements de plus ou moins de 15 minutes comme proxy pour la disponibilité des Bixi dans certains arrondissements. Ce type d'information peut être décisive pour une entreprise comme Bixi. Comme mentionné précédemment, ce proxy est imparfait, il semble néanmoins fournir une idée de quels arrondissements peuvent avoir des problèmes de disponibilité. Toutefois, le fait qu'en général le nombre d'utilisation augmente avec la durée d'utilisation nous laisse croire qu'il y a une bonne gestion de la flotte.
 
 Nous avons également examiné les facteurs influençant l'affluence à différentes périodes de la journée pour ensuite aborder le nombre total d'utilisations des Bixis. Nous constatons que les membres sollicitent davantage les vélos de l'entreprise le matin par rapport à l'après-midi, contrairement aux non-membres. Cette disparité est probablement liée à l'objectif d'utilisation : les non-membres utilisent davantage les Bixis de manière récréative, tandis que les membres les utilisent probablement comme moyen de transport courant (pour se rendre au boulot peut-être). D'ailleurs l'utilisation des bixi des membres est plus élevé en semaine qu'en fin de semaine. Contrairement au non-membre. Sur la base de ces observations, l'entreprise peut orienter ses stratégies de fidélisation. Ces informations peuvent également guider l'entreprise quant aux moments critiques pour la maintenance de leurs stations. L'utilisation d'un modèle prédictif de la météo peut être utile étant que plus il y a de précipitations moins les bixi sont utilisés. Par ailleurs, chacun de ces modèles présente des limitations significatives que nous avons mis en évidence, soulignant l'importance d'améliorer leur précision en considérant simultanément les effets fixes et les interactions.
-
 
 # Contribution des membres de l'équipe
 
