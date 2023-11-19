@@ -164,7 +164,7 @@ top_arrondissements <- dat_full %>%
 ### Interprétations
 
 \
-Nous allons donc interpréter le top 5 des arrondissements avec le plus de stations uniques (dans notre échantillon de données). (interpréter l'ensemble des coefficients serait redondant et nous manquerons d'espace)
+Nous allons donc interpréter le top 5 des arrondissements avec le plus de stations uniques (dans notre échantillon de données) (interpréter l'ensemble des coefficients serait redondant et nous manquerons d'espace). Nous allons calculer la probabilité prédite que u15 = 1, donc cela sert à cibler les arrondissements problématiques.
 
 ```{r}
 top_arrondissements$prob_mem0 = NA
@@ -585,7 +585,7 @@ Les modèles développés nous indiquent que plus la température augmente plus 
 
 # Conclusions
 
-Pour conclure, d’une part, nous utilisons la probabilité prédite des courts déplacements comme proxy pour la disponibilité des bixis dans certains arrondissements. Ce type d’information peut être décisive pour une entreprise comme Bixis. Comme mentionné précédemment, ce proxy est imparfait, il semble néanmoins fournir une idée de quels arrondissements à quel moment de l’année, les vélos, lorsqu’utilisé se font le plus usé.  
+Pour conclure, d’une part, nous utilisons la probabilité prédite des déplacements de plus ou moins de 15 minutes comme proxy pour la disponibilité des Bixi dans certains arrondissements. Ce type d’information peut être décisive pour une entreprise comme Bixi. Comme mentionné précédemment, ce proxy est imparfait, il semble néanmoins fournir une idée de quels arrondissements peuvent avoir des problèmes de disponibilité.  
 D’autre part, nous examinons les facteurs influençant l'affluence à différentes périodes de la journée pour ensuite aborder le nombre total d'utilisations des Bixis. Nous constatons que les membres sollicitent davantage les vélos de l'entreprise le matin par rapport à l'après-midi, contrairement aux non-membres. Cette disparité est probablement liée à l'objectif d'utilisation : les non-membres utilisent davantage les Bixis de manière récréative, tandis que les membres les utilisent probablement comme moyen de transport habituel. Sur la base de ces observations, l'entreprise peut orienter ses stratégies de fidélisation. De plus, lors des deux périodes étudiées, le week-end présente une baisse moyenne d'utilisation des vélos. Comme observer dans l’utilisation durant toute la journée, cette baisse peut être attribuée au fait que relativement, les membres utilisent moins le service pendant la fin de semaine que les non-membres. Ces informations peuvent guider l'entreprise quant aux moments critiques pour la maintenance de leurs stations. Le nombre total de déplacements confirme cette conjecture. Par ailleurs, chacun de ces modèles présente des limitations significatives, soulignant l'importance d'améliorer leur précision en considérant simultanément les effets fixes et les interactions. C'est pourquoi nous avons envisagé l'utilisation d'effets aléatoires pour affiner nos observations.
 
 
