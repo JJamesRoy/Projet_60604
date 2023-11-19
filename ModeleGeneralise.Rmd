@@ -102,7 +102,7 @@ pop <- dat_full %>%
 u15_i = B_0 + \sum_{j \epsilon Ns}B_jarrond_{i} + e_i (\#eq:mod1)
 \end{equation} Où $j$ est un arrondissement dans la liste des arrondissements $N_s$.
 
-Voici ci-bas les statistiques sur l'ajustement du modèle. Nous n'affichons pas les coefficients, car nous attendons de voir si nous devrions les interpréter.
+Voici ci-bas les statistiques sur l'ajustement du modèle. Nous n'affichons pas les coefficients, car nous attendons de voir si nous devrions les interpréter et cela dépend de la comparaison avec les deux modèles.
 
 ```{r, out.height = "10%"}
 dat_full$arrond <- relevel(dat_full$arrond, ref = "Le Plateau-Mont-Royal")
