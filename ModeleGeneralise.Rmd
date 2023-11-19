@@ -331,7 +331,7 @@ variance_values <- tapply(residuals^2, fitted_values, var)
 # Graphique moyenne variance
 plot(mean_values, variance_values, xlab = "Moyenne", ylab = "Variance",
      main = "",
-     xlim = c(0, 10 ), ylim = c(0, max(150)))
+     xlim = c(0, 12 ), ylim = c(0, max(250)))
 
 # Add a reference line where mean = variance
 abline(0, 1, col = "red")
@@ -339,7 +339,7 @@ abline(0, 1, col = "red")
 ```
 
 
-Comme illustré dans la figure \@ref(fig:overdispAM), l'utilisation d'un modèle de Poisson révèle un problème de surdispersion, en particulier à partir du 3e groupe. Dans de telles situations, même un modèle quasi-Poisson ne convient pas pour résoudre ce problème, principalement parce que la surdispersion n'est pas linéaire. Conséquemment, nous opterons pour l'utilisation d'un modèle binomial négatif. Le tableau de régression du modèle de base n'est pas présenté dans ce cas-ci, puisqu'il n'est pas approprié. 
+Comme illustré dans la figure \@ref(fig:overdispAM), l'utilisation d'un modèle de Poisson révèle un problème de surdispersion, en particulier à partir du 3e groupe. Dans de telles situations, même un modèle quasi-Poisson ne convient pas pour résoudre ce problème, principalement parce que la surdispersion ne semnble pas être linéaire. Conséquemment, nous opterons pour l'utilisation d'un modèle binomial négatif. Le tableau de régression du modèle de base n'est pas présenté dans ce cas-ci, puisqu'il n'est pas approprié. 
 
 ### Modèle binomial négatif
 
@@ -349,7 +349,7 @@ summary(mod.PMnb)
 
 ```
 
-Selon le tableau de régression ci-dessus, il est possible de voir qu'en moyenne les déplacements en après-midi fait par les membres sont 2.24 fois plus élevés que ceux faits des non-membres. Par ailleurs, pendant les fins de semaine, il y a une diminution d'en moyenne 2% du nombre de déplacements en après-midi. Cela est surement dû au fait que les membres utilisent moins Bixi pendant la fin de semaine (cette observation a été faite dans le premier rapport). Concernant la durée totale des déplacements, le tableau montre que pour chaque minute additionnelle d'utilisation de de bixi, le nombre de déplacements en après-midi augmente d'en moyenne de 1%.Enfin, il est possible d'observer que tous les coefficients des arrondissements sont négatifs, cela veut dire que l'arrondissement de référence, dans ce cas le plateau-mont royal, a un achalandage en après-midi plus important que tous les autres arrondissements. Bien sûr, ces observations sont seulement possibles lorsque toutes les variables restent inchangées. De plus, noter que ces interprétations sauf pour la variable `wkend` sont significatives pour tous niveau de alpha raisonnable.
+Selon le tableau de régression ci-dessus, il est possible de voir qu'en moyenne les déplacements en après-midi fait par les membres sont 2.24 fois plus élevés que ceux faits des non-membres. Par ailleurs, pendant les fins de semaine, il y a une diminution d'en moyenne 2% du nombre de déplacements en après-midi. Cela est surement dû au fait que les membres utilisent relativement moins Bixi pendant la fin de semaine (cette observation a été faite dans le premier rapport). Concernant la durée totale des déplacements, le tableau montre que pour chaque minute additionnelle d'utilisation de de bixi, le nombre de déplacements en après-midi augmente d'en moyenne de 1%. Enfin, il est possible d'observer que tous les coefficients des arrondissements sont négatifs, cela veut dire que l'arrondissement de référence, dans ce cas le plateau-mont royal, a un achalandage en après-midi plus important que tous les autres arrondissements. Bien sûr, ces observations sont seulement possibles lorsque toutes les variables restent inchangées. De plus, noter que ces interprétations sauf pour la variable `wkend` sont significatives pour tous niveau de alpha raisonnable.
 
 Ainsi, la variable `wkend` à une valeur-p assez élevée, soit de 0.14. Ce qui indique que la  diminution observée n'est pas statistiquement significative pour tout niveau de alpha raisonnable. En d'autres termes, nous n'avons pas assez de preuves pour affirmer de manière fiable que l'effet de la variable wkend est différent de zéro.
 
@@ -584,6 +584,11 @@ Tout d'abord nous voyons dans la sortie du modèle ci-dessus que la valeur-p du 
 Les modèles développés nous indiquent que plus la température augmente plus le nombre de déplacement augmente en moyenne. Mais intuitivement on peut croire qu'au delà d'une certaine température que les déplacements diminuent. Puisqu'il deviendrait très désagréable pour les usagers de se déplacer en bixi. Un tel comportement ne peut pas être bien capturé par nos modèles. Une autre limite de nos modèles concernent l'hypothèse de variance sous-jacente. En effet, nos modèles font l'hypothèse que la variance entre les différentes observations sont constantes. Or il est possible et même probable qu'il y ait une certaine corrélation entre les usagers d'une même station. En effet, chaque secteur ou quartier à comme un profil socio-économique et démographique qui lui est propre.
 
 # Conclusions
+Pour conclure, d’une part, nous utilisons la probabilité prédite des courts déplacements comme proxy pour la disponibilité des bixis dans certains arrondissements. Ce type d’information peut être décisive pour une entreprise comme Bixis. Comme mentionné précédemment, ce proxy est imparfait, il semble néanmoins fournir une idée de quels arrondissements à quel moment de l’année, les vélos, lorsqu’utilisé se font le plus usé.  
+
+Pour conclure, d’une part, nous utilisons la probabilité prédite des courts déplacements comme proxy pour la disponibilité des bixis dans certains arrondissements. Ce type d’information peut être décisive pour une entreprise comme Bixis. Comme mentionné précédemment, ce proxy est imparfait, il semble néanmoins fournir une idée de quels arrondissements à quel moment de l’année, les vélos, lorsqu’utilisé se font le plus usé.  
+D’autre part, nous examinons les facteurs influençant l'affluence à différentes périodes de la journée pour ensuite aborder le nombre total d'utilisations des Bixis. Nous constatons que les membres sollicitent davantage les vélos de l'entreprise le matin par rapport à l'après-midi, contrairement aux non-membres. Cette disparité est probablement liée à l'objectif d'utilisation : les non-membres utilisent davantage les Bixis de manière récréative, tandis que les membres les utilisent probablement comme moyen de transport habituel. Sur la base de ces observations, l'entreprise peut orienter ses stratégies de fidélisation. De plus, lors des deux périodes étudiées, le week-end présente une baisse moyenne d'utilisation des vélos. Comme observer dans l’utilisation durant toute la journée, cette baisse peut être attribuée au fait que relativement, les membres utilisent moins le service pendant la fin de semaine que les non-membres. Ces informations peuvent guider l'entreprise quant aux moments critiques pour la maintenance de leurs stations. Le nombre total de déplacements confirme cette conjecture. Par ailleurs, chacun de ces modèles présente des limitations significatives, soulignant l'importance d'améliorer leur précision en considérant simultanément les effets fixes et les interactions. C'est pourquoi nous avons envisagé l'utilisation d'effets aléatoires pour affiner nos observations.
+
 
 # Contribution des membres de l'équipe
 
