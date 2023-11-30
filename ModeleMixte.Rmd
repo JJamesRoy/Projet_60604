@@ -1,5 +1,5 @@
 ---
-title: "Projet BIXI - Partie 3: Modèle linéaire généralisés"
+title: "Projet BIXI - Partie 4: Modèle linéaire mixte"
 subtitle: "MATH60604 - Modélisation statistique"
 author: "Abdoul Wassi Badirou, Alfred Assal, James Roy, Samuel Croteau"
 date: "`r Sys.Date()`"
