@@ -67,6 +67,8 @@ dat_full <- dat_full %>%
   group_by(arrond) %>%
   mutate(nb_stations = n_distinct(station)) %>% 
   mutate(station_density = nb_stations/superficie)
+
+write.csv(dat_full, "dat_full_m.csv")
 ```
 
 # Introduction
