@@ -167,15 +167,30 @@ pchisq(D, df = 1, lower.tail = FALSE)/2
 
 
 # Impact de la densité de population
-Précédemment nous avions étudié l’effet de la densité de population sur le nombre total de déplacements. Cependant, puisque le nombre total de déplacements est une variable de dénombrement, il est plus convenable d’utiliser un modèle linéaire généralisé. Néanmoins, puisque nos connaissances actuelles des modèles mixtes se limitent au cas des régressions linéaires. Nous avons décidé d’étudier une variable réponse différente. Dans ce cas, nous choisissons d’étudier l’effet de la densité de population sur la durée de déplacement totale. À cet égard, la densité de population est calculée de la même façon que dans la seconde partie du travail, soit la population totale par arrondissement par rapport à la superficie de l’arrondissement même. Ainsi, nous avons ajouté les données d’arrondissement selon les stations tout en y incluant la population totale et la superficie de chaque arrondissement.
 
-Dans un premier temps, il faut noter que puisque la densité de population est un effet d’arrondissement, les résultats obtenus nous donneront des effets fixes inter-arrondissement. Pour essayer d’isoler l’effet de la variabilité de la densité de population par arrondissement, lorsque toutes les autres variables restent fixes, il est raisonnable de se dire qu’en ajoutant des effets fixes inter-arrondissement qu’on soit capable d’isoler en partie l’effet fixe de la densité sur la durée de déplacement par arrondissement. 
+Précédemment nous avions étudié l’effet de la densité de population sur le nombre total de déplacements. Cependant, puisque le nombre total de déplacements est une variable de dénombrement, il est plus convenable d’utiliser un modèle linéaire généralisé. Néanmoins, puisque nos connaissances actuelles des modèles mixtes se limitent au cas des régressions linéaires. Nous avons décidé d’étudier une variable réponse différente, soit la durée de déplacement. De plus, il faut noter que puisque la densité de population est un effet d’arrondissement, les résultats obtenus nous donneront des effets fixes inter-arrondissement. Cela étant dit, il nous est impossible d’isoler l’effet de la densité de la population tout en prenant en compte les effets fixe inter groupe (arrondissement), sans avoir une colinéarité parfaite entre les deux. 
+Dans un premier temps, il nous est impossible d’utiliser le modèle de densité de population que l’on a fait dans la seconde partie. Au lieu, nous allons observer l’effets des membres et de la fin de semaine sur la durée de déplacement tout en incluant l’effet inter arrondissement. 
+Dans un second temps, chaque arrondissement contient plusieurs stations. En d’autres termes, on peut assumer qu’il risque d’y avoir une corrélation intra-station, comme expliqué dans les sections précédentes. Autrement dit, en plus d’avoir des effets de groupe inter arrondissement nous nous retrouvons avec des effets de station intra arrondissement, ce qui est problématique dans un cas d’inférence. Pour aborder cette problématique, nous allons utiliser une approche à effets aléatoire, nous permettant ainsi de ne pas utiliser une pléthore de variable explicative pour contrôler les effets fixes de chaque arrondissement tout en considérant la corrélation inter station. 
+Enfin, dans la seconde partie du travail, nous avions inclus d’autres variables explicatives par arrondissement, comme le nombre de parcs, le nombre de bibliothèques, le nombre de centres communautaires, etc., mais puisque ce sont des variables fixes par arrondissement, nous n’avons pas besoin de les inclure si nous contrôlant pour les effets fixes inter-arrondissement. 
 
-Dans un second temps, chaque arrondissement contient plusieurs stations. En d’autres termes, on peut assumer qu’il risque d’y avoir une corrélation intra-station, comme expliqué dans les sections précédentes. Cette corrélation a pour effet de biaiser les tests d’hypothèse qu’on a abordés dans la deuxième partie du travail. Autrement dit, en plus d’avoir des effets de groupe inter arrondissement nous nous retrouvons avec des effets de station intra arrondissement, ce qui est problématique dans un cas d’inférence. Pour aborder cette problématique, nous allons utiliser une approche à effets aléatoire, nous permettant ainsi de ne pas utiliser une pléthore de variable explicative pour contrôler les effets fixes de chaque arrondissement tout en considérant la corrélation intra station. 
+
+# Modèle linéaire incluant la structure de corrélation sans effets aléatoire
 
 ```{r}
-selected_columns <- dat[c("station", "density")]
+dat$arrond <- as.factor(dat$arrond)
 
+cor(dat[dat$arrond == 'Rosemont-La Petite-Patrie', c("mm", "dd", "n_tot")])
+
+mod1 <- gls(dur ~ mem + arrond, correlation = corCompSymm(form = ~ 1|station), data = dat)
+summary(mod1)
+
+cor(dat[c("density", "mem", "arrond")])
+
+gls(revenge ~ sex + age + vc + wom + t, correlation = corCompSymm(form = ~1 |
+id), data = longitu1)
+
+table(dat$arrond, dat$density, dat$mem)
+print(table_result)
 ```
 
 
