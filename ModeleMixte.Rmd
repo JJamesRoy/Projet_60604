@@ -96,7 +96,7 @@ dat$festival[is.na(dat$festival)] = 0
 dat$log_n_tot = log(dat$n_tot)
 ```
 
-Dans cette section, nous allons nous intéresser à la même question que dans la deuxième partie du travail, soit analyser si les festivals tenus dans la ville de Montréal ont un impact sur l'utilisation des Bixi.
+Dans cette section, nous allons nous intéresser à la même question que dans la deuxième partie du travail, soit analyser si les festivals tenus dans la ville de Montréal ont un impact sur l'utilisation des Bixi. Ainsi, nous allons utiliser le log du nombres totaux des déplacements (`log_n_tot`).
 
 Pour tester cette question, nous allons nous baser sur les données utilisées dans les parties précédentes. Il est cependant utile de respécifier comment la variable `festival`est construite. Celle-ci est une variable de décompte qui note le nombre de festivals ayant lieu cette journée. Ainsi, elle est fixe peu importe la station, tant que la journée est pareille. La variable peut prendre la valeur de 0 à 6.
 
@@ -109,15 +109,21 @@ mod_fest = gls(log_n_tot ~ festival + mm + holiday + wkend, data = dat)
 summary(mod_fest)
 ```
 
-Avec un modèle linéaire simple, la tenue de festival semble avoir un effet positif et significatif sur le nombre total de déplacements. En effet, un festival de plus par jour augmente en moyenne le nombre total de déplacement de 5% par jour par stations (toutes choses étant égales par ailleurs). De plus, cette augmentation est significatif à tout niveau de alpha raisonnable.
+Avec un modèle linéaire simple, la tenue de festival semble avoir un effet positif et significatif sur le nombre total de déplacements. En effet, un festival de plus par jour augmente en moyenne le nombre total de déplacement de 5% par jour par stations (toutes choses étant égales par ailleurs). De plus, cette augmentation est significatif à tout niveau de alpha raisonnable. 
+
+Nous allons maintenant tester des modèle avec effets aléatoires pour voir s'il est possible d'améliorer l'inférence et la précision des résultats. 
 
 ## Modèle avec effets aléatoires
+
+D'abord, pour le premier modèle avec effet, nous allons permettent une corrélation intra-station en mettant des effets aléatoire pour l'ordonnée à l'origine. Nous n'allons pas intérpréter les résultats de suite, nous allons d'abord comparer les résultats.
 
 ```{r}
 mod_fest_2 <- lme(n_tot ~ festival + mm + holiday + wkend, random = ~1 | station,
 data = dat)
 summary(mod_fest_2)
 ```
+
+Ensuite, pour le deuxième modèle, nous allons instaurer des effets aléatoires pour l'ordonnée à l'origine et pour le coefficient de festival. Nous allons aussi attendre avant d'interpréter les résultats.
 
 ```{r}
 mod_fest_2a <- lme(n_tot ~ festival + mm + holiday + wkend, random = ~1 + festival |
@@ -126,8 +132,10 @@ summary(mod_fest_2a)
 ```
 
 ```{r}
-getVarCov(mod_fest_2a, type = "random.effects")
+#getVarCov(mod_fest_2a, type = "random.effects")
 ```
+
+Enfin, pour le dernier modèle, il sera très similaire au dernier, mais nous allons forcer sorte  $\sigma_{\beta01}$ = 0, c’est-à-dire, avec des effets aléatoires indépendants.
 
 ```{r}
 mod_fest_2b <- lme(n_tot ~ festival + mm + holiday + wkend, random = list(station = pdDiag(~1 + festival)), data = dat)
@@ -135,13 +143,34 @@ summary(mod_fest_2b)
 ```
 
 ```{r}
-getVarCov(mod_fest_2b, type = "random.effects")
+#getVarCov(mod_fest_2b, type = "random.effects")
 ```
+### Tests sur les modèles
+```{r}
+anova(mod_fest_2a, mod_fest_2b, type = "LR")
+```
+Pour le premier test, le LRT test $H_0 : \sigma_{b01} = 0\ vs. H_1 : \sigma_{b01} \neq 0$. Comme la p-value est plus petite que 0.0001, nous pouvons rejeter $H_0$ et conclure que la corrélation entre les effets aléatoires est nécessaire (aussi supporté par le BIC et le AIC).
+
+Nous allons ainsi comparer `mod_fest_2a` avec `mod_fest_2` pour voir s'il est nécessaire de rajouter des effets aléatoires pour la variable `festival`. Cette fois-ci nous allons les comparer avec AIC et BIC, car c'est un test non-standard.
 
 ```{r}
-anova(mod_fest_2, mod_fest_2a, mod_fest_2b, type = "LR")
+anova(mod_fest_2, mod_fest_2a, type = "LR")
 ```
+<<<<<<< HEAD
 # Effets des membre et de la fin semaine sur la durée de déplacements 
+=======
+
+Comme il est possible de le voir, AIC et BIC est légérement plus petit pour le modèle avec effets aléatoires pour la variable explicative. Ainsi, nous allons garder ce modèle et le comparer à un modèle linéaire.
+
+```{r}
+D <- -2 * (mod_fest$logLik - mod_fest_2a$logLik)
+pchisq(D, df = 1, lower.tail = FALSE)/2
+```
+
+
+
+# Impact de la densité de population
+>>>>>>> 7625d13d336e7a8b9047f2e8809dd88b958454f1
 
 Précédemment nous avions étudié l’effet de la densité de population sur le nombre total de déplacements. Cependant, puisque le nombre total de déplacements est une variable de dénombrement, il est plus convenable d’utiliser un modèle linéaire généralisé. Néanmoins, puisque nos connaissances actuelles des modèles mixtes se limitent au cas des régressions linéaires. Nous avons décidé d’étudier une variable réponse différente, soit la durée de déplacement. De plus, il faut noter que puisque la densité de population est un effet d’arrondissement, les résultats obtenus nous donneront des effets fixes inter-arrondissement. Cela étant dit, il nous est impossible d’isoler l’effet de la densité de la population tout en prenant en compte les effets fixe inter groupe (arrondissement), sans avoir une colinéarité parfaite entre les deux. 
 Dans un premier temps, il nous est impossible d’utiliser le modèle de densité de population que l’on a fait dans la seconde partie. Au lieu, nous allons observer l’effets des membres et de la fin de semaine sur la durée de déplacement tout en incluant l’effet inter arrondissement. 
