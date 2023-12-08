@@ -166,35 +166,50 @@ pchisq(D, df = 2, lower.tail = FALSE)/2
 On ne rejette pas $H_0$, car la p-value est supérieur à 0.05. On peut donc conclure que le modèle sans effet
 aléatoire est bien une simplification adéquate. Il semble donc que modéliser un intercepte et un effet aléatoire pour la variable  `festival` pour chaque sujet ne soit pas utile.
 
-# Effets des membre et de la fin semaine sur la durée de déplacements
+# Effet de la densité de population
 
-Précédemment nous avions étudié l’effet de la densité de population sur le nombre total de déplacements. Cependant, puisque le nombre total de déplacements est une variable de dénombrement, il est plus convenable d’utiliser un modèle linéaire généralisé. Néanmoins, puisque nos connaissances actuelles des modèles mixtes se limitent au cas des régressions linéaires. Nous avons décidé d’étudier une variable réponse différente, soit la durée de déplacement. De plus, il faut noter que puisque la densité de population est un effet d’arrondissement, les résultats obtenus nous donneront des effets fixes inter-arrondissement. Cela étant dit, il nous est impossible d’isoler l’effet de la densité de la population tout en prenant en compte les effets fixe inter groupe (arrondissement), sans avoir une colinéarité parfaite entre les deux. 
-Dans un premier temps, il nous est impossible d’utiliser le modèle de densité de population que l’on a fait dans la seconde partie. Au lieu, nous allons observer l’effets des membres et de la fin de semaine sur la durée de déplacement tout en incluant l’effet inter arrondissement. 
-Dans un second temps, chaque arrondissement contient plusieurs stations. En d’autres termes, on peut assumer qu’il risque d’y avoir une corrélation intra-arondissement, soit inter-station dans le même arondissement. Autrement dit, en plus d’avoir des effets de groupe inter arrondissement nous nous retrouvons avec des effets de station intra arrondissement, ce qui est problématique dans un cas d’inférence. Pour aborder cette problématique, nous allons utiliser une approche à effets aléatoire, nous permettant ainsi de ne pas utiliser une pléthore de variable explicative pour contrôler les effets fixes de chaque arrondissement tout en considérant la corrélation inter station. 
-Enfin, dans la seconde partie du travail, nous avions inclus d’autres variables explicatives par arrondissement, comme le nombre de parcs, le nombre de bibliothèques, le nombre de centres communautaires, etc., mais puisque ce sont des variables fixes par arrondissement, nous n’avons pas besoin de les inclure si nous contrôlant pour les effets fixes inter-arrondissement. 
+Précédemment nous avions étudié l’effet de la densité de population sur le nombre total de déplacements. Cependant, puisque le nombre total de déplacements est une variable de dénombrement, il est plus convenable d’utiliser un modèle linéaire généralisé. Néanmoins, puisque nos connaissances actuelles des modèles mixtes se limitent au cas des régressions linéaires. Nous avons décidé d’étudier une variable réponse différente, soit la durée de déplacement. De plus, il faut noter que puisque la densité de population est un effet d’arrondissement, alors il n’est pas nécessaire d’inclure les arrondissements dans nos modèles. C’est-à-dire qu’en incluant la densité on observe les changements qui arrivent inter-arrondissement sans avoir besoin d’inclure les arrondissements dans nos modèles. À cet égard, la densité de population est calculée de la même façon que dans la seconde partie du travail, soit la population totale par arrondissement par rapport à la superficie de l’arrondissement même. Ainsi, nous avons ajouté les données d’arrondissement selon les stations tout en y incluant la population totale et la superficie de chaque arrondissement.
+
+Tout d'abord, chaque arrondissement contient plusieurs stations. En d’autres termes, on peut assumer qu’il risque d’y avoir une corrélation intra-station, comme expliqué dans les sections précédentes. Cette corrélation a pour effet de biaiser les tests d’hypothèse qu’on a abordés dans la deuxième partie du travail. Autrement dit, en plus d’avoir des effets de groupe inter arrondissement capté par la densité de population, nous nous retrouvons avec des effets qui varie intra stations, ce qui est problématique dans un cas d’inférence. Pour aborder cette problématique, nous allons utiliser une approche à effets aléatoire, nous permettant ainsi de ne pas utiliser une pléthore de variable explicative pour contrôler les effets de chaque station. 
+
+Enfin, dans la seconde partie du travail, nous avions inclus d’autres variables explicatives par arrondissement, comme le nombre de parcs, le nombre de bibliothèques, le nombre de centres communautaires, etc., puisque ce sont des variables fixes par arrondissement, elles vont naturellement sur estimer l’effet de la densité si on ne les inclut pas. Néanmoins, une solution serait de contrôler aussi pour les effets inter-stations, ce qui nous permettrait de capter une bonne partie des effets fixes inter-arrondissements, sans avoir à inclure tous les effets d’arrondissements. Pour ce faire il est possible d'inclure les station dans nos modèle, mais aussi il on pourrait inclure dans nos modèle le nombre de station par arondissement comme variable continue, ce qui permetterait de capter l'effet moyen lorsqu'on augmente le nombre de station qui est représenté dans nos données comme le moment ou l'on change d'arondissment.
 
 
-## Modèle avec intéraction sans effet aléatoire
+## Modèle sans effet aléatoire avec structure de corélation intra-station
 
-Il est à noter que dans ce cas, ça ne fait pas vraiment de sens d’utiliser une structure de covariance AR1 et ARH1, puisque les données ne sont pas vraiment de sorte longitudinale. Le fait que les stations reviennent plusieurs fois n’est pas lié à une fonction temporelle. Parallelement, comme mentionnée précédmment, il faut bien comprendre que nos données sont formé de sorte a avoir plusieurs stations dans les meme arondissements.Cela étant dit, on considère une structure d'équicorrélation où la structure de corrélation entre les stations est la même pour chaque arrondissement. 
+Il est à noter que dans ce cas, ça ne fait pas vraiment de sens d’utiliser une structure de covariance AR1 et ARH1, puisque les données ne sont pas vraiment de sorte longitudinale. Le fait que les stations reviennent plusieurs fois n’est pas lié à une fonction temporelle.Cela étant dit, on considère une structure d'équicorrélation où la structure de corrélation dans chaque station est la même. 
 
-Dans la table anova ci-dessous, il est possible de voir qu'on a crée deux modèle, soit le modele 0 qui ne contient pas de structure de corrélation et le modèle 1 qui contient une structure d'équicorrélation. Les deux modèles contiennes les même covariable, membre `mem` la fin de semaine `wkend` et les arrondissements `arrond`. En plus, chaque covariable a une intéraction avec les membres, comme on l'a mentionnée dans les anciennes parties, le fait d'être memebre ou non affecte la durée d'utilisation différenement selon si c'est la fin de semaine ou la semaine. Aussi, le fait d'être membre ou non affecte chaque arrondissement de façon différente. Dans ce cas spécifique, on peut dire que l'interaction entre les membres et les arrondissements représente l'effet d'être membre sur la durée de déplacement sachant que les effets fixes sont différents entre les arrondissements. On peut aussi voir que la valeur p est raisonnable pour toute valeur de significativité et on peut conclure que la corrélation intra-arrondissement est significative.
+On peut voir dans le tableau anova ci-dessous la comparaison entre deux modèles, chaque modèle contient les mêmes variables. On essaye de voir l'impact de la densité de la population sur la durée de déplacement en y incluant d'autres covariables comme le nombre de stations par arrondissement et la variable fin de semaine. On n'inclut pas les membres dans ces modèles principalement parce que la densité a un impact sur les membres, et ces derniers influent à leur tour sur la durée de déplacement. Cela créerait une boucle d'interdépendance entre la densité, les membres, et la durée de déplacement, ce qui compliquerait l'analyse et pourrait entraîner des résultats difficiles à interpréter. Enfin, la seule différence entre les deux modèles, c'est qu'on inclut dans le deuxième modèle un effet de corrélation intra-station avec une structure d'équicorrélation. Il est possible d'observer que cet effet est bien significatif pour tout niveau d’alpha raisonnable.
+
+On ne montre pas la table de régression ici, pusique certains autres modèles risque d'être mieux adapté à la structure de nos données, donc on préfère montrer ces-dernier seulement. 
 
 ```{r}
 dat$arrond <- as.factor(dat$arrond)
 
-mod0 <- gls(dur ~ mem + wkend*mem + arrond*mem, data = dat) 
-mod1 <- gls(dur ~ mem + wkend*mem + arrond*mem, correlation = corCompSymm(form = ~ 1|station), data = dat)
+mod_dens_0 <- gls(dur ~ density + wkend + nb_stations, data = dat) 
+mod_dens_1 <- gls(dur ~  density + wkend + nb_stations, correlation = corCompSymm(form = ~ 1|station), data = dat)
 
-anova(mod0,mod1)
+anova(mod_dens_0,mod_dens_1)
 
 ```
 
-Le problème dans ce cas spécifique, c'est qu'on a les 20 arondissements qu'on dédouble puisqu'on les fait intéragir avec les memebre `mem`. Ceci ajoute beaucaup de complexité, ce qui est nuisible pour la variance du modèle. Pour cette raison, nous allons inclure les variables aléatoire. 
 
-## Modèle avec intéraction avec effet aléatoire sur l'ordonnée à l'origine. 
+## Modèle avec effet aléatoire sur l'ordonnée à l'origine incluant une structure de corrélation intra-station
+
+Dans la table anova ci-dessous, on vois la comparaison entre le fait d'ajouter un effet aléatoire avec ou sans structure de corrélation intra-station. Le deuxième modèle dans la table montre que l'ajout d'effet aléatoire sur l'ordonée à l'orgine est significative pour tout niveau de alpha raisonnable. 
+
 ```{r}
 
+mod_dens_3 <- lme(dur ~ density + wkend + nb_stations, random = ~1|station,data = dat)
+mod_dens_4 <- lme(dur ~  density + wkend + nb_stations, random = ~1|station ,correlation = corCompSymm(form = ~ 1|station), data = dat)
+
+anova(mod_dens_3,mod_dens_4, type = 'LR')
+
+```
+Dans la table de régression ci-dessous on peut voir l'effet de la densité qui affecte en moyenne positivement la durée de déplacement en minutes, même chose concernant la fin de semaine. On peut voir que la différence entre la fin de semaine et la semaine est d'en moyenne 13 minutes de déplacements. Cependant, la structure de corrélation d'équicorrélation intra station donne un rho extrêmement petit, il est à se demander si c'est la bonne structure de corrélation à utiliser où même s'il y a une structure de corrélation intra station. 
+
+```{r}
+summary(mod_dens_4)
 ```
 
 
