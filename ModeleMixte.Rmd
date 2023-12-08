@@ -226,10 +226,13 @@ Dans la table de régression ci-dessous on peut voir l'effet de la densité qui 
 summary(mod_dens_4)
 ```
 
-## Modèles avec intéraction avec effets aléatoires sur les variables explicatives
-Nous allons maintenant ajouter aussi des effets aléatoires sur les différentes variables explicatives. En effet, il est possible qu'il y aille un effet différent de la fin de semaine sur la durée des déplacements dépendamment de la station, nous pouvons penser par exemple à des stations qui serait géographiquement mieux placés ou moins bien placés que d'autres par rapport à des activités que les gens font plus la fin de semaine comme des cinémas, des bars, etc. Par exemple, une station très éloignées des attraits de fin de semaine pourrait résulter à des trajets plus long.
+## Modèles avec intéraction et avec effets aléatoires sur les variables explicatives
 
-Dans la même ordre d'idée, il serait aussi possible qu'il aille un effet différent d'être membre ou non sur la durée des déplacements d'après la station. Par exemple, puisque le fait d'être membre est avantageux par rapport à la durée du déplacement, il est plus avantageux pour un membre qui utilise une station plus éloignées d'attraits populaires que pour un non-membre de faire d'utiliser le bixi pour un long déplacement vers un attrait. Le membre pourrait ainsi utiliser le bixi pour des déplacements plus loin/long qu'un non-membre habitant près de la même station de bixis.
+Nous allons maintenant ajouter aussi des effets aléatoires sur les différentes variables explicatives.
+
+En effet, il est possible qu'il y aille un effet différent de la fin de semaine (variable `wkend`) sur la durée des déplacements dépendamment de la station, nous pouvons penser par exemple à des stations qui serait géographiquement mieux placés ou moins bien placés que d'autres par rapport à des activités que les gens font plus la fin de semaine comme des cinémas, des bars, etc. Par exemple, une station très éloignées des attraits de fin de semaine pourrait résulter à des trajets plus long.
+
+Dans la même ordre d'idée, il serait aussi possible qu'il aille un effet différent d'être membre ou non (variable `mem`) sur la durée des déplacements d'après la station. Par exemple, puisque le fait d'être membre est avantageux par rapport à la durée du déplacement, il est plus avantageux pour un membre qui utilise une station plus éloignées d'attraits populaires que pour un non-membre de faire d'utiliser le bixi pour un long déplacement vers un attrait. Le membre pourrait ainsi utiliser le bixi pour des déplacements plus loin/long qu'un non-membre habitant près de la même station de bixis.
 
 Nous allons donc développer et comparer deux modèles incluant un effet aléatoire sur l'ordonnée à l'origine et:
 1- Avec effets aléatoires sur `wkend` seulement (mod3);
@@ -238,38 +241,29 @@ Avec un modèle incluant seulement un effet aléatoire avec l'ordonnée à l'ori
 
 Les tableaux ci-dessous effectue cette comparaison:
 ```{r}
-mod3 <- lme(dur ~ mem + wkend*mem + arrond*mem, random = ~1 + wkend | station, data = dat)
-mod4 <- lme(dur ~ mem + wkend*mem + arrond*mem, random = ~1 + mem | station, data = dat)
+mod3 <- lme(dur ~ mem + wkend + density + nb_stations + wkend*mem, random = ~1 + wkend | station, data = dat)
+mod4 <- lme(dur ~ mem + wkend+ density + nb_stations + wkend*mem, random = ~1 + mem | station, data = dat)
 ```
 
 ```{r}
-anova(mod1,mod3)
-anova(mod1,mod4)
+anova(mod_dens_4,mod3)
+anova(mod_dens_4,mod4)
 ```
 Pour les deux modèles, on obtient une valeur de p très petite et une valeur de L.Ratio de -- et --- pour le modèle 3 et 4 respectivement. Ce qui veut dire que nous pouvons rejeter H0 et conclure que les modèles avec effets aléatoires sur les variables explicatives est significativement différent à tout niveau de alpha raisonnable par rapport au modèle avec seulement un effet aléatoire sur l'ordonnée à l'origine.
 
 Dans ces modèles, nous avons poser les effets aléatoires comme étant corrélés. Cependant, il se peut que ces effets soient indépendants. Nous allons donc développer un modèle qui considère ces effets aléatoires indépendants (mod3a et mod4a) et les comparer avec les deux modèles ci-dessus (mod3 et mod4).
 
 ```{r}
-mod3a <- lme(dur ~ mem + wkend*mem + arrond*mem, random = list(station = pdDiag(~1 + wkend)), data = dat)
-mod4a <- lme(dur ~ mem + wkend*mem + arrond*mem, random = list(station = pdDiag(~1 + mem)), data = dat)
+mod3a <- lme(dur ~ mem + nb_stations + density + wkend*mem, random = list(station = pdDiag(~1 + wkend)), data = dat)
+mod4a <- lme(dur ~ mem + nb_stations + density + wkend*mem, random = list(station = pdDiag(~1 + mem)), data = dat)
 
 anova(mod3,mod3a, type = "LR")
 anova(mod4,mod4a, type = "LR")
 ```
-Nous remarquons que L.Ratio = __ et p-value = __ pour le modèle 3a et L.Ratio = __ et p-value = __ pour le modèle 4a. Dans les deux cas, nous rejetons l'hypothèse H0 et pouvons conclure que ces modèles sont significativement différents que leur modèles avec des effets aléatoires corrélées avec un niveau d'alpha de 0.01.
+Nous remarquons que L.Ratio = __ et p-value = __ pour le modèle 3a et L.Ratio = __ et p-value = __ pour le modèle 4a. Dans les deux cas, nous rejetons l'hypothèse H0 et pouvons conclure que ces modèles sont significativement différents que leur modèles avec des effets aléatoires corrélées avec un niveau d'alpha de 0.05.
 
+Pour le modèle
 
-
-rejeter $H_0$ et conclure que la corrélation entre les effets aléatoires est nécessaire (aussi supporté par le BIC et le AIC).
-
-Nous allons ainsi comparer `mod_fest_2a` avec `mod_fest_2` pour voir s'il est nécessaire de rajouter des effets aléatoires pour la variable `festival`. Cette fois-ci nous allons les comparer avec AIC et BIC, car c'est un test non-standard.
-
-```{r}
-anova(mod_fest_2, mod_fest_2a, type = "LR")
-```
-
-Comme il est possible de le voir, AIC et BIC est légérement plus petit pour le modèle avec effets aléatoires pour la variable explicative. Ainsi, nous allons garder ce modèle et le comparer à un modèle linéaire.
 
 
 # Contributions des membres
