@@ -161,10 +161,10 @@ Comme il est possible de le voir, AIC et BIC est légérement plus petit pour le
 
 ```{r}
 D <- -2 * (mod_fest$logLik - mod_fest_2a$logLik)
-pchisq(D, df = 1, lower.tail = FALSE)/2
+pchisq(D, df = 2, lower.tail = FALSE)/2
 ```
-
-
+On ne rejette pas $H_0$, car la p-value est supérieur à 0.05. On peut donc conclure que le modèle sans effet
+aléatoire est bien une simplification adéquate. Il semble donc que modéliser un intercepte et un effet aléatoire pour la variable  `festival` pour chaque sujet ne soit pas utile.
 
 # Effet de la densité de population
 
