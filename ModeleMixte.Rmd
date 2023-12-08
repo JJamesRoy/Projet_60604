@@ -141,7 +141,7 @@ getVarCov(mod_fest_2b, type = "random.effects")
 ```{r}
 anova(mod_fest_2, mod_fest_2a, mod_fest_2b, type = "LR")
 ```
-# Impact de la densité de population
+# Effets des membre et de la fin semaine sur la durée de déplacements 
 
 Précédemment nous avions étudié l’effet de la densité de population sur le nombre total de déplacements. Cependant, puisque le nombre total de déplacements est une variable de dénombrement, il est plus convenable d’utiliser un modèle linéaire généralisé. Néanmoins, puisque nos connaissances actuelles des modèles mixtes se limitent au cas des régressions linéaires. Nous avons décidé d’étudier une variable réponse différente, soit la durée de déplacement. De plus, il faut noter que puisque la densité de population est un effet d’arrondissement, les résultats obtenus nous donneront des effets fixes inter-arrondissement. Cela étant dit, il nous est impossible d’isoler l’effet de la densité de la population tout en prenant en compte les effets fixe inter groupe (arrondissement), sans avoir une colinéarité parfaite entre les deux. 
 Dans un premier temps, il nous est impossible d’utiliser le modèle de densité de population que l’on a fait dans la seconde partie. Au lieu, nous allons observer l’effets des membres et de la fin de semaine sur la durée de déplacement tout en incluant l’effet inter arrondissement. 
@@ -149,23 +149,26 @@ Dans un second temps, chaque arrondissement contient plusieurs stations. En d’
 Enfin, dans la seconde partie du travail, nous avions inclus d’autres variables explicatives par arrondissement, comme le nombre de parcs, le nombre de bibliothèques, le nombre de centres communautaires, etc., mais puisque ce sont des variables fixes par arrondissement, nous n’avons pas besoin de les inclure si nous contrôlant pour les effets fixes inter-arrondissement. 
 
 
-# Modèle linéaire incluant la structure de corrélation sans effets aléatoire
+## Modèle avec intéraction sans effet aléatoire
+
+Il est à noter que dans ce cas, ça ne fait pas vraiment de sens d’utiliser une structure de covariance AR1 et ARH1, puisque les données ne sont pas vraiment de sorte longitudinale. Le fait que les stations reviennent plusieurs fois n’est pas lié à une fonction temporelle. Parallelement, comme mentionnée précédmment, il faut bien comprendre que nos données sont formé de sorte a avoir plusieurs stations dans les meme arondissements.Cela étant dit, on considère une structure d'équicorrélation où la structure de corrélation entre les stations est la même pour chaque arrondissement. 
+
+Dans la table anova ci-dessous, il est possible de voir qu'on a crée deux modèle, soit le modele 0 qui ne contient pas de structure de corrélation et le modèle 1 qui contient une structure d'équicorrélation. Les deux modèles contiennes les même covariable, membre `mem` la fin de semaine `wkend` et les arrondissements `arrond`. En plus, chaque covariable a une intéraction avec les membres, comme on l'a mentionnée dans les anciennes parties, le fait d'être memebre ou non affecte la durée d'utilisation différenement selon si c'est la fin de semaine ou la semaine. Aussi, le fait d'être membre ou non affecte chaque arrondissement de façon différente. Dans ce cas spécifique, on peut dire que l'interaction entre les membres et les arrondissements représente l'effet d'être membre sur la durée de déplacement sachant que les effets fixes sont différents entre les arrondissements. Dans le tableau ci-dessous, on peut voir que la valeur p est raisonnable pour toute valeur de significativité et on peut conclure que la corrélation intra-arrondissement est significative.
 
 ```{r}
 dat$arrond <- as.factor(dat$arrond)
 
-cor(dat[dat$arrond == 'Rosemont-La Petite-Patrie', c("mm", "dd", "n_tot")])
+mod0 <- gls(dur ~ mem + wkend*mem + arrond*mem, data = dat) 
+mod1 <- gls(dur ~ mem + wkend*mem + arrond*mem, correlation = corCompSymm(form = ~ 1|station), data = dat)
 
-mod1 <- gls(dur ~ mem + arrond, correlation = corCompSymm(form = ~ 1|station), data = dat)
-summary(mod1)
+anova(mod0,mod1)
 
-cor(dat[c("density", "mem", "arrond")])
+```
+Le problème dans ce cas spécifique, c'est qu'on a les 20 arondissements qu'on dédouble puisqu'on les fait intéragir avec les memebre `mem`. Ceci ajoute beaucaup de complexité, ce qui est nuisible pour la variance du modèle. Pour cette raison, nous allons inclure les variables aléatoire. 
 
-gls(revenge ~ sex + age + vc + wom + t, correlation = corCompSymm(form = ~1 |
-id), data = longitu1)
+## Modèle avec intéraction avec effet aléatoire sur l'ordonnée à l'origine. 
+```{r}
 
-table(dat$arrond, dat$density, dat$mem)
-print(table_result)
 ```
 
 
