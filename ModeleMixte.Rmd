@@ -156,9 +156,6 @@ Nous allons ainsi comparer `mod_fest_2a` avec `mod_fest_2` pour voir s'il est n�
 ```{r}
 anova(mod_fest_2, mod_fest_2a, type = "LR")
 ```
-<<<<<<< HEAD
-# Effets des membre et de la fin semaine sur la durée de déplacements 
-=======
 
 Comme il est possible de le voir, AIC et BIC est légérement plus petit pour le modèle avec effets aléatoires pour la variable explicative. Ainsi, nous allons garder ce modèle et le comparer à un modèle linéaire.
 
@@ -169,8 +166,7 @@ pchisq(D, df = 1, lower.tail = FALSE)/2
 
 
 
-# Impact de la densité de population
->>>>>>> 7625d13d336e7a8b9047f2e8809dd88b958454f1
+# Effets des membre et de la fin semaine sur la durée de déplacements
 
 Précédemment nous avions étudié l’effet de la densité de population sur le nombre total de déplacements. Cependant, puisque le nombre total de déplacements est une variable de dénombrement, il est plus convenable d’utiliser un modèle linéaire généralisé. Néanmoins, puisque nos connaissances actuelles des modèles mixtes se limitent au cas des régressions linéaires. Nous avons décidé d’étudier une variable réponse différente, soit la durée de déplacement. De plus, il faut noter que puisque la densité de population est un effet d’arrondissement, les résultats obtenus nous donneront des effets fixes inter-arrondissement. Cela étant dit, il nous est impossible d’isoler l’effet de la densité de la population tout en prenant en compte les effets fixe inter groupe (arrondissement), sans avoir une colinéarité parfaite entre les deux. 
 Dans un premier temps, il nous est impossible d’utiliser le modèle de densité de population que l’on a fait dans la seconde partie. Au lieu, nous allons observer l’effets des membres et de la fin de semaine sur la durée de déplacement tout en incluant l’effet inter arrondissement. 
