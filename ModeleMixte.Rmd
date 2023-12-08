@@ -181,26 +181,35 @@ Il est à noter que dans ce cas, ça ne fait pas vraiment de sens d’utiliser u
 
 On peut voir dans le tableau anova ci-dessous la comparaison entre deux modèles, chaque modèle contient les mêmes variables. On essaye de voir l'impact de la densité de la population sur la durée de déplacement en y incluant d'autres covariables comme le nombre de stations par arrondissement et la variable fin de semaine. On n'inclut pas les membres dans ces modèles principalement parce que la densité a un impact sur les membres, et ces derniers influent à leur tour sur la durée de déplacement. Cela créerait une boucle d'interdépendance entre la densité, les membres, et la durée de déplacement, ce qui compliquerait l'analyse et pourrait entraîner des résultats difficiles à interpréter. Enfin, la seule différence entre les deux modèles, c'est qu'on inclut dans le deuxième modèle un effet de corrélation intra-station avec une structure d'équicorrélation. Il est possible d'observer que cet effet est bien significatif pour tout niveau d’alpha raisonnable.
 
+On ne montre pas la table de régression ici, pusique certains autres modèles risque d'être mieux adapté à la structure de nos données, donc on préfère montrer ces-dernier seulement. 
 
 ```{r}
 dat$arrond <- as.factor(dat$arrond)
 
-mod0 <- gls(dur ~ density + wkend + nb_stations, data = dat) 
-mod1 <- gls(dur ~  density + wkend + nb_stations, correlation = corCompSymm(form = ~ 1|station), data = dat)
+mod_dens_0 <- gls(dur ~ density + wkend + nb_stations, data = dat) 
+mod_dens_1 <- gls(dur ~  density + wkend + nb_stations, correlation = corCompSymm(form = ~ 1|station), data = dat)
 
-anova(mod0,mod1)
-
-summary(mod1)
+anova(mod_dens_0,mod_dens_1)
 
 ```
 
 
 ## Modèle avec effet aléatoire sur l'ordonnée à l'origine incluant une structure de corrélation intra-station
 
+Dans la table anova ci-dessous, on vois la comparaison entre le fait d'ajouter un effet aléatoire avec ou sans structure de corrélation intra-station. Le deuxième modèle dans la table montre que l'ajout d'effet aléatoire sur l'ordonée à l'orgine est significative pour tout niveau de alpha raisonnable. 
+
 ```{r}
 
+mod_dens_3 <- lme(dur ~ density + wkend + nb_stations, random = ~1|station,data = dat)
+mod_dens_4 <- lme(dur ~  density + wkend + nb_stations, random = ~1|station ,correlation = corCompSymm(form = ~ 1|station), data = dat)
 
+anova(mod_dens_3,mod_dens_4, type = 'LR')
 
+```
+Dans la table de régression ci-dessous on peut voir l'effet de la densité qui affecte en moyenne positivement la durée de déplacement en minutes, même chose concernant la fin de semaine. On peut voir que la différence entre la fin de semaine et la semaine est d'en moyenne 13 minutes de déplacements. Cependant, la structure de corrélation d'équicorrélation intra station donne un rho extrêmement petit, il est à se demander si c'est la bonne structure de corrélation à utiliser où même s'il y a une structure de corrélation intra station. 
+
+```{r}
+summary(mod_dens_4)
 ```
 
 
