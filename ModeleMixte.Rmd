@@ -370,8 +370,7 @@ De plus, on remarque que tous les coefficients des variables explicatives sont s
 ```{r}
 anova(modèleavecOàO,modèleEAsurWeekend)
 ```
-
-On obtient une valeur de p très petite et une valeur de LRT de 50.34873. Ce qui veut dire que nous pouvons rejeter H0 et conclure que les modèles avec effets aléatoires sur la variable `wkend` est significativement différent à tout niveau de alpha raisonnable par rapport au modèle avec seulement un effet aléatoire sur l'ordonnée à l'origine et donc que ces effets aléatoires sont nécessaires. L'effet aléatoire sur `wkend` est donc nécessaire. De plus, on remarque que le BIC avec le modèle avec effets aléatoires sur la variable `wkend` est plus petit, ce qui indique aussi que ce modèle est mieux.
+Nous obtenons un BIC petit avec le modèle incluant un effet aléatoire sur le variable `wkend` ce qui indique que ce modèle est mieux. Même si le test LRT est un test non-standard ici, nous pouvons tout de même l'effectuer, nous obtenons une valeur de p très petite et une valeur de LRT de 50.34873. Ce qui veut dire que nous pouvons rejeter H0 et conclure que le modèle avec effets aléatoires sur la variable `wkend` est significativement différent à tout niveau de alpha raisonnable par rapport au modèle avec seulement un effet aléatoire sur l'ordonnée à l'origine. L'effet aléatoire sur `wkend` est donc nécessaire.
 
 Dans ce modèle, nous avons poser les effets aléatoires comme étant corrélés. Cependant, il se peut que ces effets soient indépendants. Nous allons donc développer un modèle qui considère ces effets aléatoires indépendants et le comparer avec le modèle ci-dessus.
 
