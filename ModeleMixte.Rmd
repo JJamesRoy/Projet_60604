@@ -111,7 +111,7 @@ summary(mod_fest)
 
 Nous allons attendre avant d'interpréter le modèle.
 
-Nous allons maintenant tester des modèle avec effets aléatoires pour voir s'il est possible d'améliorer l'inférence et la précision des résultats. 
+Nous allons maintenant tester des modèle avec effets aléatoires pour voir s'il est possible d'améliorer l'inférence et la précision des résultats étant donné les problématiques expliqués plus tôt.
 
 ## Modèle avec effets aléatoires
 
@@ -264,6 +264,6 @@ Nous remarquons que L.Ratio = __ et p-value = __ pour le modèle 3a et L.Ratio =
 
 Pour le modèle
 
-
+# Conclusion
 
 # Contributions des membres
