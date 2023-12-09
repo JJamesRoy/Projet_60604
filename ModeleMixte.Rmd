@@ -57,6 +57,126 @@ dat = read.csv("dat_full_m.csv")
 
 # Introduction
 
+# Impact des lieux touristiques
+
+```{r impactSiteTouristiquesData, results='hide'}
+#Préparation des données pour analyse de l'impact des sites touristiques
+bixi_raw_data_df = read.csv("bixi1.csv", sep=",", header = T)
+# Importation des données de stations: Nom, latitude et Longitude
+stations_raw_data_df=read.csv("2021_stations.csv", sep = ",", header = T, encoding='latin_1')
+#head(stations_raw_data_df)
+
+#Jointure aux données bixi
+bixi_with_name_df=merge(bixi_raw_data_df,stations_raw_data_df, by.x = "station",by.y = "pk", all.x = T, all.y = F)
+#head(bixi_with_name_df)
+
+#Importation des données de stations: Nom, arrondissement, latitude, longitude
+bixi_stations_df=read.csv("bixi_stations_full.csv", sep = ",", header = T, encoding='latin_1')
+bixi_stations_df$STATIONARRONDISSEMENT[bixi_stations_df$STATIONARRONDISSEMENT=="Mont-Royal"]="Le Plateau-Mont-Royal"
+#head(bixi_stations_df)
+
+# merge pour inclure les arrondissements
+bixi_with_arrond_df=merge(bixi_with_name_df,bixi_stations_df, by.x = 'name',by.y = 'STATIONNAME', all.x = T, all.y = F)
+#head(bixi_with_arrond_df)
+
+bixiWithArron_clean_df=data.frame(name=bixi_with_arrond_df$name,latitude=bixi_with_arrond_df$latitude,
+      longitude=bixi_with_arrond_df$longitude,arrondissement=bixi_with_arrond_df$STATIONARRONDISSEMENT,
+      bixi_with_arrond_df[,names(bixi_raw_data_df)])
+#bixiWithArron_clean_df
+
+##Import lieux intérêts montréal
+mtl_lieuxInterets_raw_data_df=read.csv("lieux_d_interet.csv", sep = ",", header = T)
+mtl_lieuxInterets_raw_data_df
+
+##Import lieux intérêts longueuil
+longueuil_lieuxInterets_raw_data_df=read.csv("installations_longueuil_riche.csv", sep=",", header = T, encoding = 'latin_1')
+longueuil_lieuxInterets_raw_data_df
+
+##Import lieux intérêts laval
+laval_lieuxInterets_raw_data_df=read.csv("sites-de-loisirs_laval.csv", sep=",", header = T)
+laval_lieuxInterets_raw_data_df
+
+##Montréal: Nombre de site par arrondissement
+cat_lieux_touristique=c("Établissement culturel","Bâtiment et lieu d'intérêt","Art public","Circuit et parcours","Attrait touristique","Lieu de diffusion","Centre de congrès / d'exposition")
+mtl_lieuxInterets_df=mtl_lieuxInterets_raw_data_df[mtl_lieuxInterets_raw_data_df$Catégorie %in% cat_lieux_touristique,]
+nb_sitesTouristiques_by_arrondissement <- mtl_lieuxInterets_df %>% 
+  group_by(Arrondissement) %>%
+  summarise(nb_tour=n())
+
+###On ajuste le nom des arrondissements pour s'aligner avec ceux dans nos données bixi
+nb_sitesTouristiques_by_arrondissement$Arrondissement[nb_sitesTouristiques_by_arrondissement$Arrondissement=="Côte-des-Neiges–Notre-Dame-de-Grâce"]="Côte-des-Neiges - Notre-Dame-de-Grâce"
+nb_sitesTouristiques_by_arrondissement$Arrondissement[nb_sitesTouristiques_by_arrondissement$Arrondissement=="Mercier–Hochelaga-Maisonneuve"]="Mercier - Hochelaga-Maisonneuve"
+#nb_sitesTouristiques_by_arrondissement$Arrondissement[nb_sitesTouristiques_by_arrondissement$Arrondissement=="Le Plateau-Mont-Royal"]="Mont-Royal"
+nb_sitesTouristiques_by_arrondissement$Arrondissement[nb_sitesTouristiques_by_arrondissement$Arrondissement=="Rivière-des-Prairies–Pointe-aux-Trembles"]="Rivière-des-Prairies - Pointe-aux-Trembles"
+nb_sitesTouristiques_by_arrondissement$Arrondissement[nb_sitesTouristiques_by_arrondissement$Arrondissement=="Rosemont–La Petite-Patrie"]="Rosemont - La Petite-Patrie"
+nb_sitesTouristiques_by_arrondissement$Arrondissement[nb_sitesTouristiques_by_arrondissement$Arrondissement=="Villeray–Saint-Michel–Parc-Extension"]="Villeray - Saint-Michel - Parc-Extension"
+nb_sitesTouristiques_by_arrondissement$Arrondissement[nb_sitesTouristiques_by_arrondissement$Arrondissement=="Ville de Westmount"]="Westmount"
+
+##Longueuil: Nombre de site par arrondissement
+longueuil_lieuxInterets_df=longueuil_lieuxInterets_raw_data_df[longueuil_lieuxInterets_raw_data_df$ARRONDISSEMENT=="Arrondissement du Vieux-Longueuil" & longueuil_lieuxInterets_raw_data_df$Catégorie=="Tourisme",]
+longueuil_nb_tour=nrow(longueuil_lieuxInterets_df)
+nb_sitesTouristiques_by_arrondissement=rbind(nb_sitesTouristiques_by_arrondissement,
+          data.frame(Arrondissement='Longueuil',nb_tour=longueuil_nb_tour))
+
+##Laval: Nombre de site par arrondissement
+cat_lieux_touristique_laval=c("Aréna","Salle de spectacle","Centre de création / Espace de diffusion","Centre sportif")
+laval_lieuxInterets_df=laval_lieuxInterets_raw_data_df[laval_lieuxInterets_raw_data_df$descr_type_site %in% cat_lieux_touristique_laval,]
+laval_nb_tour=nrow(laval_lieuxInterets_df)
+nb_sitesTouristiques_by_arrondissement=rbind(nb_sitesTouristiques_by_arrondissement,
+          data.frame(Arrondissement='Laval',nb_tour=laval_nb_tour))
+
+nb_sitesTouristiques_by_arrondissement
+
+#Merge avec les données bixi
+bixi_df=merge(bixiWithArron_clean_df,nb_sitesTouristiques_by_arrondissement,by.x = 'arrondissement',by.y = 'Arrondissement', all.x = T, all.y = F)
+bixi_df$wday <- as.factor(bixi_df$wday)
+bixi_df$mem <- as.factor(bixi_df$mem)
+bixi_df$wkend <- as.integer(bixi_df$wday == "Saturday" | bixi_df$wday == "Sunday")
+bixi_df
+
+```
+
+Tout d'abord, rappelons que dans la partie 2, cette section visait à analyser l'impact du nombre des lieux touristiques sur l'utilisation des Bixi. Nous avions donc enrichis nos données avec la variable `nb_tour` qui représentait le nombre de site touristique par arrondissement. Nous avions ensuite agrégé les autres données par arrondissement, par jour et par type de membre. Dans cette partie, puisque nous nous intéressons également aux corrélations potentielles intra-station, nous utilisons les données non-agrégées. Ainsi notre variable identifiant est `station` (l'identificateur unique de la station). Nous incluons les variables `wkend` (indicateur de fin de semaine), `mem` (indicateur membre), `holiday` (indicateur jour férié), `temp` (température moyenne quotidienne), `rain` (quantité de précipitations en mm quotidienne), `nb_tour`. Évidement nous avons exclus la variable `n_stat` qui est le nombre de stations par arrondissement.
+
+Dans la partie 2, nous avons utilisé le nombre de déplacement pour quantifier l'utilisation des Bixi. Étant donné qu'il s'agit d'une variable de dénombrement, un modèle de régression généralisé avec une loi de poisson serait probablement plus adapté. Or les modèles linéaires mixtes étudiés, reposent sur des hypothèses de normalité des erreurs. Ces derniers, dans certains cas se réflètent sur la variable dépendante conditionnellement aux variables indépendantes. Nous utilisons donc la durée des déplacements (`dur`) pour quantifier l'utilisation des bixi tel que précisé d'ailleurs dans l'énoncé de la partie 2. Au final, il s'agira donc de voir l'impact du nombre de site touristiques sur la durée totale des déplacements. 
+
+Pour faire nos interprétations, il nous faut dans un premier temps identifier le modèle le plus approprié. Vu la structure de nos données, le meilleur modèle qui inclurait une structure de corrélation sur les erreurs serait celui basé sur l'équicorrélation. En effet, nous n'avons pas le même nombre d'observations pour chaque station. De plus, Certaines journées sont manquantes ce qui rend absurde l'utilisation d'une structure autorégressive puisque la distance entre les différentes journées des mesures dont nous disposons est aléatoire. Par ailleurs, on peut imaginer que le contexte socio-démographique dans lequel se situe une station fait en sorte qu'il y a une équicorrélation entre les différents trajets qui se font dans une même station. Nous allons donc comparer un modèle de régression ordinaire à un modèle avec une structure d'équicorrélation sur les erreurs. Vu qu'ajouter un effet aléatoire pour l'ordonnée à l'origine revient à utiliser une structure d'équicorrélation, nous explorerons ensuite un modèle avec effets aléatoires sur la variable XXX et l'ordonnée.  
+
+<!-- Pour y arriver, nous allons identifier le meilleur modèle qui tient compte d'une structure de corrélation sur les erreurs. Ensuite, nous verrons si ce modèle est une simplification adéquate d'un modèle qui intègre des effets aléatoires sur l'ordonnée à l'origine.  -->
+
+**Enfin nous explorerons un modèle qui tient compte des effets aléatoires sur la variable xxxxx (faire un choix de variable et justifier le choix)**
+
+## Modèle sans effet aléatoire et avec structure de corrélation intra-station
+
+```{r, results='hide'}
+# ilt_ord <- gls(dur ~ as.factor(mm) + as.factor(dd) + wday + mem + holiday + temp 
+#                + rain + nb_tour, data=bixi_df)
+ilt_ord <- gls(dur ~ wkend + mem + holiday + temp 
+               + rain + nb_tour, data=bixi_df)
+summary(ilt_ord)
+```
+Nous présentons ci-dessous le modèle ajusté qui suppose une structure de covariance d'équicorrélation.
+```{r}
+ilt_cs <- gls(dur ~ wkend + mem + holiday + temp + rain + nb_tour, 
+              correlation=corCompSymm(form = ~1 | station), data=bixi_df)
+summary(ilt_cs)
+```
+Le paramètre de corrélation estimé est $\hat{\rho}=0.465$ avec une variance estimée de $\hat{\sigma}=61504$. Il est pertinent ici de se demander si la corrélation est significative. Pour cela nous testons: $H_0: \rho=0$ Vs $H_1: \rho \neq 0$. Nous effectuons ce test à l'aide du LRT dont la sortie est présentée ci-dessous
+
+```{r}
+anova(ilt_ord,ilt_cs)
+```
+La valeur de la statistique de test est 4514 et la valeur-p est très petit (<0.0001). On rejete donc l'hypothèse nulle ($H_0$) et on conclue que la corrélation intra-station est significative. Nous pouvons donc nous fier sur l'interprétation issue de modèle utilisant la structure d'équicorrélation sur les erreurs. Sur la sortie de ce modèle présenté plus haut, on peut constater que la valeur-p associé aux paramètres estimés des différentes variables est 0. Donc chacune des variables du modèle a un effet significatif sur la durée totale des déplacements dans chaque station. En l'occurence, le nombre de site touristique a un effet significatif sur la durée des déplacements. Pour chaque site touristique de plus, la durée total des déplacements augmente en moyenne de 0.44 min lorsque les autres variables restent inchangées. En pratique, cette augmentation peut paraitre dérisoire.   
+```{r, results='hide'}
+ilt_ar <- gls(dur ~ wkend + mem + holiday + temp + rain + nb_tour, 
+              correlation=corAR1(form = ~1 | station), data=bixi_df)
+summary(ilt_ar)
+```
+
+## Modèles avec effets aléatoires sur la variable explicative XXXX (à déterminer)
+
+## Limitations
+
 # Impact des festivals
 
 ```{r}
@@ -271,6 +391,7 @@ Nous remarquons que LRT = 2.327591 et p-value = 0.1217. Dans ce cas, nous ne pou
 De plus, on remarque que le BIC avec le modèle avec effets aléatoires indépendants est légèrement plus petit, ce qui indique que ce modèle est mieux.
 
 Nous pouvons donc conclure que le meilleur modèle avec l'effet de la densité de population est le modèle avec effets aléatoires sur l'ordonnée à l'origine et la variable de la fin de semaine et que les effets aléatoires sont indépendants.
+
 
 # Conclusion
 
