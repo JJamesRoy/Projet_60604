@@ -98,9 +98,9 @@ dat$log_n_tot = log(dat$n_tot)
 
 Dans cette section, nous allons nous intéresser à la même question que dans la deuxième partie du travail, soit analyser si les festivals tenus dans la ville de Montréal ont un impact sur l'utilisation des Bixi. Ainsi, nous allons utiliser le log du nombres totaux des déplacements (`log_n_tot`).
 
-Pour tester cette question, nous allons nous baser sur les données utilisées dans les parties précédentes. Il est cependant utile de respécifier comment la variable `festival`est construite. Celle-ci est une variable de décompte qui note le nombre de festivals ayant lieu cette journée. Ainsi, elle est fixe peu importe la station, tant que la journée est pareille. La variable peut prendre la valeur de 0 à 6.
+Pour tester cette question, nous allons nous baser sur les données utilisées dans les parties précédentes. Il est cependant utile de respécifier comment la variable `festival` est construite. Celle-ci est une variable de décompte qui note le nombre de festivals ayant lieu cette journée. Ainsi, elle est fixe peu importe la station, tant que la journée est pareille. La variable peut prendre la valeur de 0 à 6.
 
-En addition à un modèle de régression linéaire, comme utilisé lors de la deuxième partie, nous allons tester les effets des festivals en permettant une corrélation intra-station.
+En addition à un modèle de régression linéaire, comme utilisé lors de la deuxième partie, nous allons tester les effets des festivals en permettant une corrélation intra-station. En effet, étant donné que nous évaluons les stations à plusieurs moments dans le temps, il y a indéniablement une corrélation intra-station, il faut ainsi ajuster les modèles ou du moins tester si la corrélation est significative.
 
 ## Modèle de régression linéaire
 
@@ -135,7 +135,7 @@ summary(mod_fest_2a)
 #getVarCov(mod_fest_2a, type = "random.effects")
 ```
 
-Enfin, pour le dernier modèle, il sera très similaire au dernier, mais nous allons forcer sorte  $\sigma_{\beta01}$ = 0, c’est-à-dire, avec des effets aléatoires indépendants.
+Enfin, pour le dernier modèle, il sera très similaire au dernier, mais nous allons forcer sorte $\sigma_{\beta01}$ = 0, c'est-à-dire, avec des effets aléatoires indépendants.
 
 ```{r}
 mod_fest_2b <- lme(n_tot ~ festival + mm + holiday + wkend, random = list(station = pdDiag(~1 + festival)), data = dat)
@@ -145,10 +145,13 @@ summary(mod_fest_2b)
 ```{r}
 #getVarCov(mod_fest_2b, type = "random.effects")
 ```
+
 ### Tests sur les modèles
+
 ```{r}
 anova(mod_fest_2a, mod_fest_2b, type = "LR")
 ```
+
 Pour le premier test, le LRT test $H_0 : \sigma_{b01} = 0\ vs. H_1 : \sigma_{b01} \neq 0$. Comme la p-value est plus petite que 0.0001, nous pouvons rejeter $H_0$ et conclure que la corrélation entre les effets aléatoires est nécessaire (aussi supporté par le BIC et le AIC).
 
 Nous allons ainsi comparer `mod_fest_2a` avec `mod_fest_2` pour voir s'il est nécessaire de rajouter des effets aléatoires pour la variable `festival`. Cette fois-ci nous allons les comparer avec AIC et BIC, car c'est un test non-standard.
@@ -175,26 +178,25 @@ comparison_table <- data.frame(
 print(comparison_table)
 ```
 
-Étant donné que les valeurs d'AIC et de BIC sont inférieur dans le modèle linéaire, nous allons utiliser ce modèle. Il semble donc que modéliser un intercepte et un effet aléatoire pour la variable  `festival` pour chaque sujet ne soit pas utile.
+Étant donné que les valeurs d'AIC et de BIC sont inférieur dans le modèle linéaire, nous allons utiliser ce modèle. Il semble donc que modéliser un intercepte et un effet aléatoire pour la variable `festival` pour chaque sujet ne soit pas utile. Ainsi, la corrélation intra-station ne semble pas biaisé
 
 Ainsi, nous pouvons intérpréter le premier modèle (linéaire de base).
 
-Avec ce modèle simple, la tenue de festival semble avoir un effet positif et significatif sur le nombre total de déplacements. En effet, un festival de plus par jour augmente en moyenne le nombre total de déplacement de 5% par jour par stations (toutes choses étant égales par ailleurs). De plus, cette augmentation est significatif à tout niveau de alpha raisonnable. 
+Avec ce modèle simple, la tenue de festival semble avoir un effet positif et significatif sur le nombre total de déplacements. En effet, un festival de plus par jour augmente en moyenne le nombre total de déplacement de 5% par jour par stations (toutes choses étant égales par ailleurs). De plus, cette augmentation est significatif à tout niveau de alpha raisonnable.
 
 # Effet de la densité de population
 
-Précédemment nous avions étudié l’effet de la densité de population sur le nombre total de déplacements. *Cependant, puisque le nombre total de déplacements est une variable de dénombrement, il est plus convenable d’utiliser un modèle linéaire généralisé*. Néanmoins, puisque nos connaissances actuelles des modèles mixtes se limitent au cas des régressions linéaires. Nous avons décidé d’étudier une variable réponse différente, soit la durée de déplacement. De plus, il faut noter que puisque la densité de population est un effet d’arrondissement, alors il n’est pas nécessaire d’inclure les arrondissements dans nos modèles. *C’est-à-dire qu’en incluant la densité on observe les changements qui arrivent inter-arrondissement sans avoir besoin d’inclure les arrondissements dans nos modèles*. À cet égard, la densité de population est calculée de la même façon que dans la seconde partie du travail, soit la population totale par arrondissement par rapport à la superficie de l’arrondissement même. Ainsi, nous avons ajouté les données d’arrondissement selon les stations tout en y incluant la population totale et la superficie de chaque arrondissement.
+Précédemment nous avions étudié l'effet de la densité de population sur le nombre total de déplacements. *Cependant, puisque le nombre total de déplacements est une variable de dénombrement, il est plus convenable d'utiliser un modèle linéaire généralisé*. Néanmoins, puisque nos connaissances actuelles des modèles mixtes se limitent au cas des régressions linéaires. Nous avons décidé d'étudier une variable réponse différente, soit la durée de déplacement. De plus, il faut noter que puisque la densité de population est un effet d'arrondissement, alors il n'est pas nécessaire d'inclure les arrondissements dans nos modèles. *C'est-à-dire qu'en incluant la densité on observe les changements qui arrivent inter-arrondissement sans avoir besoin d'inclure les arrondissements dans nos modèles*. À cet égard, la densité de population est calculée de la même façon que dans la seconde partie du travail, soit la population totale par arrondissement par rapport à la superficie de l'arrondissement même. Ainsi, nous avons ajouté les données d'arrondissement selon les stations tout en y incluant la population totale et la superficie de chaque arrondissement.
 
-Tout d'abord, chaque arrondissement contient plusieurs stations. En d’autres termes, on peut assumer qu’il risque d’y avoir une corrélation intra-station, comme expliqué dans les sections précédentes. Cette corrélation a pour effet de biaiser les tests d’hypothèse qu’on a abordés dans la deuxième partie du travail. Autrement dit, en plus d’avoir des effets de groupe inter arrondissement capté par la densité de population, nous nous retrouvons avec des effets qui varie intra stations, ce qui est problématique dans un cas d’inférence. Pour aborder cette problématique, nous allons utiliser une approche à effets aléatoire, nous permettant ainsi de ne pas utiliser une pléthore de variable explicative pour contrôler les effets de chaque station. 
+Tout d'abord, chaque arrondissement contient plusieurs stations. En d'autres termes, on peut assumer qu'il risque d'y avoir une corrélation intra-station, comme expliqué dans les sections précédentes. Cette corrélation a pour effet de biaiser les tests d'hypothèse qu'on a abordés dans la deuxième partie du travail. Autrement dit, en plus d'avoir des effets de groupe inter arrondissement capté par la densité de population, nous nous retrouvons avec des effets qui varie intra stations, ce qui est problématique dans un cas d'inférence. Pour aborder cette problématique, nous allons utiliser une approche à effets aléatoire, nous permettant ainsi de ne pas utiliser une pléthore de variable explicative pour contrôler les effets de chaque station.
 
-Enfin, dans la seconde partie du travail, nous avions inclus d’autres variables explicatives par arrondissement, comme le nombre de parcs, le nombre de bibliothèques, le nombre de centres communautaires, etc., puisque ce sont des variables fixes par arrondissement, elles vont naturellement sur estimer l’effet de la densité si on ne les inclut pas. Une solution serait de contrôler pour les effets inter-stations,ce qui nous permettrait de ne pas avoir à inclure tous les effets d’arrondissements fixes, puisqu'ils seraient captés par les effets de station fixes. Pour ce faire il est possible d'inclure les stations dans nos modèles, mais il est aussi possible d'inclure le nombre de stations par arrondissement. Le nombre de stations par arrondissement `nb_stations` est une variable continue qui varie seulement lorsqu'on change d'arrondissement. Ainsi, sa variation nous permettrait de capter l'effet moyen lorsqu'on augmente le nombre de stations ce qui est représenté dans nos données comme le moment où l'on change d'arrondissement.
-
+Enfin, dans la seconde partie du travail, nous avions inclus d'autres variables explicatives par arrondissement, comme le nombre de parcs, le nombre de bibliothèques, le nombre de centres communautaires, etc., puisque ce sont des variables fixes par arrondissement, elles vont naturellement sur estimer l'effet de la densité si on ne les inclut pas. Une solution serait de contrôler pour les effets inter-stations,ce qui nous permettrait de ne pas avoir à inclure tous les effets d'arrondissements fixes, puisqu'ils seraient captés par les effets de station fixes. Pour ce faire il est possible d'inclure les stations dans nos modèles, mais il est aussi possible d'inclure le nombre de stations par arrondissement. Le nombre de stations par arrondissement `nb_stations` est une variable continue qui varie seulement lorsqu'on change d'arrondissement. Ainsi, sa variation nous permettrait de capter l'effet moyen lorsqu'on augmente le nombre de stations ce qui est représenté dans nos données comme le moment où l'on change d'arrondissement.
 
 ## Modèle sans effet aléatoire avec structure de corélation intra-station
 
-Il est à noter que dans ce cas, qu'on considère une structure d'équicorrélation où la structure de corrélation dans chaque station est la même. On peut voir dans le tableau anova ci-dessous la comparaison entre deux modèles, chaque modèle contient les mêmes variables. On essaye de voir l'impact de la densité de la population sur la durée de déplacement en minutes  en y incluant d'autres covariables comme le nombre de stations par arrondissement et la variable fin de semaine. On n'inclut pas les membres dans ces modèles principalement parce que la densité a un impact sur les membres, et ces derniers influent à leur tour sur la durée de déplacement, en incluant les membres on crée une sorte de biais post-traitement. Enfin, la seule différence entre les deux modèles, c'est qu'on inclut dans le deuxième modèle un effet de corrélation intra-station avec une structure d'équicorrélation. Il est possible d'observer que cet effet est bien significatif pour tout niveau d’alpha raisonnable.
+Il est à noter que dans ce cas, qu'on considère une structure d'équicorrélation où la structure de corrélation dans chaque station est la même. On peut voir dans le tableau anova ci-dessous la comparaison entre deux modèles, chaque modèle contient les mêmes variables. On essaye de voir l'impact de la densité de la population sur la durée de déplacement en minutes en y incluant d'autres covariables comme le nombre de stations par arrondissement et la variable fin de semaine. On n'inclut pas les membres dans ces modèles principalement parce que la densité a un impact sur les membres, et ces derniers influent à leur tour sur la durée de déplacement, en incluant les membres on crée une sorte de biais post-traitement. Enfin, la seule différence entre les deux modèles, c'est qu'on inclut dans le deuxième modèle un effet de corrélation intra-station avec une structure d'équicorrélation. Il est possible d'observer que cet effet est bien significatif pour tout niveau d'alpha raisonnable.
 
-On ne montre pas la table de régression ici, pusique certains autres modèles risque d'être mieux adapté à la structure de nos données, donc on préfère montrer ces-dernier seulement. 
+On ne montre pas la table de régression ici, pusique certains autres modèles risque d'être mieux adapté à la structure de nos données, donc on préfère montrer ces-dernier seulement.
 
 ```{r}
 dat$arrond <- as.factor(dat$arrond)
@@ -206,10 +208,9 @@ anova(mod_dens_0,mod_dens_1)
 
 ```
 
-
 ## Modèle avec effet aléatoire sur l'ordonnée à l'origine incluant une structure de corrélation intra-station
 
-Dans la table anova ci-dessous, on vois la comparaison entre le fait d'ajouter un effet aléatoire avec ou sans structure de corrélation intra-station. Le deuxième modèle dans la table montre que l'ajout d'effet aléatoire sur l'ordonée à l'orgine est significative pour tout niveau de alpha raisonnable. 
+Dans la table anova ci-dessous, on vois la comparaison entre le fait d'ajouter un effet aléatoire avec ou sans structure de corrélation intra-station. Le deuxième modèle dans la table montre que l'ajout d'effet aléatoire sur l'ordonée à l'orgine est significative pour tout niveau de alpha raisonnable.
 
 ```{r}
 
@@ -220,29 +221,33 @@ anova(mod_dens_3,mod_dens_4, type = 'LR')
 
 ```
 
-Dans la table de régression ci-dessous on peut voir l'effet de la densité qui affecte en moyenne positivement la durée de déplacement en minutes, même chose concernant la fin de semaine. On peut voir que la différence entre la fin de semaine et la semaine est d'en moyenne 13 minutes de déplacements. Cependant, la structure de corrélation d'équicorrélation intra station donne un rho extrêmement petit, il est à se demander si c'est la bonne structure de corrélation à utiliser où même s'il y a une structure de corrélation intra station. 
+Dans la table de régression ci-dessous on peut voir l'effet de la densité qui affecte en moyenne positivement la durée de déplacement en minutes, même chose concernant la fin de semaine. On peut voir que la différence entre la fin de semaine et la semaine est d'en moyenne 13 minutes de déplacements. Cependant, la structure de corrélation d'équicorrélation intra station donne un rho extrêmement petit, il est à se demander si c'est la bonne structure de corrélation à utiliser où même s'il y a une structure de corrélation intra station.
 
 ```{r}
 summary(mod_dens_4)
 ```
 
 ## Modèles avec effets aléatoires sur la variable explicative wkend
+
 Nous allons maintenant ajouter aussi des effets aléatoires sur la variable explicative `wkend`.
 
 En effet, il est possible qu'il y aille un effet différent de la fin de semaine (variable `wkend`) sur la durée des déplacements dépendamment de la station, nous pouvons penser par exemple à des stations qui serait géographiquement mieux placés ou moins bien placés que d'autres par rapport à des activités que les gens font plus la fin de semaine comme des cinémas, des bars, etc. Par exemple, une station très éloignées des attraits de fin de semaine pourrait résulter à des trajets plus long la fin de semaine.
 
 Le modèle obtenu est le suivant:
+
 ```{r}
 modèleEAsurWeekend <- lme(dur ~ wkend + density + nb_stations, random = ~1 + wkend | station, data = dat)
 modèleavecOàO <- mod_dens_4
 summary(modèleEAsurWeekend)
 ```
+
 Il est possible d'effectuer un LRT test pour évaluer si l'ajout d'effets aléatoires sur la variable `wkend` était nécessaire avec un test LRT Ho: $\beta_{i,wkend}$ = 0 vs H1: $\beta_{i,wkend} \neq$ 0.
+
 ```{r}
 anova(modèleavecOàO,modèleEAsurWeekend)
 ```
-On obtient une valeur de p très petite et une valeur de LRT de 50.34873. Ce qui veut dire que nous pouvons rejeter H0 et conclure que les modèles avec effets aléatoires sur la variable `wkend` est significativement différent à tout niveau de alpha raisonnable par rapport au modèle avec seulement un effet aléatoire sur l'ordonnée à l'origine et donc que ces effets aléatoires sont nécessaires. L'effet aléatoire sur `wkend` est donc nécessaire. De plus, on remarque que le BIC avec le modèle avec effets aléatoires sur la variable `wkend` est plus petit, ce qui indique aussi que ce modèle est mieux.
 
+On obtient une valeur de p très petite et une valeur de LRT de 50.34873. Ce qui veut dire que nous pouvons rejeter H0 et conclure que les modèles avec effets aléatoires sur la variable `wkend` est significativement différent à tout niveau de alpha raisonnable par rapport au modèle avec seulement un effet aléatoire sur l'ordonnée à l'origine et donc que ces effets aléatoires sont nécessaires. L'effet aléatoire sur `wkend` est donc nécessaire. De plus, on remarque que le BIC avec le modèle avec effets aléatoires sur la variable `wkend` est plus petit, ce qui indique aussi que ce modèle est mieux.
 
 Dans ce modèle, nous avons poser les effets aléatoires comme étant corrélés. Cependant, il se peut que ces effets soient indépendants. Nous allons donc développer un modèle qui considère ces effets aléatoires indépendants et le comparer avec le modèle ci-dessus.
 
@@ -250,19 +255,22 @@ Dans ce modèle, nous avons poser les effets aléatoires comme étant corrélés
 modèleEAsurWeekendA <- lme(dur ~ wkend + nb_stations + density, random = list(station = pdDiag(~1 + wkend)), data = dat)
 summary(modèleEAsurWeekendA)
 ```
+
 Il est possible d'effectuer un LRT test pour évaluer si de considérer les effets aléatoires sur la variable wkend et l'ordonnée à l'origine comme indépendants est mieux avec un test LRT Ho: $\sigma_{\beta_{01}}$ = 0 vs H1: $\sigma_{\beta_{01}} \neq$ 0.
+
 ```{r}
 anova(modèleEAsurWeekend,modèleEAsurWeekendA, type = "LR")
 ```
 
 Nous remarquons que LRT = 2.327591 et p-value = 0.1217. Dans ce cas, nous ne pouvons pas rejeter l'hypothèse H0 et pouvons conclure que le modèle est n'est pas significativement différent que le modèle avec des effets aléatoires corrélées avec un niveau d'alpha de 0.10 et donc il semble que la corrélation entre les effets aléatoires ne soit pas nécessaire.
 
-# Conclusion
+## Conclusion
 
 De plus, on remarque que le BIC avec le modèle avec effets aléatoires indépendants est légèrement plus petit, ce qui indique que ce modèle est mieux.
 
 Nous pouvons donc conclure que le meilleur modèle avec l'effet de la densité de population est le modèle avec effets aléatoires sur l'ordonnée à l'origine et la variable de la fin de semaine et que les effets aléatoires sont indépendants.
 
+# Conclusion
 
 # Contributions des membres
 
