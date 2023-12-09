@@ -104,18 +104,20 @@ En addition à un modèle de régression linéaire, comme utilisé lors de la de
 
 ## Modèle de régression linéaire
 
+Pour tous les modèles, nous allons les tester avant de les interpréter.
+
 ```{r, out.height = "30%"}
 mod_fest = gls(log_n_tot ~ festival + mm + holiday + wkend, data = dat)
 summary(mod_fest)
 ```
 
-Nous allons attendre avant d'interpréter le modèle.
+Ci-dessus la sortie du modèle pareille à celui de la deuxième partie, les coefficients ont légérement changé, car nous avons réparé quelques erreurs dans la construction des données (certaines observations avaient été omis).
 
 Nous allons maintenant tester des modèle avec effets aléatoires pour voir s'il est possible d'améliorer l'inférence et la précision des résultats étant donné les problématiques expliqués plus tôt.
 
 ## Modèle avec effets aléatoires
 
-D'abord, pour le premier modèle avec effet, nous allons permettent une corrélation intra-station en mettant des effets aléatoire pour l'ordonnée à l'origine. Nous n'allons pas intérpréter les résultats de suite, nous allons d'abord comparer les résultats.
+D'abord, pour le premier modèle avec effet aléatoires, nous allons permettent une corrélation intra-station en mettant des effets aléatoire pour l'ordonnée à l'origine. De cette façon, nous allons capter des effets différents sur l'intercepte pour les différentes stations.
 
 ```{r}
 mod_fest_2 <- lme(n_tot ~ festival + mm + holiday + wkend, random = ~1 | station,
@@ -123,7 +125,7 @@ data = dat)
 summary(mod_fest_2)
 ```
 
-Ensuite, pour le deuxième modèle, nous allons instaurer des effets aléatoires pour l'ordonnée à l'origine et pour le coefficient de festival. Nous allons aussi attendre avant d'interpréter les résultats.
+Ensuite, pour le deuxième modèle, nous allons instaurer des effets aléatoires pour l'ordonnée à l'origine et pour le coefficient de festival. En effet, il est probable de croire que les festivals ont un effets différents selon la station (surtout si on ne controle pas pour les arrondissements ou les stations.)
 
 ```{r}
 mod_fest_2a <- lme(n_tot ~ festival + mm + holiday + wkend, random = ~1 + festival |
@@ -135,7 +137,7 @@ summary(mod_fest_2a)
 #getVarCov(mod_fest_2a, type = "random.effects")
 ```
 
-Enfin, pour le dernier modèle, il sera très similaire au dernier, mais nous allons forcer sorte $\sigma_{\beta01}$ = 0, c'est-à-dire, avec des effets aléatoires indépendants.
+Enfin, pour le dernier modèle, il sera très similaire au dernier, mais nous allons forcer sorte $\sigma_{\beta01}$ = 0, c'est-à-dire, avec des effets aléatoires indépendants. C'est-à-dire que les effets aléatoires ne sont pas corrélés avec les stations différentes. 
 
 ```{r}
 mod_fest_2b <- lme(n_tot ~ festival + mm + holiday + wkend, random = list(station = pdDiag(~1 + festival)), data = dat)
