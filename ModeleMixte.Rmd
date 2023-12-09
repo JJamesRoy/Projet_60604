@@ -257,15 +257,15 @@ anova(modèleEAsurWeekend,modèleEAsurWeekendA, type = "LR")
 
 Nous remarquons que LRT = 2.327591 et p-value = 0.1217. Dans ce cas, nous ne pouvons pas rejeter l'hypothèse H0 et pouvons conclure que le modèle est n'est pas significativement différent que le modèle avec des effets aléatoires corrélées avec un niveau d'alpha de 0.10 et donc il semble que la corrélation entre les effets aléatoires ne soit pas nécessaire.
 
-<<<<<<< HEAD
 # Conclusion
-=======
+
 De plus, on remarque que le BIC avec le modèle avec effets aléatoires indépendants est légèrement plus petit, ce qui indique que ce modèle est mieux.
 
 Nous pouvons donc conclure que le meilleur modèle avec l'effet de la densité de population est le modèle avec effets aléatoires sur l'ordonnée à l'origine et la variable de la fin de semaine et que les effets aléatoires sont indépendants.
->>>>>>> 0116e0b926b8d5a35864d38e64fd86b7d2b0f7f6
+
 
 # Contributions des membres
+
 Abdoul:
 
 Alfred:
