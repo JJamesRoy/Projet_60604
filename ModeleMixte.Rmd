@@ -226,44 +226,50 @@ Dans la table de régression ci-dessous on peut voir l'effet de la densité qui 
 summary(mod_dens_4)
 ```
 
-## Modèles avec intéraction et avec effets aléatoires sur les variables explicatives
+## Modèles avec effets aléatoires sur la variable explicative wkend
+Nous allons maintenant ajouter aussi des effets aléatoires sur la variable explicative `wkend`.
 
-Nous allons maintenant ajouter aussi des effets aléatoires sur les différentes variables explicatives.
+En effet, il est possible qu'il y aille un effet différent de la fin de semaine (variable `wkend`) sur la durée des déplacements dépendamment de la station, nous pouvons penser par exemple à des stations qui serait géographiquement mieux placés ou moins bien placés que d'autres par rapport à des activités que les gens font plus la fin de semaine comme des cinémas, des bars, etc. Par exemple, une station très éloignées des attraits de fin de semaine pourrait résulter à des trajets plus long la fin de semaine.
 
-En effet, il est possible qu'il y aille un effet différent de la fin de semaine (variable `wkend`) sur la durée des déplacements dépendamment de la station, nous pouvons penser par exemple à des stations qui serait géographiquement mieux placés ou moins bien placés que d'autres par rapport à des activités que les gens font plus la fin de semaine comme des cinémas, des bars, etc. Par exemple, une station très éloignées des attraits de fin de semaine pourrait résulter à des trajets plus long.
-
-Dans la même ordre d'idée, il serait aussi possible qu'il aille un effet différent d'être membre ou non (variable `mem`) sur la durée des déplacements d'après la station. Par exemple, puisque le fait d'être membre est avantageux par rapport à la durée du déplacement, il est plus avantageux pour un membre qui utilise une station plus éloignées d'attraits populaires que pour un non-membre de faire d'utiliser le bixi pour un long déplacement vers un attrait. Le membre pourrait ainsi utiliser le bixi pour des déplacements plus loin/long qu'un non-membre habitant près de la même station de bixis.
-
-Nous allons donc développer et comparer deux modèles incluant un effet aléatoire sur l'ordonnée à l'origine et:
-1- Avec effets aléatoires sur `wkend` seulement (mod3);
-2- Avec effets aléatoires sur `mem` seulement (mod4);
-Avec un modèle incluant seulement un effet aléatoire avec l'ordonnée à l'origine.
-
-Les tableaux ci-dessous effectue cette comparaison:
+Le modèle obtenu est le suivant:
 ```{r}
-mod3 <- lme(dur ~ mem + wkend + density + nb_stations + wkend*mem, random = ~1 + wkend | station, data = dat)
-mod4 <- lme(dur ~ mem + wkend+ density + nb_stations + wkend*mem, random = ~1 + mem | station, data = dat)
+modèleEAsurWeekend <- lme(dur ~ wkend + density + nb_stations, random = ~1 + wkend | station, data = dat)
+modèleavecOàO <- mod_dens_4
+summary(modèleEAsurWeekend)
 ```
-
+Il est possible d'effectuer un LRT test pour évaluer si l'ajout d'effets aléatoires sur la variable `wkend` était nécessaire avec un test LRT Ho: $\beta_{i,wkend}$ = 0 vs H1: $\beta_{i,wkend} \neq$ 0.
 ```{r}
-anova(mod_dens_4,mod3)
-anova(mod_dens_4,mod4)
+anova(modèleavecOàO,modèleEAsurWeekend)
 ```
-Pour les deux modèles, on obtient une valeur de p très petite et une valeur de L.Ratio de -- et --- pour le modèle 3 et 4 respectivement. Ce qui veut dire que nous pouvons rejeter H0 et conclure que les modèles avec effets aléatoires sur les variables explicatives est significativement différent à tout niveau de alpha raisonnable par rapport au modèle avec seulement un effet aléatoire sur l'ordonnée à l'origine.
+On obtient une valeur de p très petite et une valeur de LRT de 50.34873. Ce qui veut dire que nous pouvons rejeter H0 et conclure que les modèles avec effets aléatoires sur la variable `wkend` est significativement différent à tout niveau de alpha raisonnable par rapport au modèle avec seulement un effet aléatoire sur l'ordonnée à l'origine et donc que ces effets aléatoires sont nécessaires. L'effet aléatoire sur `wkend` est donc nécessaire. De plus, on remarque que le BIC avec le modèle avec effets aléatoires sur la variable `wkend` est plus petit, ce qui indique aussi que ce modèle est mieux.
 
-Dans ces modèles, nous avons poser les effets aléatoires comme étant corrélés. Cependant, il se peut que ces effets soient indépendants. Nous allons donc développer un modèle qui considère ces effets aléatoires indépendants (mod3a et mod4a) et les comparer avec les deux modèles ci-dessus (mod3 et mod4).
+
+Dans ce modèle, nous avons poser les effets aléatoires comme étant corrélés. Cependant, il se peut que ces effets soient indépendants. Nous allons donc développer un modèle qui considère ces effets aléatoires indépendants et le comparer avec le modèle ci-dessus.
 
 ```{r}
-mod3a <- lme(dur ~ mem + nb_stations + density + wkend*mem, random = list(station = pdDiag(~1 + wkend)), data = dat)
-mod4a <- lme(dur ~ mem + nb_stations + density + wkend*mem, random = list(station = pdDiag(~1 + mem)), data = dat)
-
-anova(mod3,mod3a, type = "LR")
-anova(mod4,mod4a, type = "LR")
+modèleEAsurWeekendA <- lme(dur ~ wkend + nb_stations + density, random = list(station = pdDiag(~1 + wkend)), data = dat)
+summary(modèleEAsurWeekendA)
 ```
-Nous remarquons que L.Ratio = __ et p-value = __ pour le modèle 3a et L.Ratio = __ et p-value = __ pour le modèle 4a. Dans les deux cas, nous rejetons l'hypothèse H0 et pouvons conclure que ces modèles sont significativement différents que leur modèles avec des effets aléatoires corrélées avec un niveau d'alpha de 0.05.
+Il est possible d'effectuer un LRT test pour évaluer si de considérer les effets aléatoires sur la variable wkend et l'ordonnée à l'origine comme indépendants est mieux avec un test LRT Ho: $\sigma_{\beta_{01}}$ = 0 vs H1: $\sigma_{\beta_{01}} \neq$ 0.
+```{r}
+anova(modèleEAsurWeekend,modèleEAsurWeekendA, type = "LR")
+```
 
-Pour le modèle
+Nous remarquons que LRT = 2.327591 et p-value = 0.1217. Dans ce cas, nous ne pouvons pas rejeter l'hypothèse H0 et pouvons conclure que le modèle est n'est pas significativement différent que le modèle avec des effets aléatoires corrélées avec un niveau d'alpha de 0.10 et donc il semble que la corrélation entre les effets aléatoires ne soit pas nécessaire.
 
+<<<<<<< HEAD
 # Conclusion
+=======
+De plus, on remarque que le BIC avec le modèle avec effets aléatoires indépendants est légèrement plus petit, ce qui indique que ce modèle est mieux.
+
+Nous pouvons donc conclure que le meilleur modèle avec l'effet de la densité de population est le modèle avec effets aléatoires sur l'ordonnée à l'origine et la variable de la fin de semaine et que les effets aléatoires sont indépendants.
+>>>>>>> 0116e0b926b8d5a35864d38e64fd86b7d2b0f7f6
 
 # Contributions des membres
+Abdoul:
+
+Alfred:
+
+James:
+
+Samuel: Modèle avec la densité et effets aléatoires sur les variables explicatives
