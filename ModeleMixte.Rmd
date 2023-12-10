@@ -428,11 +428,10 @@ De plus, on remarque que le BIC avec le modèle avec effets aléatoires indépen
 ## Limitations 
 Dans un cas d’inférence, nous avons clairement un problème de variables omises. C’est-à-dire que même si on est capable de contrôler pour les effets fixes entre les arrondissements en utilisant la variation de la densité et la variation du nombre de stations, il reste plusieurs effets variables que nous sommes incapables de capter. Par exemple, puisque les données sont recueillies en 2021, nous sommes conscients qu'à certains moments de l'année, des restrictions de sortie étaient en place en raison de la COVID. Ces restrictions pouvaient évoluer au fil du temps en fonction de la situation au Québec, et elles pouvaient également varier en fonction de la région au Québec. Ainsi, ce type de donnée manquante ne nous permet pas de bien observer le comportement de la densité de population sur la durée de déplacement. 
 
-## Conclusion
-Nous pouvons donc conclure que le meilleur modèle avec l'effet de la densité de population est le modèle avec effets aléatoires sur l'ordonnée à l'origine et la variable de la fin de semaine et que les effets aléatoires sont indépendants.
-
-
 # Conclusion
+
+Pour conclure, le meilleur modèle avec l'effet de la densité de population est le modèle avec effets aléatoires sur l'ordonnée à l'origine et la variable de la fin de semaine et que les effets aléatoires sont indépendants.
+
 
 # Contributions des membres
 
