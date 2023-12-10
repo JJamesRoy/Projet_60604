@@ -57,10 +57,9 @@ dat = read.csv("dat_full_m.csv")
 
 # Introduction
 
-Dans la seconde partie, nous voulions tester plusieurs effets sur le nombre de déplacements. Nous voulions d’abord tester les effets des festivals sur le nombre de déplacements, ensuite nous avons observé le portrait démographique de la ville, en examinant comment la densité de la population et les lieux culturels affectaient le nombre de déplacements en Bixi. Cela dit, notre méthodologie reste inchangée en ce qui concerne l'impact des festivals. Nous cherchons à étudier ici comment les festivals influent sur le nombre total de déplacements en Bixi, tout en ajustant la structure de corrélation à l’intérieur des stations. Cependant, quant à la densité de la population et les lieux culturels, pour éviter la modification de cette variable de dénombrement (nombre de déplacement), nous avons décidé de changer notre variable réponse. Ainsi, nous allons observer l'effet de la densité et des lieux touristiques sur la durée de déplacement en minutes. 
+Dans la seconde partie, nous voulions tester plusieurs effets sur le nombre de déplacements. Nous voulions d'abord tester les effets des festivals sur le nombre de déplacements, ensuite nous avons observé le portrait démographique de la ville, en examinant comment la densité de la population et les lieux culturels affectaient le nombre de déplacements en Bixi. Cela dit, notre méthodologie reste inchangée en ce qui concerne l'impact des festivals. Nous cherchons à étudier ici comment les festivals influent sur le nombre total de déplacements en Bixi, tout en ajustant la structure de corrélation à l'intérieur des stations. Cependant, quant à la densité de la population et les lieux culturels, pour éviter la modification de cette variable de dénombrement (nombre de déplacement), nous avons décidé de changer notre variable réponse. Ainsi, nous allons observer l'effet de la densité et des lieux touristiques sur la durée de déplacement en minutes.
 
-Bien sûr, tout comme la seconde partie, le but est toujours de répondre aux besoins entrepreneurials de l’OBNL. Il est à noter que les constats que nous avions posés tiennent toujours. C’est-à-dire que nous essayons toujours d’observer qu’est-ce qui fait augmenter le nombre d’utilisations des Bixi, dans le but de décarboniser les moyens de transport dans la province. La seule différence ici, c’est que dans la plupart des observations se feront sur la durée de déplacement en minutes et non sur le nombre de déplacements.
-
+Bien sûr, tout comme la seconde partie, le but est toujours de répondre aux besoins entrepreneurials de l'OBNL. Il est à noter que les constats que nous avions posés tiennent toujours. C'est-à-dire que nous essayons toujours d'observer qu'est-ce qui fait augmenter le nombre d'utilisations des Bixi, dans le but de décarboniser les moyens de transport dans la province. La seule différence ici, c'est que dans la plupart des observations se feront sur la durée de déplacement en minutes et non sur le nombre de déplacements.
 
 # Impact des lieux touristiques
 
@@ -143,9 +142,9 @@ bixi_df
 
 Tout d'abord, rappelons que dans la partie 2, cette section visait à analyser l'impact du nombre des lieux touristiques sur l'utilisation des Bixi. Nous avions donc enrichis nos données avec la variable `nb_tour` qui représentait le nombre de site touristique par arrondissement. Nous avions ensuite agrégé les autres données par arrondissement, par jour et par type de membre. Dans cette partie, puisque nous nous intéressons également aux corrélations potentielles intra-station, nous utilisons les données non-agrégées. Ainsi notre variable identifiant est `station` (l'identificateur unique de la station). Nous incluons les variables `wkend` (indicateur de fin de semaine), `mem` (indicateur membre), `holiday` (indicateur jour férié), `temp` (température moyenne quotidienne), `rain` (quantité de précipitations en mm quotidienne), `nb_tour`. Évidement nous avons exclus la variable `n_stat` qui est le nombre de stations par arrondissement.
 
-Dans la partie 2, nous avons utilisé le nombre de déplacement pour quantifier l'utilisation des Bixi. Étant donné qu'il s'agit d'une variable de dénombrement, un modèle de régression généralisé avec une loi de poisson serait probablement plus adapté. Or les modèles linéaires mixtes étudiés, reposent sur des hypothèses de normalité des erreurs. Ces derniers, dans certains cas se réflètent sur la variable dépendante conditionnellement aux variables indépendantes. Nous utilisons donc la durée des déplacements (`dur`) pour quantifier l'utilisation des bixi tel que précisé d'ailleurs dans l'énoncé de la partie 2. Au final, il s'agira donc de voir l'impact du nombre de site touristiques sur la durée totale des déplacements. 
+Dans la partie 2, nous avons utilisé le nombre de déplacement pour quantifier l'utilisation des Bixi. Étant donné qu'il s'agit d'une variable de dénombrement, un modèle de régression généralisé avec une loi de poisson serait probablement plus adapté. Or les modèles linéaires mixtes étudiés, reposent sur des hypothèses de normalité des erreurs. Ces derniers, dans certains cas se réflètent sur la variable dépendante conditionnellement aux variables indépendantes. Nous utilisons donc la durée des déplacements (`dur`) pour quantifier l'utilisation des bixi tel que précisé d'ailleurs dans l'énoncé de la partie 2. Au final, il s'agira donc de voir l'impact du nombre de site touristiques sur la durée totale des déplacements.
 
-Pour faire nos interprétations, il nous faut dans un premier temps identifier le modèle le plus approprié. Vu la structure de nos données, le meilleur modèle qui inclurait une structure de corrélation sur les erreurs serait celui basé sur l'équicorrélation. En effet, nous n'avons pas le même nombre d'observations pour chaque station. De plus, Certaines journées sont manquantes ce qui rend absurde l'utilisation d'une structure autorégressive puisque la distance entre les différentes journées des mesures dont nous disposons est aléatoire. Par ailleurs, on peut imaginer que le contexte socio-démographique dans lequel se situe une station fait en sorte qu'il y a une équicorrélation entre les différents trajets qui se font dans une même station. Nous allons donc comparer un modèle de régression ordinaire à un modèle avec une structure d'équicorrélation sur les erreurs. Vu qu'ajouter un effet aléatoire pour l'ordonnée à l'origine revient à utiliser une structure d'équicorrélation, nous explorerons ensuite un modèle avec effets aléatoires sur la variable `wkend` et l'ordonnée à l'origine.  
+Pour faire nos interprétations, il nous faut dans un premier temps identifier le modèle le plus approprié. Vu la structure de nos données, le meilleur modèle qui inclurait une structure de corrélation sur les erreurs serait celui basé sur l'équicorrélation. En effet, nous n'avons pas le même nombre d'observations pour chaque station. De plus, Certaines journées sont manquantes ce qui rend absurde l'utilisation d'une structure autorégressive puisque la distance entre les différentes journées des mesures dont nous disposons est aléatoire. Par ailleurs, on peut imaginer que le contexte socio-démographique dans lequel se situe une station fait en sorte qu'il y a une équicorrélation entre les différents trajets qui se font dans une même station. Nous allons donc comparer un modèle de régression ordinaire à un modèle avec une structure d'équicorrélation sur les erreurs. Vu qu'ajouter un effet aléatoire pour l'ordonnée à l'origine revient à utiliser une structure d'équicorrélation, nous explorerons ensuite un modèle avec effets aléatoires sur la variable `wkend` et l'ordonnée à l'origine.
 
 <!-- Pour y arriver, nous allons identifier le meilleur modèle qui tient compte d'une structure de corrélation sur les erreurs. Ensuite, nous verrons si ce modèle est une simplification adéquate d'un modèle qui intègre des effets aléatoires sur l'ordonnée à l'origine. **Enfin nous explorerons un modèle qui tient compte des effets aléatoires sur la variable xxxxx (faire un choix de variable et justifier le choix)** -->
 
@@ -158,18 +157,23 @@ ilt_ord <- gls(dur ~ wkend + mem + holiday + temp
                + rain + nb_tour, data=bixi_df)
 summary(ilt_ord)
 ```
+
 Nous présentons ci-dessous le modèle ajusté qui suppose une structure de covariance d'équicorrélation.
+
 ```{r}
 ilt_cs <- gls(dur ~ wkend + mem + holiday + temp + rain + nb_tour, 
               correlation=corCompSymm(form = ~1 | station), data=bixi_df)
 summary(ilt_cs)
 ```
+
 Le paramètre de corrélation estimé est $\hat{\rho}=0.465$ avec une variance estimée de $\hat{\sigma}^2=61504$. Il est pertinent ici de se demander si la corrélation est significative. Pour cela nous testons: $H_0: \rho=0$ Vs $H_1: \rho \neq 0$. Nous effectuons ce test à l'aide du LRT dont la sortie est présentée ci-dessous
 
 ```{r}
 anova(ilt_ord,ilt_cs)
 ```
-La valeur de la statistique de test est 4514 et la valeur-p est très petit (<0.0001). On rejete donc l'hypothèse nulle ($H_0$) et on conclue que la corrélation intra-station est significative. Nous pouvons donc nous fier sur l'interprétation issue de modèle utilisant la structure d'équicorrélation sur les erreurs. Sur la sortie de ce modèle présenté plus haut, on peut constater que la valeur-p associé aux paramètres estimés des différentes variables est 0. Donc chacune des variables du modèle a un effet significatif sur la durée totale des déplacements dans chaque station. En l'occurence, le nombre de site touristique a un effet significatif sur la durée des déplacements. Pour chaque site touristique de plus, la durée total des déplacements augmente en moyenne de 0.44 min lorsque les autres variables restent inchangées. En pratique, cette augmentation peut paraitre dérisoire.   
+
+La valeur de la statistique de test est 4514 et la valeur-p est très petit (\<0.0001). On rejete donc l'hypothèse nulle ($H_0$) et on conclue que la corrélation intra-station est significative. Nous pouvons donc nous fier sur l'interprétation issue de modèle utilisant la structure d'équicorrélation sur les erreurs. Sur la sortie de ce modèle présenté plus haut, on peut constater que la valeur-p associé aux paramètres estimés des différentes variables est 0. Donc chacune des variables du modèle a un effet significatif sur la durée totale des déplacements dans chaque station. En l'occurence, le nombre de site touristique a un effet significatif sur la durée des déplacements. Pour chaque site touristique de plus, la durée total des déplacements augmente en moyenne de 0.44 min lorsque les autres variables restent inchangées. En pratique, cette augmentation peut paraitre dérisoire.
+
 ```{r, results='hide'}
 ilt_ar <- gls(dur ~ wkend + mem + holiday + temp + rain + nb_tour, 
               correlation=corAR1(form = ~1 | station), data=bixi_df)
@@ -177,6 +181,7 @@ summary(ilt_ar)
 ```
 
 ## Modèles avec effets aléatoires sur la variable explicative wkend
+
 Dans cette section, nous ajustons un modèle qui suppose un effet aléatoire sur l'ordonnée à l'origine et sur la variable `wkend`. En effet, on peut penser qu'en général la fin de semaine à un impact sur la durée des déplacements, mais qu'il y a une certaine spécificité propre à chaque station en raison peut-être de leur proximité avec des sites touristiques ou d'autres endroits qui sont prisés pour des activités en fin de semaine. Le modèle ajusté est présenté ci-dessous
 
 ```{r}
@@ -184,12 +189,14 @@ ilt_rndEffect <- lme(dur ~ wkend + mem + holiday + temp + rain + nb_tour,
               random=~1 + wkend | station, data=bixi_df)
 summary(ilt_rndEffect)
 ```
+
 Le AIC et BIC de ce modèle sont respectivement 134108 et 134188. Ceux du modèle qui inclus une structure d'équicorrélation sur les erreurs sont respectivement 134249 et 134314. Le présent modèle qui inclus les effets aléatoires sur l'ordonnée à l'origine et sur la variable `wkend` est donc meilleur.
 
 ```{r, results='hide'}
 station_by_maxTour_df=bixi_df %>% group_by(station) %>% summarise(max_tour=max(nb_tour), nbObs=n()) %>% arrange(desc(max_tour))
 station_by_maxTour_df
 ```
+
 ```{r, results='hide'}
 station_max_id=station_by_maxTour_df[which.max(station_by_maxTour_df$max_tour)
                                      ,'station']
@@ -198,16 +205,21 @@ station_min_id=station_by_maxTour_df[which.min(station_by_maxTour_df$max_tour),
 c(station_max_id,station_min_id)
 ind=unique(bixi_df$station)
 ```
+
 ```{r, results='hide'}
 getVarCov(ilt_rndEffect, individual = which(ind==31), type = "marginal" )
 ```
+
 ```{r, results='hide'}
 round(cov2cor(as.matrix(getVarCov(ilt_rndEffect, individual = which(ind==31), type = "marginal" )[[1]])),2)
 ```
-La sortie ci-dessous est la matrice de corrélation marginale de la station 271. À l'instar de celle des autres stations, on constate que certaines observations dans une station sont corrélées. Cette corrélation se produit entre les observations qui ont les mêmes indicateurs de fin de semaine. Autrement dit, les observations qui sont en fin de semaine sont corrélées, celles qui sont en semaine sont corrélées entre elles, etc. 
+
+La sortie ci-dessous est la matrice de corrélation marginale de la station 271. À l'instar de celle des autres stations, on constate que certaines observations dans une station sont corrélées. Cette corrélation se produit entre les observations qui ont les mêmes indicateurs de fin de semaine. Autrement dit, les observations qui sont en fin de semaine sont corrélées, celles qui sont en semaine sont corrélées entre elles, etc.
+
 ```{r}
 round(cov2cor(as.matrix(getVarCov(ilt_rndEffect, individual = which(ind==271), type = "marginal" )[[1]])),2)
 ```
+
 ```{r, results='hide'}
 round(cov2cor(as.matrix(getVarCov(ilt_rndEffect, individual = which(ind==636), type = "marginal" )[[1]])),2)
 ```
@@ -216,9 +228,9 @@ round(cov2cor(as.matrix(getVarCov(ilt_rndEffect, individual = which(ind==636), t
 bixi_df[bixi_df$station==636,]
 ```
 
-
 ## Limitations
-Une limitation importante qu'on peut soulever est liée aux observations aléatoirement manquantes pour chaque station, en raison du fait que nous utilisons un sous-ensemble de données. Ainsi les stations avec très peu d'observations peuvent souffrir d'une variance plus grande. De plus, il est possible que les spécificités propres aux groupes ne soient pas bien captées en raison de la dominance artificielle de certaines caractéristiques dans certains groupes plutôt que dans d'autres. Également les données mis à notre disposition ne nous ont pas permis de tester des structure de corrélation autorégressive qui pourrait même en lumière d'autres constats. 
+
+Une limitation importante qu'on peut soulever est liée aux observations aléatoirement manquantes pour chaque station, en raison du fait que nous utilisons un sous-ensemble de données. Ainsi les stations avec très peu d'observations peuvent souffrir d'une variance plus grande. De plus, il est possible que les spécificités propres aux groupes ne soient pas bien captées en raison de la dominance artificielle de certaines caractéristiques dans certains groupes plutôt que dans d'autres. Également les données mis à notre disposition ne nous ont pas permis de tester des structure de corrélation autorégressive qui pourrait même en lumière d'autres constats.
 
 # Impact des festivals
 
@@ -261,7 +273,7 @@ dat$log_n_tot = log(dat$n_tot)
 
 Dans cette section, nous allons nous intéresser à la même question que dans la deuxième partie du travail, soit analyser si les festivals tenus dans la ville de Montréal ont un impact sur l'utilisation des Bixi. Ainsi, nous allons utiliser le log du nombres totaux des déplacements (`log_n_tot`) qui s'apparente d'une loi normale comme montré dans la 2e partie du travail.
 
-Pour tester cette question, nous allons nous baser sur les données utilisées dans les parties précédentes. Il est cependant utile de respécifier comment la variable `festival` est construite. Celle-ci est une variable de décompte qui note le nombre de festivals ayant lieu cette journée. Ainsi, elle est fixe peu importe la station, tant que la journée est pareille. La variable peut prendre la valeur de 0 à 6. Les autres variables sont assez explicites. 
+Pour tester cette question, nous allons nous baser sur les données utilisées dans les parties précédentes. Il est cependant utile de respécifier comment la variable `festival` est construite. Celle-ci est une variable de décompte qui note le nombre de festivals ayant lieu cette journée. Ainsi, elle est fixe peu importe la station, tant que la journée est pareille. La variable peut prendre la valeur de 0 à 6. Les autres variables sont assez explicites.
 
 En addition à un modèle de régression linéaire, comme utilisé lors de la deuxième partie, nous allons tester les effets des festivals en permettant une corrélation intra-station. En effet, étant donné que nous évaluons les stations à plusieurs moments dans le temps, il y a indéniablement une corrélation intra-station, il faut ainsi ajuster les modèles ou du moins tester si la corrélation est significative. Ensuite, nous allons interpréter le coefficient de la variable d'intérêt sur le modèle choisi par les tests.
 
@@ -300,7 +312,7 @@ summary(mod_fest_2a)
 #getVarCov(mod_fest_2a, type = "random.effects")
 ```
 
-Enfin, pour le dernier modèle, il sera très similaire au dernier, mais nous allons forcer sorte $\sigma_{\beta01}$ = 0, c'est-à-dire, avec des effets aléatoires indépendants. C'est-à-dire que les effets aléatoires ne sont pas corrélés avec les stations différentes. 
+Enfin, pour le dernier modèle, il sera très similaire au dernier, mais nous allons forcer sorte $\sigma_{\beta01}$ = 0, c'est-à-dire, avec des effets aléatoires indépendants. C'est-à-dire que les effets aléatoires ne sont pas corrélés avec les stations différentes.
 
 ```{r}
 mod_fest_2b <- lme(n_tot ~ festival + mm + holiday + wkend, random = list(station = pdDiag(~1 + festival)), data = dat)
@@ -350,6 +362,7 @@ Ainsi, nous pouvons intérpréter le premier modèle (linéaire de base).
 Avec ce modèle simple, la tenue de festival semble avoir un effet positif et significatif sur le nombre total de déplacements. En effet, un festival de plus par jour augmente en moyenne le nombre total de déplacement de 5% par jour par stations (toutes choses étant égales par ailleurs). De plus, cette augmentation est significatif à tout niveau de alpha raisonnable.
 
 ## Limitations
+
 Une des principales limitation est, comme expliqué au premier modèle, le manque de données sur certaines stations. De plus, une autre limitation pourrait être le manque de variable, il serait certainement possible de mieux spécifier les modèles si on faisait plus de test sur quelles variables ajouter ou enlever.
 
 # Effet de la densité de population
@@ -378,12 +391,13 @@ anova(mod_dens_0,mod_dens_1)
 
 ```
 
-Dans la table de régression ci-dessous, on peut voir que  l'effet de la densité affecte en moyenne positivement la durée de déplacement en minutes, pareillement pour la fin de semaine. Aussi, on peut voir que la différence entre les journées de fin de semaine et les journées de semaine est d'en moyenne 13 minutes de déplacements. De plus, la densité et le nombre de stations sont significatifs pour tout niveau d’alpha raisonnable. Concernant la variable de fin de semaine `wkend`, sa valeur p est plus petite qu’alpha = 5%, on peut ainsi conclure que sa moyenne est significativement non nulle.
+Dans la table de régression ci-dessous, on peut voir que l'effet de la densité affecte en moyenne positivement la durée de déplacement en minutes, pareillement pour la fin de semaine. Aussi, on peut voir que la différence entre les journées de fin de semaine et les journées de semaine est d'en moyenne 13 minutes de déplacements. De plus, la densité et le nombre de stations sont significatifs pour tout niveau d'alpha raisonnable. Concernant la variable de fin de semaine `wkend`, sa valeur p est plus petite qu'alpha = 5%, on peut ainsi conclure que sa moyenne est significativement non nulle.
 
 ```{r}
 summary(mod_dens_1)
 
 ```
+
 Concernant l'entreprise, cette dernière peut s'attendre à voir en moyenne une augmentation de la durée de déplacement lorsque la densité de la population augmente. Par exemple, si la densité de la population d'un arrondissement augmente de 1000 personnes par kilomètre carré, l'entreprise pourrait anticiper une augmentation moyenne de la durée de déplacement en Bixi d'environ 6.8 minutes. Ainsi, même si nous n'observons pas la même variable réponse que dans la seconde partie du travail, nos conclusions restent similaires, la seule différence ici, c'est qu'en utilisant une structure de corrélation intra-station nous diminuons la probabilité de faire une erreur de type 1 dans notre modèle.
 
 ## Modèles avec effets aléatoires sur la variable explicative wkend
@@ -407,6 +421,7 @@ De plus, on remarque que tous les coefficients des variables explicatives sont s
 ```{r}
 anova(modèleavecOàO,modèleEAsurWeekend)
 ```
+
 Nous obtenons un BIC petit avec le modèle incluant un effet aléatoire sur le variable `wkend` ce qui indique que ce modèle est mieux. Même si le test LRT est un test non-standard ici, nous pouvons tout de même l'effectuer, nous obtenons une valeur de p très petite et une valeur de LRT de 50.34873. Ce qui veut dire que nous pouvons rejeter H0 et conclure que le modèle avec effets aléatoires sur la variable `wkend` est significativement différent à tout niveau de alpha raisonnable par rapport au modèle avec seulement un effet aléatoire sur l'ordonnée à l'origine. L'effet aléatoire sur `wkend` est donc nécessaire.
 
 Dans ce modèle, nous avons poser les effets aléatoires comme étant corrélés. Cependant, il se peut que ces effets soient indépendants. Nous allons donc développer un modèle qui considère ces effets aléatoires indépendants et le comparer avec le modèle ci-dessus.
@@ -428,14 +443,17 @@ Nous remarquons que LRT = 2.327591 et p-value = 0.1217. Dans ce cas, nous ne pou
 
 De plus, on remarque que le BIC avec le modèle avec effets aléatoires indépendants est légèrement plus petit, ce qui indique que ce modèle est mieux pour expliquer la durée des déplacements.
 
-## Limitations 
-Dans un cas d’inférence, nous avons clairement un problème de variables omises. C’est-à-dire que même si on est capable de contrôler pour les effets fixes entre les arrondissements en utilisant la variation de la densité et la variation du nombre de stations, il reste plusieurs effets variables que nous sommes incapables de capter. Par exemple, puisque les données sont recueillies en 2021, nous sommes conscients qu'à certains moments de l'année, des restrictions de sortie étaient en place en raison de la COVID. Ces restrictions pouvaient évoluer au fil du temps en fonction de la situation au Québec, et elles pouvaient également varier en fonction de la région au Québec. Ainsi, ce type de donnée manquante ne nous permet pas de bien observer le comportement de la densité de population sur la durée de déplacement. 
+## Limitations
+
+Dans un cas d'inférence, nous avons clairement un problème de variables omises. C'est-à-dire que même si on est capable de contrôler pour les effets fixes entre les arrondissements en utilisant la variation de la densité et la variation du nombre de stations, il reste plusieurs effets variables que nous sommes incapables de capter. Par exemple, puisque les données sont recueillies en 2021, nous sommes conscients qu'à certains moments de l'année, des restrictions de sortie étaient en place en raison de la COVID. Ces restrictions pouvaient évoluer au fil du temps en fonction de la situation au Québec, et elles pouvaient également varier en fonction de la région au Québec. Ainsi, ce type de donnée manquante ne nous permet pas de bien observer le comportement de la densité de population sur la durée de déplacement.
 
 ## Conclusion
+
 Nous pouvons donc conclure que le meilleur modèle avec l'effet de la densité de population est le modèle avec effets aléatoires sur l'ordonnée à l'origine et la variable de la fin de semaine et que les effets aléatoires sont indépendants.
 
-
 # Conclusion
+
+Pour le modèle sur les festivals, un modèle linéaire non-mixte est suffisant pour estimer l'impact des festivals sur le nombre de déplacements. 
 
 # Contributions des membres
 
