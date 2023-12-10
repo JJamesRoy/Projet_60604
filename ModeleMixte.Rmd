@@ -3,7 +3,7 @@ title: "Projet BIXI - Partie 4: Modèle linéaire mixte"
 subtitle: "MATH60604 - Modélisation statistique"
 author: "Abdoul Wassi Badirou, Alfred Assal, James Roy, Samuel Croteau"
 date: "`r Sys.Date()`"
-geometry: margin=1.5cm
+geometry: margin=2cm
 output:
   # bookdown::html_document2:
   #   toc: yes
@@ -57,7 +57,7 @@ dat = read.csv("dat_full_m.csv")
 
 # Introduction
 
-Dans la seconde partie, nous voulions tester plusieurs effets sur le nombre de déplacements. Nous voulions d'abord tester les effets des festivals sur le nombre de déplacements, ensuite nous avons observé le portrait démographique de la ville, en examinant comment la densité de la population et les lieux culturels affectaient le nombre de déplacements en Bixi. Cela dit, notre méthodologie reste inchangée en ce qui concerne l'impact des festivals. Nous cherchons à étudier ici comment les festivals influent sur le nombre total de déplacements en Bixi, tout en ajustant la structure de corrélation à l'intérieur des stations. Cependant, quant à la densité de la population et les lieux culturels, pour éviter la modification de cette variable de dénombrement (nombre de déplacement), nous avons décidé de changer notre variable réponse. Ainsi, nous allons observer l'effet de la densité et des lieux touristiques sur la durée de déplacement en minutes.
+Dans la seconde partie, nous voulions tester plusieurs effets sur le nombre de déplacements. Tout comme dans la partie 2, nous évaluons l'impact des lieux touristiques sur l'utilisation des bixi,  ensuite les effets des festivals sur le nombre de déplacements, puis nous avons observé le portrait démographique de la ville, en examinant comment la densité de la population et les lieux culturels affectaient le nombre de déplacements en Bixi. Cela dit, notre méthodologie reste inchangée en ce qui concerne l'impact des festivals. Nous cherchons à étudier ici comment les festivals influent sur le nombre total de déplacements en Bixi, tout en ajustant la structure de corrélation à l'intérieur des stations. Cependant, quant à la densité de la population et les lieux culturels et touristiques, pour éviter la modification de cette variable de dénombrement (nombre de déplacement), nous avons décidé de changer notre variable réponse. Surtout que la variable de dénombrement est probablement mieux adapté à des modèles généralisés utilisant par exemple la loi de poisson comme nous l'avons vu dans la partie 3. Ainsi, nous allons observer l'effet de la densité et des lieux touristiques sur la durée de déplacement en minutes.
 
 Bien sûr, tout comme la seconde partie, le but est toujours de répondre aux besoins entrepreneurials de l'OBNL. Il est à noter que les constats que nous avions posés tiennent toujours. C'est-à-dire que nous essayons toujours d'observer qu'est-ce qui fait augmenter le nombre d'utilisations des Bixi, dans le but de décarboniser les moyens de transport dans la province. La seule différence ici, c'est que dans la plupart des observations se feront sur la durée de déplacement en minutes et non sur le nombre de déplacements.
 
@@ -172,7 +172,7 @@ Le paramètre de corrélation estimé est $\hat{\rho}=0.465$ avec une variance e
 anova(ilt_ord,ilt_cs)
 ```
 
-La valeur de la statistique de test est 4514 et la valeur-p est très petit (\<0.0001). On rejete donc l'hypothèse nulle ($H_0$) et on conclue que la corrélation intra-station est significative. Nous pouvons donc nous fier sur l'interprétation issue de modèle utilisant la structure d'équicorrélation sur les erreurs. Sur la sortie de ce modèle présenté plus haut, on peut constater que la valeur-p associé aux paramètres estimés des différentes variables est 0. Donc chacune des variables du modèle a un effet significatif sur la durée totale des déplacements dans chaque station. En l'occurence, le nombre de site touristique a un effet significatif sur la durée des déplacements. Pour chaque site touristique de plus, la durée total des déplacements augmente en moyenne de 0.44 min lorsque les autres variables restent inchangées. En pratique, cette augmentation peut paraitre dérisoire.
+La valeur de la statistique de test est 4514 et la valeur-p est très petite (\<0.0001). On rejete donc l'hypothèse nulle ($H_0$) et on conclue que la corrélation intra-station est significative. Nous pouvons donc nous fier sur l'interprétation issue de modèle utilisant la structure d'équicorrélation sur les erreurs. Sur la sortie de ce modèle présenté plus haut, on peut constater que la valeur-p associée aux paramètres estimés des différentes variables est 0. Donc chacune des variables du modèle a un effet significatif sur la durée totale des déplacements dans chaque station. En l'occurence, le nombre de site touristique a un effet significatif sur la durée des déplacements. Pour chaque site touristique de plus, la durée total des déplacements augmente en moyenne de 0.44 min lorsque les autres variables restent inchangées. En pratique, cette augmentation peut paraitre dérisoire.
 
 ```{r, results='hide'}
 ilt_ar <- gls(dur ~ wkend + mem + holiday + temp + rain + nb_tour, 
@@ -271,7 +271,7 @@ dat$festival[is.na(dat$festival)] = 0
 dat$log_n_tot = log(dat$n_tot)
 ```
 
-Dans cette section, nous allons nous intéresser à la même question que dans la deuxième partie du travail, soit analyser si les festivals tenus dans la ville de Montréal ont un impact sur l'utilisation des Bixi. Ainsi, nous allons utiliser le log du nombres totaux des déplacements (`log_n_tot`) qui s'apparente d'une loi normale comme montré dans la 2e partie du travail.
+Dans cette section, nous allons nous intéresser à la même question que dans la deuxième partie du travail, soit analyser si les festivals tenus dans la ville de Montréal ont un impact sur l'utilisation des Bixi. Ainsi, nous allons utiliser le log du nombres totaux des déplacements (`log_n_tot`) qui s'apparente d'une loi normale, comme montré dans la 2e partie du travail, même si la vrai loi sous-jacente n'est peut-être pas normale.
 
 Pour tester cette question, nous allons nous baser sur les données utilisées dans les parties précédentes. Il est cependant utile de respécifier comment la variable `festival` est construite. Celle-ci est une variable de décompte qui note le nombre de festivals ayant lieu cette journée. Ainsi, elle est fixe peu importe la station, tant que la journée est pareille. La variable peut prendre la valeur de 0 à 6. Les autres variables sont assez explicites.
 
@@ -446,7 +446,7 @@ Dans un cas d'inférence, nous avons clairement un problème de variables omises
 
 # Conclusion
 
-Pour conclure, pour le modèle sur les festivals, un modèle linéaire non mixte est suffisant pour estimer l'impact des festivals sur le nombre de déplacements. Pour le modèle de densité, il est possible de voir qu’en ajoutant une structure d’équicorrélation sur les stations, qu’on obtient un modèle plus précis. De plus, toujours concernant les modèles sur la densité de population, on peut observer que le modèle avec effets aléatoires sur l'ordonnée à l'origine et des effets aléatoires sur la variable de la fin de semaine est plus précis tout en spécifiant que les effets aléatoires sont indépendants.
+Pour conclure, pour le modèle sur les festivals, un modèle linéaire non mixte est suffisant pour estimer l'impact des festivals sur le nombre de déplacements. Pour le modèle de densité et celui qui mesure l'impact des lieux touristiques, il est possible de voir qu’en ajoutant une structure d’équicorrélation sur les stations, qu’on obtient un modèle plus précis. Celà suggère donc que les déplacements provenant d'une même station sont raisonnablements équitablement corrélées. De plus, toujours concernant les modèles sur la densité de population, on peut observer que le modèle avec effets aléatoires sur l'ordonnée à l'origine et des effets aléatoires sur la variable de la fin de semaine est plus précis tout en spécifiant que les effets aléatoires sont indépendants. Les modèles semblent montrer également, qu'il y a potentiellement des spécificités dans chaque station associées au fait d'être en semaine ou fin de semaine. En effet, les stations qui sont proches d'évènements ou d'activités qui se font majoritairement en fin de semaine auront un effet différent sur l'utilisation des bixi par rapport à d'autres stations. En raison des données manquantes et des différents nombre d'observations pour chaque station, nous n'avons pas pu évaluer les structures de corrélation auto-régressive. En effet peut-être que les déplacements qui se font plus tard dans la saison sont mieux corrélées entre elles qu'avec celles qui se font en début de saison.
 
 
 # Contributions des membres
