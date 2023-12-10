@@ -140,11 +140,9 @@ Tout d'abord, rappelons que dans la partie 2, cette section visait à analyser l
 
 Dans la partie 2, nous avons utilisé le nombre de déplacement pour quantifier l'utilisation des Bixi. Étant donné qu'il s'agit d'une variable de dénombrement, un modèle de régression généralisé avec une loi de poisson serait probablement plus adapté. Or les modèles linéaires mixtes étudiés, reposent sur des hypothèses de normalité des erreurs. Ces derniers, dans certains cas se réflètent sur la variable dépendante conditionnellement aux variables indépendantes. Nous utilisons donc la durée des déplacements (`dur`) pour quantifier l'utilisation des bixi tel que précisé d'ailleurs dans l'énoncé de la partie 2. Au final, il s'agira donc de voir l'impact du nombre de site touristiques sur la durée totale des déplacements. 
 
-Pour faire nos interprétations, il nous faut dans un premier temps identifier le modèle le plus approprié. Vu la structure de nos données, le meilleur modèle qui inclurait une structure de corrélation sur les erreurs serait celui basé sur l'équicorrélation. En effet, nous n'avons pas le même nombre d'observations pour chaque station. De plus, Certaines journées sont manquantes ce qui rend absurde l'utilisation d'une structure autorégressive puisque la distance entre les différentes journées des mesures dont nous disposons est aléatoire. Par ailleurs, on peut imaginer que le contexte socio-démographique dans lequel se situe une station fait en sorte qu'il y a une équicorrélation entre les différents trajets qui se font dans une même station. Nous allons donc comparer un modèle de régression ordinaire à un modèle avec une structure d'équicorrélation sur les erreurs. Vu qu'ajouter un effet aléatoire pour l'ordonnée à l'origine revient à utiliser une structure d'équicorrélation, nous explorerons ensuite un modèle avec effets aléatoires sur la variable XXX et l'ordonnée.  
+Pour faire nos interprétations, il nous faut dans un premier temps identifier le modèle le plus approprié. Vu la structure de nos données, le meilleur modèle qui inclurait une structure de corrélation sur les erreurs serait celui basé sur l'équicorrélation. En effet, nous n'avons pas le même nombre d'observations pour chaque station. De plus, Certaines journées sont manquantes ce qui rend absurde l'utilisation d'une structure autorégressive puisque la distance entre les différentes journées des mesures dont nous disposons est aléatoire. Par ailleurs, on peut imaginer que le contexte socio-démographique dans lequel se situe une station fait en sorte qu'il y a une équicorrélation entre les différents trajets qui se font dans une même station. Nous allons donc comparer un modèle de régression ordinaire à un modèle avec une structure d'équicorrélation sur les erreurs. Vu qu'ajouter un effet aléatoire pour l'ordonnée à l'origine revient à utiliser une structure d'équicorrélation, nous explorerons ensuite un modèle avec effets aléatoires sur la variable `wkend` et l'ordonnée à l'origine.  
 
-<!-- Pour y arriver, nous allons identifier le meilleur modèle qui tient compte d'une structure de corrélation sur les erreurs. Ensuite, nous verrons si ce modèle est une simplification adéquate d'un modèle qui intègre des effets aléatoires sur l'ordonnée à l'origine.  -->
-
-**Enfin nous explorerons un modèle qui tient compte des effets aléatoires sur la variable xxxxx (faire un choix de variable et justifier le choix)**
+<!-- Pour y arriver, nous allons identifier le meilleur modèle qui tient compte d'une structure de corrélation sur les erreurs. Ensuite, nous verrons si ce modèle est une simplification adéquate d'un modèle qui intègre des effets aléatoires sur l'ordonnée à l'origine. **Enfin nous explorerons un modèle qui tient compte des effets aléatoires sur la variable xxxxx (faire un choix de variable et justifier le choix)** -->
 
 ## Modèle sans effet aléatoire et avec structure de corrélation intra-station
 
@@ -161,7 +159,7 @@ ilt_cs <- gls(dur ~ wkend + mem + holiday + temp + rain + nb_tour,
               correlation=corCompSymm(form = ~1 | station), data=bixi_df)
 summary(ilt_cs)
 ```
-Le paramètre de corrélation estimé est $\hat{\rho}=0.465$ avec une variance estimée de $\hat{\sigma}=61504$. Il est pertinent ici de se demander si la corrélation est significative. Pour cela nous testons: $H_0: \rho=0$ Vs $H_1: \rho \neq 0$. Nous effectuons ce test à l'aide du LRT dont la sortie est présentée ci-dessous
+Le paramètre de corrélation estimé est $\hat{\rho}=0.465$ avec une variance estimée de $\hat{\sigma}^2=61504$. Il est pertinent ici de se demander si la corrélation est significative. Pour cela nous testons: $H_0: \rho=0$ Vs $H_1: \rho \neq 0$. Nous effectuons ce test à l'aide du LRT dont la sortie est présentée ci-dessous
 
 ```{r}
 anova(ilt_ord,ilt_cs)
@@ -173,9 +171,49 @@ ilt_ar <- gls(dur ~ wkend + mem + holiday + temp + rain + nb_tour,
 summary(ilt_ar)
 ```
 
-## Modèles avec effets aléatoires sur la variable explicative XXXX (à déterminer)
+## Modèles avec effets aléatoires sur la variable explicative wkend
+Dans cette section, nous ajustons un modèle qui suppose un effet aléatoire sur l'ordonnée à l'origine et sur la variable `wkend`. En effet, on peut penser qu'en général la fin de semaine à un impact sur la durée des déplacements, mais qu'il y a une certaine spécificité propre à chaque station en raison peut-être de leur proximité avec des sites touristiques ou d'autres endroits qui sont prisés pour des activités en fin de semaine. Le modèle ajusté est présenté ci-dessous
+
+```{r}
+ilt_rndEffect <- lme(dur ~ wkend + mem + holiday + temp + rain + nb_tour, 
+              random=~1 + wkend | station, data=bixi_df)
+summary(ilt_rndEffect)
+```
+Le AIC et BIC de ce modèle sont respectivement 134108 et 134188. Ceux du modèle qui inclus une structure d'équicorrélation sur les erreurs sont respectivement 134249 et 134314. Le présent modèle qui inclus les effets aléatoires sur l'ordonnée à l'origine et sur la variable `wkend` est donc meilleur.
+
+```{r, results='hide'}
+station_by_maxTour_df=bixi_df %>% group_by(station) %>% summarise(max_tour=max(nb_tour), nbObs=n()) %>% arrange(desc(max_tour))
+station_by_maxTour_df
+```
+```{r, results='hide'}
+station_max_id=station_by_maxTour_df[which.max(station_by_maxTour_df$max_tour)
+                                     ,'station']
+station_min_id=station_by_maxTour_df[which.min(station_by_maxTour_df$max_tour),
+                                     'station']
+c(station_max_id,station_min_id)
+ind=unique(bixi_df$station)
+```
+```{r, results='hide'}
+getVarCov(ilt_rndEffect, individual = which(ind==31), type = "marginal" )
+```
+```{r, results='hide'}
+round(cov2cor(as.matrix(getVarCov(ilt_rndEffect, individual = which(ind==31), type = "marginal" )[[1]])),2)
+```
+La sortie ci-dessous est la matrice de corrélation marginale de la station 271. À l'instar de celle des autres stations, on constate que certaines observations dans une station sont corrélées. Cette corrélation se produit entre les observations qui ont les mêmes indicateurs de fin de semaine. Autrement dit, les observations qui sont en fin de semaine sont corrélées, celles qui sont en semaine sont corrélées entre elles, etc. 
+```{r}
+round(cov2cor(as.matrix(getVarCov(ilt_rndEffect, individual = which(ind==271), type = "marginal" )[[1]])),2)
+```
+```{r, results='hide'}
+round(cov2cor(as.matrix(getVarCov(ilt_rndEffect, individual = which(ind==636), type = "marginal" )[[1]])),2)
+```
+
+```{r, results='hide'}
+bixi_df[bixi_df$station==636,]
+```
+
 
 ## Limitations
+Une limitation importante qu'on peut soulever est liée aux observations aléatoirement manquantes pour chaque station, en raison du fait que nous utilisons un sous-ensemble de données. Ainsi les stations avec très peu d'observations peuvent souffrir d'une variance plus grande. De plus, il est possible que les spécificités propres aux groupes ne soient pas bien captées en raison de la dominance artificielle de certaines caractéristiques dans certains groupes plutôt que dans d'autres. Également les données mis à notre disposition ne nous ont pas permis de tester des structure de corrélation autorégressive qui pourrait même en lumière d'autres constats. 
 
 # Impact des festivals
 
@@ -397,7 +435,7 @@ Nous pouvons donc conclure que le meilleur modèle avec l'effet de la densité d
 
 # Contributions des membres
 
-Abdoul:
+Abdoul: Impact des lieux touristiques
 
 Alfred:
 
