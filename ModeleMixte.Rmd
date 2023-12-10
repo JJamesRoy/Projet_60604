@@ -351,7 +351,7 @@ Nous allons maintenant ajouter aussi des effets aléatoires sur la variable expl
 
 En effet, il est possible qu'il y aille un effet différent de la fin de semaine (variable `wkend`) sur la durée des déplacements dépendamment de la station, nous pouvons penser par exemple à des stations qui serait géographiquement mieux placés ou moins bien placés que d'autres par rapport à des activités que les gens font plus la fin de semaine comme des cinémas, des bars, etc. Par exemple, une station très éloignées des attraits de fin de semaine pourrait résulter à des trajets plus long la fin de semaine.
 
-Le modèle obtenu est le suivant:
+Le modèle obtenu (avec effet aléatoire sur l'origine, équivalent à inclure une structure d'équicorrélation intra-station) est le suivant:
 
 ```{r}
 modèleEAsurWeekend <- lme(dur ~ wkend + density + nb_stations, random = ~1 + wkend | station, data = dat)
@@ -361,11 +361,12 @@ summary(modèleEAsurWeekend)
 
 Il est possible d'effectuer un LRT test pour évaluer si l'ajout d'effets aléatoires sur la variable `wkend` était nécessaire avec un test LRT Ho: $\beta_{i,wkend}$ = 0 vs H1: $\beta_{i,wkend} \neq$ 0.
 
+De plus, on remarque que tous les coefficients des variables explicatives sont significativements différents de 0 pour un niveau d'alpha de 5% avec un test-t Ho: $\beta_i$ = 0 vs H1: $\beta_i \neq$ 0, nous rejetons donc l'hypothèse nulle.
+
 ```{r}
 anova(modèleavecOàO,modèleEAsurWeekend)
 ```
-
-On obtient une valeur de p très petite et une valeur de LRT de 50.34873. Ce qui veut dire que nous pouvons rejeter H0 et conclure que les modèles avec effets aléatoires sur la variable `wkend` est significativement différent à tout niveau de alpha raisonnable par rapport au modèle avec seulement un effet aléatoire sur l'ordonnée à l'origine et donc que ces effets aléatoires sont nécessaires. L'effet aléatoire sur `wkend` est donc nécessaire. De plus, on remarque que le BIC avec le modèle avec effets aléatoires sur la variable `wkend` est plus petit, ce qui indique aussi que ce modèle est mieux.
+Nous obtenons un BIC petit avec le modèle incluant un effet aléatoire sur le variable `wkend` ce qui indique que ce modèle est mieux. Même si le test LRT est un test non-standard ici, nous pouvons tout de même l'effectuer, nous obtenons une valeur de p très petite et une valeur de LRT de 50.34873. Ce qui veut dire que nous pouvons rejeter H0 et conclure que le modèle avec effets aléatoires sur la variable `wkend` est significativement différent à tout niveau de alpha raisonnable par rapport au modèle avec seulement un effet aléatoire sur l'ordonnée à l'origine. L'effet aléatoire sur `wkend` est donc nécessaire.
 
 Dans ce modèle, nous avons poser les effets aléatoires comme étant corrélés. Cependant, il se peut que ces effets soient indépendants. Nous allons donc développer un modèle qui considère ces effets aléatoires indépendants et le comparer avec le modèle ci-dessus.
 
@@ -375,6 +376,8 @@ summary(modèleEAsurWeekendA)
 ```
 
 Il est possible d'effectuer un LRT test pour évaluer si de considérer les effets aléatoires sur la variable wkend et l'ordonnée à l'origine comme indépendants est mieux avec un test LRT Ho: $\sigma_{\beta_{01}}$ = 0 vs H1: $\sigma_{\beta_{01}} \neq$ 0.
+
+De plus, on remarque que tous les coefficients des variables explicatives sont significativements différents de 0 pour un niveau d'alpha de 5% avec un test-t Ho: $\beta_i$ = 0 vs H1: $\beta_i \neq$ 0, nous rejetons donc l'hypothèse nulle.
 
 ```{r}
 anova(modèleEAsurWeekend,modèleEAsurWeekendA, type = "LR")
@@ -388,7 +391,7 @@ Dans un cas d’inférence, nous avons clairement un problème de variables omis
 
 ## Conclusion
 
-De plus, on remarque que le BIC avec le modèle avec effets aléatoires indépendants est légèrement plus petit, ce qui indique que ce modèle est mieux.
+De plus, on remarque que le BIC avec le modèle avec effets aléatoires indépendants est légèrement plus petit, ce qui indique que ce modèle est mieux pour expliquer la durée des déplacements.
 
 Nous pouvons donc conclure que le meilleur modèle avec l'effet de la densité de population est le modèle avec effets aléatoires sur l'ordonnée à l'origine et la variable de la fin de semaine et que les effets aléatoires sont indépendants.
 
