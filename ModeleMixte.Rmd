@@ -399,15 +399,14 @@ modèleEAsurWeekend <- lme(dur ~ wkend + density + nb_stations, random = ~1 + wk
 modèleavecOàO <- mod_dens_1
 summary(modèleEAsurWeekend)
 ```
+On remarque que tous les coefficients des variables explicatives sont significativements différents de 0 pour un niveau d'alpha de 5% avec un test-t Ho: $\beta_i$ = 0 vs H1: $\beta_i \neq$ 0, nous rejetons donc l'hypothèse nulle. Ceux-ci sont aussi positifs ce qui suggère qu'en moyenne la durée des déplacements augmente pour les jours de fin de semaine, quand la densité augmente ou quand le nombre de stations par arrondissement augmente aussi, lorsque les autres variables restent inchangées. L'effet de la fin de semaine est aussi plus élevé que celle des autres variables.
 
 Il est possible d'effectuer un LRT test pour évaluer si l'ajout d'effets aléatoires sur la variable `wkend` était nécessaire avec un test LRT Ho: $\beta_{i,wkend}$ = 0 vs H1: $\beta_{i,wkend} \neq$ 0.
-
-De plus, on remarque que tous les coefficients des variables explicatives sont significativements différents de 0 pour un niveau d'alpha de 5% avec un test-t Ho: $\beta_i$ = 0 vs H1: $\beta_i \neq$ 0, nous rejetons donc l'hypothèse nulle. Ceux-ci sont aussi positifs ce qui suggère qu'en moyenne la durée des déplacements augmente pour les jours de fin de semaine, quand la densité augmente ou quand le nombre de stations par arrondissement augmente aussi, lorsque les autres variables restent inchangées. L'effet de la fin de semaine est aussi plus élevé que celle des autres variables.
 
 ```{r}
 anova(modèleavecOàO,modèleEAsurWeekend)
 ```
-Nous obtenons un BIC petit avec le modèle incluant un effet aléatoire sur le variable `wkend` ce qui indique que ce modèle est mieux. Même si le test LRT est un test non-standard ici, nous pouvons tout de même l'effectuer, nous obtenons une valeur de p très petite et une valeur de LRT de 50.34873. Ce qui veut dire que nous pouvons rejeter H0 et conclure que le modèle avec effets aléatoires sur la variable `wkend` est significativement différent à tout niveau de alpha raisonnable par rapport au modèle avec seulement un effet aléatoire sur l'ordonnée à l'origine. L'effet aléatoire sur `wkend` est donc nécessaire.
+Nous obtenons un BIC plus petit avec le modèle incluant un effet aléatoire sur le variable `wkend` ce qui indique que ce modèle est mieux. Même si le test LRT est un test non-standard ici, nous pouvons tout de même l'effectuer, nous obtenons une valeur de p très petite et une valeur de LRT de 50.34873. Ce qui veut dire que nous pouvons rejeter H0 et conclure que le modèle avec effets aléatoires sur la variable `wkend` est significativement différent à tout niveau de alpha raisonnable par rapport au modèle avec seulement un effet aléatoire sur l'ordonnée à l'origine. L'effet aléatoire sur `wkend` est donc nécessaire.
 
 Dans ce modèle, nous avons poser les effets aléatoires comme étant corrélés. Cependant, il se peut que ces effets soient indépendants. Nous allons donc développer un modèle qui considère ces effets aléatoires indépendants et le comparer avec le modèle ci-dessus.
 
@@ -415,11 +414,9 @@ Dans ce modèle, nous avons poser les effets aléatoires comme étant corrélés
 modèleEAsurWeekendA <- lme(dur ~ wkend + nb_stations + density, random = list(station = pdDiag(~1 + wkend)), data = dat)
 summary(modèleEAsurWeekendA)
 ```
-
-Il est possible d'effectuer un LRT test pour évaluer si de considérer les effets aléatoires sur la variable wkend et l'ordonnée à l'origine comme indépendants est mieux avec un test LRT Ho: $\sigma_{\beta_{01}}$ = 0 vs H1: $\sigma_{\beta_{01}} \neq$ 0.
-
 Tout comme le modèle avec des effets aléatoires corrélés, tous les coefficients des variables explicatives sont significativements différents de 0 pour un niveau d'alpha de 5% avec un test-t Ho: $\beta_i$ = 0 vs H1: $\beta_i \neq$ 0, nous rejetons donc l'hypothèse nulle. Ceux-ci sont aussi positifs ce qui suggère qu'en moyenne la durée des déplacements augmente pour les jours de fin de semaine, quand la densité augmente ou quand le nombre de stations par arrondissement augmente aussi, lorsque les autres variables restent inchangées. L'effet de la fin de semaine est aussi plus élevé que celle des autres variables.
 
+Il est possible d'effectuer un LRT test pour évaluer si de considérer les effets aléatoires sur la variable wkend et l'ordonnée à l'origine comme indépendants est mieux avec un test LRT Ho: $\sigma_{\beta_{01}}$ = 0 vs H1: $\sigma_{\beta_{01}} \neq$ 0.
 ```{r}
 anova(modèleEAsurWeekend,modèleEAsurWeekendA, type = "LR")
 ```
