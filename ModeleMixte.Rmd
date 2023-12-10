@@ -57,6 +57,11 @@ dat = read.csv("dat_full_m.csv")
 
 # Introduction
 
+Dans la seconde partie, nous voulions tester plusieurs effets sur le nombre de déplacements. Nous voulions d’abord tester les effets des festivals sur le nombre de déplacements, ensuite nous avons observé le portrait démographique de la ville, en examinant comment la densité de la population et les lieux culturels affectaient le nombre de déplacements en Bixi. Cela dit, notre méthodologie reste inchangée en ce qui concerne l'impact des festivals. Nous cherchons à étudier ici comment les festivals influent sur le nombre total de déplacements en Bixi, tout en ajustant la structure de corrélation à l’intérieur des stations. Cependant, quant à la densité de la population et les lieux culturels, pour éviter la modification de cette variable de dénombrement (nombre de déplacement), nous avons décidé de changer notre variable réponse. Ainsi, nous allons observer l'effet de la densité et des lieux touristiques sur la durée de déplacement en minutes. 
+
+Bien sûr, tout comme la seconde partie, le but est toujours de répondre aux besoins entrepreneurials de l’OBNL. Il est à noter que les constats que nous avions posés tiennent toujours. C’est-à-dire que nous essayons toujours d’observer qu’est-ce qui fait augmenter le nombre d’utilisations des Bixi, dans le but de décarboniser les moyens de transport dans la province. La seule différence ici, c’est que dans la plupart des observations se feront sur la durée de déplacement en minutes et non sur le nombre de déplacements.
+
+
 # Impact des lieux touristiques
 
 ```{r impactSiteTouristiquesData, results='hide'}
@@ -308,7 +313,9 @@ Avec ce modèle simple, la tenue de festival semble avoir un effet positif et si
 
 # Effet de la densité de population
 
-Précédemment nous avions étudié l'effet de la densité de population sur le logarithme du nombre total de déplacements. Cependant, puisque le nombre total de déplacements est une variable de dénombrement, il est plus convenable d'utiliser un modèle linéaire généralisé si on ne veut pas procéder à des modifications de la variable réponses, comme dans la section précédente sur les festivals. Conséquemment, nous avons décidé d'étudier une variable réponse différente, soit la durée de déplacement. De plus, il faut noter que puisque la densité de population est un effet d'arrondissement, alors il n'est pas nécessaire d'inclure les arrondissements dans nos modèles.C'est-à-dire qu'en incluant la densité on observe les changements qui arrivent inter-arrondissement sans avoir besoin d'inclure les arrondissements dans nos modèles. À cet égard, la densité de population est calculée de la même façon que dans la seconde partie du travail, soit la population totale par arrondissement par rapport à la superficie de l'arrondissement même. Ainsi, nous avons ajouté les données d'arrondissement selon les stations tout en y incluant la population totale et la superficie de chaque arrondissement.
+Précédemment nous avions étudié l'effet de la densité de population sur le logarithme du nombre total de déplacements. Dans ce cas, comme mentionnée dans l'introduction nous observerons l'effet de la densité sur la durée de déplacement.
+
+Il faut noter que puisque la densité de population est un effet d'arrondissement, alors il n'est pas nécessaire d'inclure les arrondissements dans nos modèles.C'est-à-dire qu'en incluant la densité on observe les changements qui arrivent inter-arrondissement sans avoir besoin d'inclure les arrondissements dans nos modèles. À cet égard, la densité de population est calculée de la même façon que dans la seconde partie du travail, soit la population totale par arrondissement par rapport à la superficie de l'arrondissement même. Ainsi, nous avons ajouté les données d'arrondissement selon les stations tout en y incluant la population totale et la superficie de chaque arrondissement.
 
 Tout d'abord, chaque arrondissement contient plusieurs stations. En d'autres termes, on peut assumer qu'il risque d'y avoir une corrélation intra-station, comme expliqué dans les sections précédentes. Cette corrélation a pour effet de biaiser les tests d'hypothèse qu'on a abordés dans la deuxième partie du travail. Autrement dit, en plus d'avoir des effets de groupe inter arrondissement capté par la densité de population, nous nous retrouvons avec des effets qui varie intra stations, ce qui est problématique dans un cas d'inférence. Pour aborder cette problématique, nous allons utiliser une approche à effets aléatoire, nous permettant ainsi de ne pas utiliser une pléthore de variable explicative pour contrôler les effets de chaque station.
 
@@ -318,36 +325,25 @@ Enfin, dans la seconde partie du travail, nous avions inclus d'autres variables 
 
 Il est à noter que dans ce cas, qu'on considère une structure d'équicorrélation où la structure de corrélation dans chaque station est la même. On peut voir dans le tableau anova ci-dessous la comparaison entre deux modèles, chaque modèle contient les mêmes variables. On essaye de voir l'impact de la densité de la population sur la durée de déplacement en minutes en y incluant d'autres covariables comme le nombre de stations par arrondissement et la variable fin de semaine. On n'inclut pas les membres dans ces modèles principalement parce que la densité a un impact sur les membres, et ces derniers influent à leur tour sur la durée de déplacement, en incluant les membres on crée une sorte de biais post-traitement. Enfin, la seule différence entre les deux modèles, c'est qu'on inclut dans le deuxième modèle un effet de corrélation intra-station avec une structure d'équicorrélation. Il est possible d'observer que cet effet est bien significatif pour tout niveau d'alpha raisonnable.
 
-On ne montre pas la table de régression ici, pusique certains autres modèles risque d'être mieux adapté à la structure de nos données, donc on préfère montrer ces-dernier seulement.
-
 ```{r}
 dat$arrond <- as.factor(dat$arrond)
+dat$station <- as.factor(dat$station)
 
 mod_dens_0 <- gls(dur ~ density + wkend + nb_stations, data = dat) 
 mod_dens_1 <- gls(dur ~  density + wkend + nb_stations, correlation = corCompSymm(form = ~ 1|station), data = dat)
 
 anova(mod_dens_0,mod_dens_1)
 
+
 ```
 
-## Modèle avec effet aléatoire sur l'ordonnée à l'origine incluant une structure de corrélation intra-station
-
-Dans la table anova ci-dessous, on vois la comparaison entre le fait d'ajouter un effet aléatoire avec ou sans structure de corrélation intra-station. Le deuxième modèle dans la table montre que l'ajout d'effet aléatoire sur l'ordonée à l'orgine est significative pour tout niveau de alpha raisonnable.
+Dans la table de régression ci-dessous, on peut voir que  l'effet de la densité affecte en moyenne positivement la durée de déplacement en minutes, pareillement pour la fin de semaine. Aussi, on peut voir que la différence entre les journées de fin de semaine et les journées de semaine est d'en moyenne 13 minutes de déplacements. De plus, la densité et le nombre de stations sont significatifs pour tout niveau d’alpha raisonnable. Concernant la variable de fin de semaine `wkend`, sa valeur p est plus petite qu’alpha = 5%, on peut ainsi conclure que sa moyenne est significativement non nulle.
 
 ```{r}
-
-mod_dens_3 <- lme(dur ~ density + wkend + nb_stations, random = ~1|station,data = dat)
-mod_dens_4 <- lme(dur ~  density + wkend + nb_stations, random = ~1|station ,correlation = corCompSymm(form = ~ 1|station), data = dat)
-
-anova(mod_dens_3,mod_dens_4, type = 'LR')
+summary(mod_dens_1)
 
 ```
-
-Dans la table de régression ci-dessous on peut voir l'effet de la densité qui affecte en moyenne positivement la durée de déplacement en minutes, même chose concernant la fin de semaine. On peut voir que la différence entre la fin de semaine et la semaine est d'en moyenne 13 minutes de déplacements. Cependant, la structure de corrélation d'équicorrélation intra station donne un rho extrêmement petit, il est à se demander si c'est la bonne structure de corrélation à utiliser où même s'il y a une structure de corrélation intra station.
-
-```{r}
-summary(mod_dens_4)
-```
+Concernant l'entreprise, cette dernière peut s'attendre à voir en moyenne une augmentation de la durée de déplacement lorsque la densité de la population augmente. Par exemple, si la densité de la population d'un arrondissement augmente de 1000 personnes par kilomètre carré, l'entreprise pourrait anticiper une augmentation moyenne de la durée de déplacement en Bixi d'environ 6.8 minutes. Ainsi, même si nous n'observons pas la même variable réponse que dans la seconde partie du travail, nos conclusions restent similaires, la seule différence ici, c'est qu'en utilisant une structure de corrélation intra-station nous diminuons la probabilité de faire une erreur de type 1 dans notre modèle.
 
 ## Modèles avec effets aléatoires sur la variable explicative wkend
 
@@ -385,6 +381,10 @@ anova(modèleEAsurWeekend,modèleEAsurWeekendA, type = "LR")
 ```
 
 Nous remarquons que LRT = 2.327591 et p-value = 0.1217. Dans ce cas, nous ne pouvons pas rejeter l'hypothèse H0 et pouvons conclure que le modèle est n'est pas significativement différent que le modèle avec des effets aléatoires corrélées avec un niveau d'alpha de 0.10 et donc il semble que la corrélation entre les effets aléatoires ne soit pas nécessaire.
+
+## Limitations 
+
+Dans un cas d’inférence, nous avons clairement un problème de variables omises. C’est-à-dire que même si on est capable de contrôler pour les effets fixes entre les arrondissements en utilisant la variation de la densité et la variation du nombre de stations, il reste plusieurs effets variables que nous ne sommes pas capables de capter. Par exemple, puisque les données sont recueillies en 2021, nous sommes conscients qu'à certains moments de l'année, des restrictions de sortie étaient en place en raison de la COVID. Ces restrictions pouvaient évoluer au fil du temps en fonction de la situation au Québec, et elles pouvaient également varier en fonction de la région au Québec. Ainsi, ce type de donnée manquante ne nous permet pas de bien observer le comportement de la densité de population sur la durée de déplacement. 
 
 ## Conclusion
 
