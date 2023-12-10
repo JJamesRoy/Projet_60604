@@ -446,8 +446,7 @@ Dans un cas d'inférence, nous avons clairement un problème de variables omises
 
 # Conclusion
 
-
-Pour conclure, le meilleur modèle avec l'effet de la densité de population est le modèle avec effets aléatoires sur l'ordonnée à l'origine et la variable de la fin de semaine et que les effets aléatoires sont indépendants. Pour le modèle sur les festivals, un modèle linéaire non-mixte est suffisant pour estimer l'impact des festivals sur le nombre de déplacements. 
+Pour conclure, pour le modèle sur les festivals, un modèle linéaire non mixte est suffisant pour estimer l'impact des festivals sur le nombre de déplacements. Pour le modèle de densité, il est possible de voir qu’en ajoutant une structure d’équicorrélation sur les stations, qu’on obtient un modèle plus précis. De plus, toujours concernant les modèles sur la densité de population, on peut observer que le modèle avec effets aléatoires sur l'ordonnée à l'origine et des effets aléatoires sur la variable de la fin de semaine est plus précis tout en spécifiant que les effets aléatoires sont indépendants.
 
 
 # Contributions des membres
