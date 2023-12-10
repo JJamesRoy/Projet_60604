@@ -259,11 +259,11 @@ dat$festival[is.na(dat$festival)] = 0
 dat$log_n_tot = log(dat$n_tot)
 ```
 
-Dans cette section, nous allons nous intéresser à la même question que dans la deuxième partie du travail, soit analyser si les festivals tenus dans la ville de Montréal ont un impact sur l'utilisation des Bixi. Ainsi, nous allons utiliser le log du nombres totaux des déplacements (`log_n_tot`).
+Dans cette section, nous allons nous intéresser à la même question que dans la deuxième partie du travail, soit analyser si les festivals tenus dans la ville de Montréal ont un impact sur l'utilisation des Bixi. Ainsi, nous allons utiliser le log du nombres totaux des déplacements (`log_n_tot`) qui s'apparente d'une loi normale comme montré dans la 2e partie du travail.
 
-Pour tester cette question, nous allons nous baser sur les données utilisées dans les parties précédentes. Il est cependant utile de respécifier comment la variable `festival` est construite. Celle-ci est une variable de décompte qui note le nombre de festivals ayant lieu cette journée. Ainsi, elle est fixe peu importe la station, tant que la journée est pareille. La variable peut prendre la valeur de 0 à 6.
+Pour tester cette question, nous allons nous baser sur les données utilisées dans les parties précédentes. Il est cependant utile de respécifier comment la variable `festival` est construite. Celle-ci est une variable de décompte qui note le nombre de festivals ayant lieu cette journée. Ainsi, elle est fixe peu importe la station, tant que la journée est pareille. La variable peut prendre la valeur de 0 à 6. Les autres variables sont assez explicites. 
 
-En addition à un modèle de régression linéaire, comme utilisé lors de la deuxième partie, nous allons tester les effets des festivals en permettant une corrélation intra-station. En effet, étant donné que nous évaluons les stations à plusieurs moments dans le temps, il y a indéniablement une corrélation intra-station, il faut ainsi ajuster les modèles ou du moins tester si la corrélation est significative.
+En addition à un modèle de régression linéaire, comme utilisé lors de la deuxième partie, nous allons tester les effets des festivals en permettant une corrélation intra-station. En effet, étant donné que nous évaluons les stations à plusieurs moments dans le temps, il y a indéniablement une corrélation intra-station, il faut ainsi ajuster les modèles ou du moins tester si la corrélation est significative. Ensuite, nous allons interpréter le coefficient de la variable d'intérêt sur le modèle choisi par les tests.
 
 ## Modèle de régression linéaire
 
@@ -317,7 +317,7 @@ summary(mod_fest_2b)
 anova(mod_fest_2a, mod_fest_2b, type = "LR")
 ```
 
-Pour le premier test, le LRT test $H_0 : \sigma_{b01} = 0\ vs. H_1 : \sigma_{b01} \neq 0$. Comme la p-value est plus petite que 0.0001, nous pouvons rejeter $H_0$ et conclure que la corrélation entre les effets aléatoires est nécessaire (aussi supporté par le BIC et le AIC).
+Pour le premier test, nous allons tester les deux modèles avec effets aléatoires sur les variables explicatives, le LRT test $H_0 : \sigma_{b01} = 0\ vs. H_1 : \sigma_{b01} \neq 0$. Comme la p-value est plus petite que 0.0001, nous pouvons rejeter $H_0$ et conclure que la corrélation entre les effets aléatoires est nécessaire (aussi supporté par le BIC et le AIC).
 
 Nous allons ainsi comparer `mod_fest_2a` avec `mod_fest_2` pour voir s'il est nécessaire de rajouter des effets aléatoires pour la variable `festival`. Cette fois-ci nous allons les comparer avec AIC et BIC, car c'est un test non-standard.
 
@@ -348,6 +348,9 @@ print(comparison_table)
 Ainsi, nous pouvons intérpréter le premier modèle (linéaire de base).
 
 Avec ce modèle simple, la tenue de festival semble avoir un effet positif et significatif sur le nombre total de déplacements. En effet, un festival de plus par jour augmente en moyenne le nombre total de déplacement de 5% par jour par stations (toutes choses étant égales par ailleurs). De plus, cette augmentation est significatif à tout niveau de alpha raisonnable.
+
+## Limitations
+Une des principales limitation est, comme expliqué au premier modèle, le manque de données sur certaines stations. De plus, une autre limitation pourrait être le manque de variable, il serait certainement possible de mieux spécifier les modèles si on faisait plus de test sur quelles variables ajouter ou enlever.
 
 # Effet de la densité de population
 
