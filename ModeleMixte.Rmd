@@ -420,12 +420,8 @@ Il est possible d'effectuer un LRT test pour évaluer si l'ajout d'effets aléat
 ```{r}
 anova(modèleavecOàO,modèleEAsurWeekend)
 ```
-<<<<<<< HEAD
 
 Nous obtenons un BIC petit avec le modèle incluant un effet aléatoire sur le variable `wkend` ce qui indique que ce modèle est mieux. Même si le test LRT est un test non-standard ici, nous pouvons tout de même l'effectuer, nous obtenons une valeur de p très petite et une valeur de LRT de 50.34873. Ce qui veut dire que nous pouvons rejeter H0 et conclure que le modèle avec effets aléatoires sur la variable `wkend` est significativement différent à tout niveau de alpha raisonnable par rapport au modèle avec seulement un effet aléatoire sur l'ordonnée à l'origine. L'effet aléatoire sur `wkend` est donc nécessaire.
-=======
-Nous obtenons un BIC plus petit avec le modèle incluant un effet aléatoire sur le variable `wkend` ce qui indique que ce modèle est mieux. Même si le test LRT est un test non-standard ici, nous pouvons tout de même l'effectuer, nous obtenons une valeur de p très petite et une valeur de LRT de 50.34873. Ce qui veut dire que nous pouvons rejeter H0 et conclure que le modèle avec effets aléatoires sur la variable `wkend` est significativement différent à tout niveau de alpha raisonnable par rapport au modèle avec seulement un effet aléatoire sur l'ordonnée à l'origine. L'effet aléatoire sur `wkend` est donc nécessaire.
->>>>>>> c3d6f9e788ac5a1b17c1600d5df920a9d78c43d8
 
 Dans ce modèle, nous avons poser les effets aléatoires comme étant corrélés. Cependant, il se peut que ces effets soient indépendants. Nous allons donc développer un modèle qui considère ces effets aléatoires indépendants et le comparer avec le modèle ci-dessus.
 
@@ -448,20 +444,9 @@ De plus, on remarque que le BIC avec le modèle avec effets aléatoires indépen
 
 Dans un cas d'inférence, nous avons clairement un problème de variables omises. C'est-à-dire que même si on est capable de contrôler pour les effets fixes entre les arrondissements en utilisant la variation de la densité et la variation du nombre de stations, il reste plusieurs effets variables que nous sommes incapables de capter. Par exemple, puisque les données sont recueillies en 2021, nous sommes conscients qu'à certains moments de l'année, des restrictions de sortie étaient en place en raison de la COVID. Ces restrictions pouvaient évoluer au fil du temps en fonction de la situation au Québec, et elles pouvaient également varier en fonction de la région au Québec. Ainsi, ce type de donnée manquante ne nous permet pas de bien observer le comportement de la densité de population sur la durée de déplacement.
 
-<<<<<<< HEAD
-## Conclusion
-
-Nous pouvons donc conclure que le meilleur modèle avec l'effet de la densité de population est le modèle avec effets aléatoires sur l'ordonnée à l'origine et la variable de la fin de semaine et que les effets aléatoires sont indépendants.
-
 # Conclusion
 
-Pour le modèle sur les festivals, un modèle linéaire non-mixte est suffisant pour estimer l'impact des festivals sur le nombre de déplacements. 
-=======
-# Conclusion
-
-Pour conclure, le meilleur modèle avec l'effet de la densité de population est le modèle avec effets aléatoires sur l'ordonnée à l'origine et la variable de la fin de semaine et que les effets aléatoires sont indépendants.
-
->>>>>>> c3d6f9e788ac5a1b17c1600d5df920a9d78c43d8
+Pour conclure, le meilleur modèle avec l'effet de la densité de population est le modèle avec effets aléatoires sur l'ordonnée à l'origine et la variable de la fin de semaine et que les effets aléatoires sont indépendants. Pour le modèle sur les festivals, un modèle linéaire non-mixte est suffisant pour estimer l'impact des festivals sur le nombre de déplacements. 
 
 # Contributions des membres
 
