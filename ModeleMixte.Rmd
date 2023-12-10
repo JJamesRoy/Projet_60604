@@ -401,6 +401,6 @@ Abdoul:
 
 Alfred:
 
-James:
+James: Modèle sur les festivals
 
 Samuel: Modèle avec la densité et effets aléatoires sur les variables explicatives
